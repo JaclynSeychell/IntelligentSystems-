@@ -38,7 +38,8 @@ import jade.domain.FIPAAgentManagement.FailureException;
 import java.util.Vector;
 
 
- // this is a test comment for github 
+// I changed this test comment for github
+// new comment
 /**
    This example shows how to implement nested protocols.
    In this case in particular we want to implement a broker agent
