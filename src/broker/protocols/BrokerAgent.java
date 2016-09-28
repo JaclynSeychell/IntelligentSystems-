@@ -46,6 +46,7 @@ import java.util.Vector;
    requested action has to be performed.
    @author Giovanni Caire - TILAB
  */
+// Eclipse connection to github
 public class BrokerAgent extends Agent {
 	private AID responder;
 	
