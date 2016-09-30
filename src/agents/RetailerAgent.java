@@ -1,4 +1,4 @@
-package retailer.protocols;
+package agents;
 
 import jade.core.Agent;
 import jade.domain.FIPANames;
