@@ -5,6 +5,7 @@ public interface SupplierVocabulary {
 	public static final int BUY = 1;
 	public static final int SELL = 2;
 	public static final String BROKER_AGENT = "Broker agent";
+	public static final String RETAILER_AGENT = "Retailer agent";
 	
 	// Ontology Vocabulary
 	public static final String HOME = "Home";

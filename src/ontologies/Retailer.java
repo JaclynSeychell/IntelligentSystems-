@@ -4,8 +4,8 @@ import jade.content.*;
 
 public class Retailer implements Concept {
 	private String id;
-	private float supply;
-	private float price;
+	private int supply;
+	private int price;
 	
 	public String getId() {
 		return id;
@@ -19,7 +19,7 @@ public class Retailer implements Concept {
 		return supply;
 	}
 	
-	public void setSupply(float pSupply) {
+	public void setSupply(int pSupply) {
 		supply = pSupply;
 	}
 	
@@ -27,7 +27,7 @@ public class Retailer implements Concept {
 		return price;
 	}
 	
-	public void setBudget(float pPrice) {
+	public void setBudget(int pPrice) {
 		price = pPrice;
 	}
 	

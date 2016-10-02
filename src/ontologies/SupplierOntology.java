@@ -24,19 +24,19 @@ public class SupplierOntology extends Ontology implements SupplierVocabulary {
 			ConceptSchema cs = new ConceptSchema(HOME);
 			add(cs, Home.class);
 			cs.add(HOME_ID, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-			cs.add(HOME_REQUIREMENT, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
-			cs.add(HOME_BUDGET, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
+			cs.add(HOME_REQUIREMENT, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			cs.add(HOME_BUDGET, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			
 			// Retailer
 			add(new ConceptSchema(RETAILER), Retailer.class);
 			cs.add(RETAILER_ID, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
-			cs.add(RETAILER_SUPPLY, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
-			cs.add(RETAILER_PRICE, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
+			cs.add(RETAILER_SUPPLY, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			cs.add(RETAILER_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			
 			// Problem
 			add(new ConceptSchema(PROBLEM), Problem.class);
 			cs.add(PROBLEM_NUM, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
-			cs.add(PROBLEM_MSG, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
+			cs.add(PROBLEM_MSG, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
 			
 			// -- Actions -- 
 			
@@ -44,7 +44,7 @@ public class SupplierOntology extends Ontology implements SupplierVocabulary {
 			AgentActionSchema as = new AgentActionSchema(EXCHANGE);
 			add(as, Exchange.class);
 			as.add(EXCHANGE_TYPE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
-	        as.add(EXCHANGE_PRICE, (PrimitiveSchema) getSchema(BasicOntology.FLOAT), ObjectSchema.MANDATORY);
+	        as.add(EXCHANGE_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 	         
 		} catch (OntologyException oe) {
 			oe.printStackTrace();

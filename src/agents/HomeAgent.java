@@ -11,65 +11,63 @@ import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import jade.content.onto.basic.*;
 
+import java.util.Random;
+
 import ontologies.*;
+import behaviours.*;
+import utility.*;
+
 
 public class HomeAgent extends Agent implements SupplierVocabulary {
-	private Home agentDetails;
+	private Home homeDetails;
 	private AID broker;
+	private ACLMessage brokerResponse;
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
+	
+	private Random rnd = Utility.newRandom(hashCode());
 	
 	protected void setup() {
 		// Register language and ontology
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		
-		addBehaviour(new ContactBroker(this, 5000));
-	}
-	
-	class WaitBrokerResponse extends ParallelBehaviour {
-		WaitBrokerResponse(Agent a) {
-			super(a, 1);
-			
-			addSubBehaviour(new ReceiveResponse(myAgent));
-			
-			addSubBehaviour(new WakerBehaviour(myAgent, 2000) {
-				protected void handleElapsedTimeout() {
-					System.out.println("No response from server. Please, try later!");
-				}
-			});
-		}
-	}
-	
-	class ReceiveResponse extends SimpleBehaviour {
-		private boolean finished = false;
+		SequentialBehaviour seq = new SequentialBehaviour();
+		addBehaviour(seq);
 		
-		ReceiveResponse(Agent a) {
-			super(a);
-		}
+		Exchange ex = new Exchange();
+		ex.setPrice(100);
+		ex.setType(BUY);
+		sendMessage(ACLMessage.REQUEST, ex);
 		
-		public void action() {
-			ACLMessage msg = receive(MessageTemplate.MatchSender(broker));
-			if (msg == null) {block(); return; }
-			
-			if (msg.getPerformative() == ACLMessage.NOT_UNDERSTOOD) {
-				System.out.println("Response from broker: NOT UNDERSTOOD!");
-			} else if (msg.getPerformative() != ACLMessage.INFORM) {
-				System.out.println("Unexpected msg from broker!");
-			} else {
-				System.out.println("Broker has completed the request.");
+		seq.addSubBehaviour(handleBrokerResponse);
+		
+		seq.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(5000)) {
+			@Override
+			public void handleElapsedTimeout() {
+				setup();
 			}
-			finished = true;
-		}
-		
-		public boolean done() { return finished; }
-		
-		public int onEnd() {
-			return 0;
-		}
+		});
 	}
 	
-	
+	// Code to handle the response from the broker after some request
+	private ReceiveResponse handleBrokerResponse = new ReceiveResponse (this, 1000, MessageTemplate.MatchSender(broker)) {
+		@Override 
+		public void handle(ACLMessage m) {
+			if (msg != null) {
+				if (msg.getPerformative() == ACLMessage.NOT_UNDERSTOOD) {
+					System.out.println("Response from broker: NOT UNDERSTOOD!");
+				} else if (msg.getPerformative() != ACLMessage.INFORM) {
+					System.out.println("Unexpected msg from broker!");
+				} else {
+					System.out.println("Broker has completed the request.");
+				}
+			} else {
+				System.out.println("Broker did not respond in time");
+			}
+		}
+	};
+
 	// -- Utility Methods --
 	void lookupBroker() {
 		ServiceDescription sd = new ServiceDescription();
@@ -83,11 +81,11 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 				broker = dfds[0].getName();
 				System.out.println("Localized broker agent");
 			} else {
-				System.out.println("\nCouldn't localize broker agent!");
+				System.out.println("Couldn't localize broker agent!");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("\nFailed searching in the DF!");
+			System.out.println("Failed searching in the DF!");
 		}
 	}
 	
@@ -101,28 +99,15 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		ACLMessage msg = new ACLMessage(performative);
 		msg.setLanguage(codec.getName());
 		msg.setOntology(ontology.getName());
+		msg.setConversationId(Utility.genCID(getLocalName(), hashCode()));
+		
 		try {
 			getContentManager().fillContent(msg, new Action(broker, action));
 			msg.addReceiver(broker);
 			send(msg);
 			System.out.println("Contacting broker... Please wait!");
-			addBehaviour(new WaitBrokerResponse(this));
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-	}
-	
-	// Contact Broker
-	class ContactBroker extends TickerBehaviour {
-		ContactBroker(Agent a, long ms) {
-			super(a, ms);
-		}
-		
-		protected void onTick() {
-			Exchange ex = new Exchange();
-			ex.setPrice(100);
-			ex.setType(BUY);
-			sendMessage(ACLMessage.REQUEST, ex);
 		}
 	}
 }

@@ -4,8 +4,8 @@ import jade.content.*;
 
 public class Home implements Concept {
 	private String id;
-	private float requirement;
-	private float budget;
+	private int requirement;
+	private int budget;
 	
 	public String getId() {
 		return id;
@@ -15,19 +15,19 @@ public class Home implements Concept {
 		id = pId;
 	}
 	
-	public float getRequirement() {
+	public int getRequirement() {
 		return requirement;
 	}
 	
-	public void setRequirement(float pRequirement) {
+	public void setRequirement(int pRequirement) {
 		requirement = pRequirement;
 	}
 	
-	public float getBudget() {
+	public int getBudget() {
 		return budget;
 	}
 	
-	public void setBudget(float pBudget) {
+	public void setBudget(int pBudget) {
 		budget = pBudget;
 	}
 	

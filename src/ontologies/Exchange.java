@@ -4,7 +4,7 @@ import jade.content.*;
 
 public class Exchange implements AgentAction {
 	private int type;
-	private float price;
+	private int price;
 	
 	public int getType() {
 		return type;
@@ -14,11 +14,11 @@ public class Exchange implements AgentAction {
 		type = pType;
 	}
 	
-	public float getPrice() {
+	public int getPrice() {
 		return price;
 	}
 	
-	public void setPrice(float pPrice) {
+	public void setPrice(int pPrice) {
 		price = pPrice;
 	}
 }
