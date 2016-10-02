@@ -2,6 +2,8 @@ package ontologies;
 
 import jade.content.*;
 
+@SuppressWarnings("serial")
+
 public class Exchange implements AgentAction {
 	private int type;
 	private int price;
@@ -20,5 +22,9 @@ public class Exchange implements AgentAction {
 	
 	public void setPrice(int pPrice) {
 		price = pPrice;
+	}
+	
+	public String toString() {
+		return "Exchange {type:" + type + ", price:" + price + "}";
 	}
 }

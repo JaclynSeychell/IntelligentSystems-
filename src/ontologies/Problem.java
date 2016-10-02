@@ -2,6 +2,8 @@ package ontologies;
 
 import jade.content.*;
 
+@SuppressWarnings("serial")
+
 public class Problem implements Concept {
 	private int num;
 	private String msg;
@@ -23,6 +25,6 @@ public class Problem implements Concept {
 	}
 	
 	public String toString() {
-		return "Price {num:" + num + ", msg:" + msg;
+		return "Problem {num:" + num + ", msg:" + msg + "}";
 	}
 }

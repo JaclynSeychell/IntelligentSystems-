@@ -5,6 +5,7 @@ import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+@SuppressWarnings("serial")
 public class ReceiveResponse extends SimpleBehaviour {
 	private MessageTemplate template;
 	private long timeOut;
