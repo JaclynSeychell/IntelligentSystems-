@@ -1,7 +1,4 @@
-/agents/
-/broker/
-/home/
-/retailer/
 /ontologies/
+/agents/
 /utility/
 /behaviours/

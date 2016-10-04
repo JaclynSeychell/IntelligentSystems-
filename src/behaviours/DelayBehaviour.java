@@ -19,6 +19,7 @@ package behaviours;
 import jade.core.behaviours.*;
 import jade.core.*;
 
+@SuppressWarnings("serial")
 public class DelayBehaviour extends SimpleBehaviour 
 {
 	private long timeout;

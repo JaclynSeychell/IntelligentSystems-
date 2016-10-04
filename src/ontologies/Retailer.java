@@ -2,37 +2,47 @@ package ontologies;
 
 import jade.content.*;
 
+@SuppressWarnings("serial")
+
 public class Retailer implements Concept {
-	private String id;
+	private int generationRate;
+	private int pricePerUnit;
 	private int supply;
-	private int price;
 	
-	public String getId() {
-		return id;
+	public Retailer() {
+		generationRate = 0;
+		pricePerUnit = 0;
+		supply = 0;
 	}
 	
-	public void setId(String pId) {
-		id = pId;
+	public int getGenerationRate() {
+		return generationRate;
 	}
-	
-	public float getSupply() {
+
+	public void setGenerationRate(int generationRate) {
+		this.generationRate = generationRate;
+	}
+
+	public int getPricePerUnit() {
+		return pricePerUnit;
+	}
+
+	public void setPricePerUnit(int pricePerUnit) {
+		this.pricePerUnit = pricePerUnit;
+	}
+
+	public int getSupply() {
 		return supply;
 	}
-	
-	public void setSupply(int pSupply) {
-		supply = pSupply;
+
+	public void setSupply(int supply) {
+		this.supply = supply;
+		if (this.supply < 0) this.supply = 0; // Cannot be less than 0
 	}
-	
-	public float getPrice() {
-		return price;
-	}
-	
-	public void setBudget(int pPrice) {
-		price = pPrice;
-	}
-	
+
+	@Override
 	public String toString() {
-		return "Retailer {id:" + id + ", supply:" + supply +
-				", price:" + price;
+		return "Retailer [generationRate=" + generationRate + ", pricePerUnit=" + pricePerUnit + ", supply=" + supply
+				+ "]";
 	}
 }

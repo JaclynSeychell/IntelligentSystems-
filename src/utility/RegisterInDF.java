@@ -6,6 +6,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
+@SuppressWarnings("serial")
 public class RegisterInDF extends OneShotBehaviour {
 	private String type;
 	
