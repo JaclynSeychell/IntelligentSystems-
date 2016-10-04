@@ -2,6 +2,7 @@ package agents;
 
 import jade.core.*;
 import jade.core.behaviours.*;
+import jade.domain.DFService;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
@@ -18,12 +19,13 @@ import ontologies.*;
 import utility.*;
 
 @SuppressWarnings("serial")
-
 public class RetailerAgent extends Agent implements SupplierVocabulary {
 	private Retailer retailer = new Retailer();
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
 	private Random rnd = Utility.newRandom(hashCode());
+	
+	private static final int TICK_TIME = 10000;
 	
 	void setupRetailer() {
 		retailer.setGenerationRate(rnd.nextInt(10));
@@ -42,10 +44,14 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		setupRetailer();
 		
 		// Register in the DF
-		addBehaviour(new RegisterInDF(this, RETAILER_AGENT));
+		DFRegistry.register(this, RETAILER_AGENT);
 		
 		// Run agent
 		process();
+	}
+	
+	protected void takeDown() {
+		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 	}
 	
 	void process() {
@@ -100,13 +106,15 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	  	return (Math.random() > 0.2);
 	  }
 	
-	TickerBehaviour updateRetailer = new TickerBehaviour(this, rnd.nextInt(10000)) {
+	TickerBehaviour updateRetailer = new TickerBehaviour(this, rnd.nextInt(TICK_TIME)) {
 		@Override
 		public void onTick() {
 			retailer.setSupply(retailer.getSupply() + retailer.getGenerationRate());
 		
 			System.out.println(myAgent.getLocalName() + " updating supply...\n Change = " + 
 					retailer.getGenerationRate() + "\n Supply = " + retailer.getSupply());
+			
+			reset(rnd.nextInt(TICK_TIME));
 		}
 	};
 }

@@ -16,8 +16,8 @@ import java.sql.Date;
 import java.util.Random;
 import java.util.Vector;
 
-import ontologies.*;
 import behaviours.*;
+import ontologies.*;
 import utility.*;
 
 @SuppressWarnings("serial")
@@ -27,6 +27,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
 	private Random rnd = Utility.newRandom(hashCode());
+	
+	private static final int TICK_TIME = 10000;
 	
 	// Initialize home values
 	void setupHome() {
@@ -62,6 +64,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	}
 	
 	void process() {
+		System.out.println("Contacting the broker");
 		SequentialBehaviour tradingSequence = new SequentialBehaviour();
 		addBehaviour(tradingSequence);
 	
@@ -75,13 +78,13 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			public boolean done() { return true; }
 		});
 		
-		/*tradingSequence.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(5000)) {
+		tradingSequence.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(5000)) {
 			@Override 
 			public void handleElapsedTimeout() { process(); }
-		});*/
+		});
 	}
 	
-	TickerBehaviour updateHome = new TickerBehaviour(this, rnd.nextInt(10000)) {
+	TickerBehaviour updateHome = new TickerBehaviour(this, rnd.nextInt(TICK_TIME)) {
 		@Override
 		public void onTick() {
 			int supplyChange = (home.getGenerationRate() + home.getUsageRate());
@@ -89,6 +92,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			
 			System.out.println(myAgent.getLocalName() + " updating supply...\n Change = " 
 					+ supplyChange + "\n Supply = " + home.getSupply());
+			
+			reset(rnd.nextInt(TICK_TIME));
 		}
 	};
 
@@ -136,6 +141,11 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		}
 		
 		addBehaviour(new AchieveREInitiator(this, msg) {
+			protected void handleAgree(ACLMessage refuse) {
+				System.out.println("Agent " + refuse.getSender().getName() + 
+						" agreed to perform the requested action");
+			}
+			
 			protected void handleInform(ACLMessage inform) {
 				System.out.println("Agent " + inform.getSender().getName() + 
 						" successfully performed the requested action");
@@ -156,7 +166,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 				}
 			}
 			protected void handleAllResultNotifications(Vector notifications) {
-				System.out.println("Timeout expired: no response received");
+				System.out.println("Broker communication concluded\n");
 				if (notifications.size() == 0) {
 					// Some responder didn't reply within the specified timeout
 					System.out.println("Timeout expired: no response received");

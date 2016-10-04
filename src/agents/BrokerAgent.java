@@ -7,16 +7,14 @@ import jade.domain.FIPAAgentManagement.*;
 import jade.lang.acl.*;
 import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
-import jade.content.*;
+import jade.proto.SubscriptionInitiator;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
-import jade.content.onto.basic.*;
 
 import java.util.*;
 
 import ontologies.*;
-import behaviours.*;
 import utility.*;
 
 @SuppressWarnings("serial")
@@ -31,14 +29,17 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		getContentManager().registerOntology(ontology);
 		
 		// Register in the DF
-		addBehaviour(new RegisterInDF(this, BROKER_AGENT));
-		addBehaviour(fetchRetailers);
+		DFRegistry.register(this, BROKER_AGENT);
 		
 		// Find retailers
-		lookupRetailers();
+		subscribeToRetailers();
 		
 		// Run agent
 		process();
+	}
+	
+	protected void takeDown() {
+		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 	}
 	
 	void process() {
@@ -65,7 +66,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			
 			protected Vector prepareRequests(ACLMessage request) {
 				// Retrieve the incoming request from the DataStore
-				String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
+				/*String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
 				ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestKey);
 				
 				// Prepare the request to forward to the responder
@@ -82,6 +83,25 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 					v.addElement(outgoingRequest);
 					outgoingRequest.removeReceiver(retailer);
 				}
+				return v;*/
+				
+				// Retrieve the incoming request from the DataStore
+				String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
+				ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestKey);
+				
+				ACLMessage outgoingRequest = new ACLMessage(ACLMessage.REQUEST);
+				outgoingRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+				
+				for(AID retailer: retailers){
+					// Prepare the request to forward to the responder
+					System.out.println("Agent " + getLocalName() + ": Forward the request to " + retailer.getName());
+					outgoingRequest.addReceiver(retailer);
+				}
+				
+				outgoingRequest.setContent(incomingRequest.getContent());
+				outgoingRequest.setReplyByDate(incomingRequest.getReplyByDate());
+				Vector v = new Vector(1);
+				v.addElement(outgoingRequest);
 				return v;
 			}
 			
@@ -103,7 +123,6 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			
 			protected void handleAllResultNotifications(Vector notifications) {
 				if (notifications.size() == 0) {
-					// Timeout
 					storeNotification(ACLMessage.FAILURE);
 				}
 			}
@@ -130,34 +149,25 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		addBehaviour(arer);
   	}
 	
-	TickerBehaviour fetchRetailers = new TickerBehaviour(this, 10000) {
-		@Override
-		public void onTick() {
-			retailers.clear();
-			lookupRetailers();
-		}
-	};
-	
 	// -- Utility Methods --
-	void lookupRetailers() {
+	void subscribeToRetailers() {
+		DFAgentDescription dfd = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType(RETAILER_AGENT);
-		
-		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.addServices(sd);
-		try {
-			DFAgentDescription[] dfds = DFService.search(this, dfd);
-			if (dfds.length > 0) {
-				for (int i = 0; i < dfds.length; i++) {
-					retailers.add(dfds[i].getName());
-					System.out.println("Localized retailer with AID = " + dfds[i].getName());
-				}
-			} else {
-				System.out.println("Couldn't localize any retailer agents");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Failed searching in the DF!");
-		}
+	    
+  		addBehaviour(new SubscriptionInitiator(this,
+			DFService.createSubscriptionMessage(this, getDefaultDF(), dfd, null)) {
+  			
+  			protected void handleInform(ACLMessage inform) {
+  				try {
+  					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
+  					System.out.println("Found new retailer: " + dfds[0].getName());
+  					retailers.add(dfds[0].getName());
+  				} catch (Exception e) {
+  					e.printStackTrace();
+  				}
+  			}
+		});
 	}
 }
