@@ -29,7 +29,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	
 	void setupRetailer() {
 		retailer.setGenerationRate(rnd.nextInt(10));
-		retailer.setPricePerUnit(rnd.nextInt(5));
+		retailer.setPricePerUnit(rnd.nextInt(5) + 1);
 		retailer.setSupply(rnd.nextInt(2000));
 		System.out.println(retailer.toString());
 		addBehaviour(updateRetailer);
@@ -60,51 +60,51 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 		  		MessageTemplate.MatchPerformative(ACLMessage.REQUEST) );
 		
+		// Handle purchase confirmation
 		addBehaviour(new AchieveREResponder(this, template) {
 			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
 				System.out.println("Agent " + getLocalName() + ": REQUEST received from " + 
 						request.getSender().getName() + ". Action is " + request.getContent());
+		
+				System.out.println("Agent " + getLocalName() + ": Agree");
+				ACLMessage agree = request.createReply();
+				agree.setPerformative(ACLMessage.AGREE);
+				return agree;
+			}
+			
+			/*protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
+				System.out.println("Agent " + getLocalName() + ": Action successfully performed");
+				ACLMessage inform = request.createReply();
+				inform.setPerformative(ACLMessage.INFORM);
+				return inform;
+			}*/
+		} );
+		
+		MessageTemplate queryTemplate = MessageTemplate.and(
+		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+		  		MessageTemplate.MatchPerformative(ACLMessage.QUERY_REF) );
+		
+		// Handle purchase confirmation
+		addBehaviour(new AchieveREResponder(this, queryTemplate) {
+			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
+				System.out.println("Agent " + getLocalName() + ": QUERY_REF received from " + 
+						request.getSender().getName() + ". Action is " + request.getContent());
 				
-				if (checkAction()) {
-					// We agree to perform the action. Note that in the FIPA-Request
-					// protocol the AGREE message is optional. Return null if you
-					// don't want to send it.
-					System.out.println("Agent " + getLocalName() + ": Agree");
-					ACLMessage agree = request.createReply();
-					agree.setPerformative(ACLMessage.AGREE);
-					return agree;
-				}
-				else {
-					// We refuse to perform the action
-					System.out.println("Agent "+getLocalName()+": Refuse");
-					throw new RefuseException("check-failed");
-				}
+				System.out.println("Agent " + getLocalName() + ": Agree");
+				ACLMessage agree = request.createReply();
+				agree.setPerformative(ACLMessage.AGREE);
+				return agree;
 			}
 			
 			protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
-				if (performAction()) {
-					System.out.println("Agent " + getLocalName() + ": Action successfully performed");
-					ACLMessage inform = request.createReply();
-					inform.setPerformative(ACLMessage.INFORM);
-					return inform;
-				}
-				else {
-					System.out.println("Agent " + getLocalName() + ": Action failed");
-					throw new FailureException("unexpected-error");
-				}	
+				System.out.println("Agent " + getLocalName() + ": Quote generated");
+				ACLMessage inform = request.createReply();
+				inform.setPerformative(ACLMessage.INFORM);
+				inform.setContent("" + retailer.getPricePerUnit());
+				return inform;
 			}
 		} );
 	}
-	
-	 private boolean checkAction() {
-	  	// Simulate a check by generating a random number
-	  	return (Math.random() > 0.2);
-	  }
-	  
-	  private boolean performAction() {
-	  	// Simulate action execution by generating a random number
-	  	return (Math.random() > 0.2);
-	  }
 	
 	TickerBehaviour updateRetailer = new TickerBehaviour(this, rnd.nextInt(TICK_TIME)) {
 		@Override

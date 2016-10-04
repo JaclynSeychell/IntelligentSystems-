@@ -80,7 +80,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		
 		tradingSequence.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(5000)) {
 			@Override 
-			public void handleElapsedTimeout() { process(); }
+			public void handleElapsedTimeout() { /*process();*/ }
 		});
 	}
 	
@@ -141,8 +141,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		}
 		
 		addBehaviour(new AchieveREInitiator(this, msg) {
-			protected void handleAgree(ACLMessage refuse) {
-				System.out.println("Agent " + refuse.getSender().getName() + 
+			protected void handleAgree(ACLMessage agree) {
+				System.out.println("Agent " + agree.getSender().getName() + 
 						" agreed to perform the requested action");
 			}
 			
@@ -165,6 +165,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 							" failed to perform the requested action");
 				}
 			}
+			
 			protected void handleAllResultNotifications(Vector notifications) {
 				System.out.println("Broker communication concluded\n");
 				if (notifications.size() == 0) {

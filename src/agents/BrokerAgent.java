@@ -8,10 +8,14 @@ import jade.lang.acl.*;
 import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
 import jade.proto.SubscriptionInitiator;
+import jade.content.Concept;
+import jade.content.ContentElement;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
+import jade.content.onto.basic.Action;
 
+import java.sql.Date;
 import java.util.*;
 
 import ontologies.*;
@@ -22,6 +26,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	private ArrayList<AID> retailers = new ArrayList<AID>();
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
+	private ACLMessage request;
 	
 	protected void setup() {
 		// Register language and ontology
@@ -52,9 +57,17 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
 				System.out.println("Agent " + getLocalName() + ": REQUEST received from " + 
 						request.getSender().getName() + ". Action is " + request.getContent());
-				ACLMessage agree = request.createReply();
-				agree.setPerformative(ACLMessage.AGREE);
-				return agree;
+				
+				// Request fails if their are no retailers
+				ACLMessage response = request.createReply();
+				
+				if(retailers.size() > 1) {
+					response.setPerformative(ACLMessage.AGREE);
+				} else {
+					response.setPerformative(ACLMessage.REFUSE);
+				}
+				
+				return response;
 			}
 		};
 			
@@ -65,33 +78,14 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			// method to build the request on the fly
 			
 			protected Vector prepareRequests(ACLMessage request) {
-				// Retrieve the incoming request from the DataStore
-				/*String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
-				ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestKey);
-				
-				// Prepare the request to forward to the responder
-				ACLMessage outgoingRequest = new ACLMessage(ACLMessage.REQUEST);
-				outgoingRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-				outgoingRequest.setContent(incomingRequest.getContent());
-				outgoingRequest.setReplyByDate(incomingRequest.getReplyByDate());
-				Vector v = new Vector();
-
-				for(AID retailer: retailers) {
-					System.out.println("Agent " + getLocalName() + ": Forward the request to " + retailer.getName());
-					outgoingRequest.addReceiver(retailer);
-					send(outgoingRequest);
-					v.addElement(outgoingRequest);
-					outgoingRequest.removeReceiver(retailer);
-				}
-				return v;*/
 				
 				// Retrieve the incoming request from the DataStore
 				String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
 				ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestKey);
-				
-				ACLMessage outgoingRequest = new ACLMessage(ACLMessage.REQUEST);
+				ACLMessage outgoingRequest = new ACLMessage(ACLMessage.QUERY_REF);
 				outgoingRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 				
+				request = incomingRequest;
 				for(AID retailer: retailers){
 					// Prepare the request to forward to the responder
 					System.out.println("Agent " + getLocalName() + ": Forward the request to " + retailer.getName());
@@ -106,7 +100,10 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			}
 			
 			protected void handleInform(ACLMessage inform) {
-				storeNotification(ACLMessage.INFORM);
+				// storeNotification(ACLMessage.INFORM);
+				
+				System.out.println("Quote received from " + inform.getSender().getName() + 
+						".\n\tPrice per unit: " + Integer.parseInt(inform.getContent()));
 			}
 			
 			protected void handleRefuse(ACLMessage refuse) {
@@ -124,6 +121,53 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			protected void handleAllResultNotifications(Vector notifications) {
 				if (notifications.size() == 0) {
 					storeNotification(ACLMessage.FAILURE);
+				} else {
+					System.out.println("Evaluating quotes \n...");
+					
+					
+					// Find the best quote
+					try {
+						Iterator i = notifications.iterator();
+						ACLMessage bestOffer = (ACLMessage)i.next();
+						int bestPrice = Integer.parseInt(bestOffer.getContent());
+						while(i.hasNext()) {
+							ACLMessage notification = (ACLMessage)i.next();
+							if(Integer.parseInt(notification.getContent()) < bestPrice) {
+								bestPrice = Integer.parseInt(notification.getContent());
+								bestOffer = notification;
+							}
+						}
+						
+						System.out.println("\t Best quote found: \n\t\tOffered by " 
+								+ bestOffer.getSender().getName() + "\n\t\tPrice" + bestPrice);
+						
+						ACLMessage purchase = new ACLMessage(ACLMessage.REQUEST);
+						purchase.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+						purchase.setReplyByDate(new Date(System.currentTimeMillis() + 5000));
+						purchase.addReceiver(bestOffer.getSender());
+						purchase.setLanguage(codec.getName());
+						purchase.setOntology(ontology.getName());
+						
+						String incomingRequestkey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
+						ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestkey);
+						purchase.setContent(incomingRequest.getContent());
+						purchase.setReplyByDate(incomingRequest.getReplyByDate());
+						
+						
+						addBehaviour(new AchieveREInitiator(myAgent, purchase) {
+							public void handleAgree(ACLMessage agree) {
+								System.out.println("Retailer has accepted our purchase");
+								storeNotification(ACLMessage.INFORM);
+							}
+							
+							public void handleRefuse(ACLMessage refuse) {
+								System.out.println("Retailer has rejected our purchase");
+							}
+						});
+						
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			
@@ -143,6 +187,12 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 				notification.setPerformative(performative);
 				String notificationkey = (String) ((AchieveREResponder) parent).RESULT_NOTIFICATION_KEY;
 				getDataStore().put(notificationkey, notification);
+				
+				// Want to send back the quote here
+				/*ACLMessage notification = request.createReply();
+				notification.setPerformative(performative);
+				String notificationkey = (String) ((AchieveREResponder) parent).RESULT_NOTIFICATION_KEY;
+				getDataStore().put(notificationkey, notification);*/
 			}
 		} );
 
