@@ -26,8 +26,9 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	private ArrayList<AID> retailers = new ArrayList<AID>();
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
-	private ACLMessage request;
+	private ACLMessage homeRequest;
 	
+	@Override
 	protected void setup() {
 		// Register language and ontology
 		getContentManager().registerLanguage(codec);
@@ -43,17 +44,22 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		process();
 	}
 	
+	@Override
 	protected void takeDown() {
+		System.out.println("Shutting down " + this.getName() + ".");
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 	}
 	
 	void process() {
-		System.out.println("Agent "+getLocalName()+" waiting for requests...");
+		System.out.println("Agent " + getLocalName() + " waiting for requests...");
 	  	MessageTemplate template = MessageTemplate.and(
 	  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 	  		MessageTemplate.MatchPerformative(ACLMessage.REQUEST) );
+	  	
+	  	
 	  		
 		AchieveREResponder arer = new AchieveREResponder(this, template) {
+			@Override
 			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
 				System.out.println("Agent " + getLocalName() + ": REQUEST received from " + 
 						request.getSender().getName() + ". Action is " + request.getContent());
@@ -61,7 +67,10 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 				// Request fails if their are no retailers
 				ACLMessage response = request.createReply();
 				
-				if(retailers.size() > 1) {
+				// Store the initial request
+				homeRequest = request;
+				
+				if(retailers.size() > 0) {
 					response.setPerformative(ACLMessage.AGREE);
 				} else {
 					response.setPerformative(ACLMessage.REFUSE);
@@ -77,6 +86,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			// when we construct this AchieveREInitiator, we redefine this 
 			// method to build the request on the fly
 			
+			@Override
 			protected Vector prepareRequests(ACLMessage request) {
 				
 				// Retrieve the incoming request from the DataStore
@@ -99,31 +109,33 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 				return v;
 			}
 			
+			@Override
 			protected void handleInform(ACLMessage inform) {
-				// storeNotification(ACLMessage.INFORM);
-				
 				System.out.println("Quote received from " + inform.getSender().getName() + 
 						".\n\tPrice per unit: " + Integer.parseInt(inform.getContent()));
 			}
 			
+			@Override
 			protected void handleRefuse(ACLMessage refuse) {
 				storeNotification(ACLMessage.FAILURE);
 			}
 			
+			@Override
 			protected void handleNotUnderstood(ACLMessage notUnderstood) {
 				storeNotification(ACLMessage.FAILURE);
 			}
 			
+			@Override
 			protected void handleFailure(ACLMessage failure) {
 				storeNotification(ACLMessage.FAILURE);
 			}
 			
+			@Override
 			protected void handleAllResultNotifications(Vector notifications) {
 				if (notifications.size() == 0) {
 					storeNotification(ACLMessage.FAILURE);
 				} else {
 					System.out.println("Evaluating quotes \n...");
-					
 					
 					// Find the best quote
 					try {
@@ -139,7 +151,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 						}
 						
 						System.out.println("\t Best quote found: \n\t\tOffered by " 
-								+ bestOffer.getSender().getName() + "\n\t\tPrice" + bestPrice);
+								+ bestOffer.getSender().getName() + "\n\t\tPrice " + bestPrice);
 						
 						ACLMessage purchase = new ACLMessage(ACLMessage.REQUEST);
 						purchase.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
@@ -153,15 +165,31 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 						purchase.setContent(incomingRequest.getContent());
 						purchase.setReplyByDate(incomingRequest.getReplyByDate());
 						
+						// Retrieve the incoming request from the DataStore
+						String notificationkey = (String) ((AchieveREResponder) parent).RESULT_NOTIFICATION_KEY;
+						
+						ACLMessage notification = incomingRequest.createReply();
 						
 						addBehaviour(new AchieveREInitiator(myAgent, purchase) {
 							public void handleAgree(ACLMessage agree) {
 								System.out.println("Retailer has accepted our purchase");
-								storeNotification(ACLMessage.INFORM);
 							}
 							
 							public void handleRefuse(ACLMessage refuse) {
 								System.out.println("Retailer has rejected our purchase");
+							}
+							
+							public void handleInform(ACLMessage inform) {
+								System.out.println("Informing home agent of succesful purchase");	
+						
+								notification.setPerformative(ACLMessage.INFORM);
+								try {
+									notification.setPerformative(ACLMessage.INFORM);
+									setNotification(notificationkey, notification);
+									//getDataStore().put(notificationkey, notification);
+								} catch(Exception e) {
+									e.printStackTrace();
+								}
 							}
 						});
 						
@@ -171,6 +199,10 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 				}
 			}
 			
+			private void setNotification(String nk, ACLMessage n) {
+				getDataStore().put(nk, n);
+			}
+			
 			private void storeNotification(int performative) {
 				if (performative == ACLMessage.INFORM) {
 					System.out.println("Agent " + getLocalName() + ": brokerage successful");
@@ -178,21 +210,6 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 				else {
 					System.out.println("Agent " + getLocalName() + ": brokerage failed");
 				}
-					
-				// Retrieve the incoming request from the DataStore
-				String incomingRequestkey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
-				ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestkey);
-				// Prepare the notification to the request originator and store it in the DataStore
-				ACLMessage notification = incomingRequest.createReply();
-				notification.setPerformative(performative);
-				String notificationkey = (String) ((AchieveREResponder) parent).RESULT_NOTIFICATION_KEY;
-				getDataStore().put(notificationkey, notification);
-				
-				// Want to send back the quote here
-				/*ACLMessage notification = request.createReply();
-				notification.setPerformative(performative);
-				String notificationkey = (String) ((AchieveREResponder) parent).RESULT_NOTIFICATION_KEY;
-				getDataStore().put(notificationkey, notification);*/
 			}
 		} );
 
@@ -205,15 +222,37 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType(RETAILER_AGENT);
 		dfd.addServices(sd);
-	    
+	
+		// Handle registration of new retailers
   		addBehaviour(new SubscriptionInitiator(this,
 			DFService.createSubscriptionMessage(this, getDefaultDF(), dfd, null)) {
   			
+  			@Override
   			protected void handleInform(ACLMessage inform) {
   				try {
   					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
-  					System.out.println("Found new retailer: " + dfds[0].getName());
-  					retailers.add(dfds[0].getName());
+  					DFAgentDescription[] df = DFService.search(myAgent, dfd);
+  					
+  					if(dfds.length > 0) {
+  						for(int i = 0; i < dfds.length; i++) {
+  							boolean exists = false;
+  							
+  							for(int j = 0; j < df.length; j++) {
+  								if(dfds[i].getName().hashCode() == df[j].getName().hashCode()) {
+  									exists = true;
+  									break;
+  								}
+  							}
+  							
+  							if(exists) {
+								System.out.println("\tNew retailer: " + dfds[i].getName());
+								retailers.add(dfds[i].getName());
+  							} else {
+  								System.out.println("\tDeleted retailer: " + dfds[i].getName());
+  								retailers.remove(dfds[i].getName());
+  							}
+						}
+  					}
   				} catch (Exception e) {
   					e.printStackTrace();
   				}

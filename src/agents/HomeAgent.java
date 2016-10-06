@@ -26,9 +26,9 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private AID broker;
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
-	private Random rnd = Utility.newRandom(hashCode());
+	private Random rnd = Utility.newRandom(hashCode());	
 	
-	private static final int TICK_TIME = 10000;
+	private static final int TICK_TIME = (60000 * 5);
 	
 	// Initialize home values
 	void setupHome() {
