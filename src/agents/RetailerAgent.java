@@ -8,13 +8,18 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREResponder;
+import jade.proto.SubscriptionResponder;
+import jade.proto.SubscriptionResponder.Subscription;
+import jade.util.leap.Iterator;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import java.util.Random;
+import java.util.Vector;
 
 import ontologies.*;
 import utility.*;
@@ -46,6 +51,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		
 		// Register in the DF
 		DFRegistry.register(this, RETAILER_AGENT);
+		subscriptionHandler();
 		
 		// Run agent
 		process();
@@ -57,12 +63,17 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 		
 		try {
-			DFAgentDescription[] dfds = DFService.search(this, new DFAgentDescription());
+			DFAgentDescription dfd = new DFAgentDescription();
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType(RETAILER_AGENT);
+			dfd.addServices(sd);
+			
+			DFAgentDescription[] dfds = DFService.search(this, dfd);
 			
 			if(dfds.length > 0) {
 				System.out.println("\tRemaining retailers:");
 			} else {
-				System.out.println("\tNo remaining retailers");
+				System.out.println("\tNo remaining retailers.");
 			}
 			
 			for(int i = 0; i < dfds.length; i++) {
@@ -138,4 +149,44 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			reset(rnd.nextInt(TICK_TIME));
 		}
 	};
+	
+	// -- Utility Methods -- 
+	void subscriptionHandler() {
+		MessageTemplate mt = MessageTemplate.and(
+			MessageTemplate.MatchPerformative(ACLMessage.QUERY_REF),
+			MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE)
+		);
+		
+		SubscriptionResponder sr = new SubscriptionResponder(this, mt) {
+			ACLMessage notification;
+			Subscription sub;
+			int lastPrice = 0;
+			
+			@Override
+			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
+				super.handleSubscription(subscription);
+				System.out.println("Subscription: \n\t" + 
+						subscription.getSender().getName() + " successfully subscribed to " + myAgent.getName());
+				
+				sub = getSubscription(subscription);
+				notification = subscription.createReply();
+				notification.setPerformative(ACLMessage.INFORM);
+				
+				addBehaviour(new CyclicBehaviour() {
+					@Override
+					public void action() {
+						if(lastPrice == 0 || retailer.getPricePerUnit() != lastPrice) {
+							notification.setContent(Integer.toString(retailer.getPricePerUnit()));
+							lastPrice = retailer.getPricePerUnit();
+							sub.notify(notification);
+						}
+					}
+				});
+				
+				return null;
+			}	
+		};
+		
+		addBehaviour(sr);
+	}
 }
