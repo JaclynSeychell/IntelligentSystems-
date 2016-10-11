@@ -28,6 +28,11 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private Ontology ontology = SupplierOntology.getInstance();
 	private Random rnd = Utility.newRandom(hashCode());	
 	
+	private int bestPrice;
+	
+	private boolean queryFinished;
+	private boolean purchaseFinished;
+	
 	private static final int TICK_TIME = (60000 * 5);
 	
 	// Initialize home values
@@ -65,22 +70,57 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	
 	void process() {
 		System.out.println("Contacting the broker");
+		
 		SequentialBehaviour tradingSequence = new SequentialBehaviour();
 		addBehaviour(tradingSequence);
 	
-		tradingSequence.addSubBehaviour(new SimpleBehaviour() {
+		// Get prices
+		tradingSequence.addSubBehaviour(new OneShotBehaviour() {
 			@Override 
 			public void action() { 
-				contactBroker(ACLMessage.REQUEST, getExchange()); 
+				System.out.println("\n\nCommencing Query");
+				query();
 			}
-			
-			@Override 
-			public boolean done() { return true; }
 		});
 		
-		tradingSequence.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(5000)) {
+		tradingSequence.addSubBehaviour(new SimpleBehaviour() {
+			@Override
+			public void action() {};
+			
 			@Override 
-			public void handleElapsedTimeout() { /*process();*/ }
+			public boolean done() { 
+				if (queryFinished) System.out.println("Finished Query");
+				return queryFinished; 
+			}
+		});
+		
+		// Buy units
+		tradingSequence.addSubBehaviour(new OneShotBehaviour() {
+			@Override 
+			public void action() { 
+				System.out.println("\nCommencing Purchase\n");
+				purchase();
+			}
+		});
+		
+		tradingSequence.addSubBehaviour(new SimpleBehaviour() {
+			@Override
+			public void action() {}
+			
+			@Override 
+			public boolean done() { 
+				if (purchaseFinished) System.out.println("\n\nFinished Purchase");
+				return purchaseFinished; 
+			}
+		});
+		
+		// Wait to restart behaviour
+		tradingSequence.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(10000)) {
+			@Override 
+			public void handleElapsedTimeout() { 
+				queryFinished = purchaseFinished = false;
+				process(); 
+			}
 		});
 	}
 	
@@ -118,7 +158,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		}
 	}
 	
-	void contactBroker(int performative, Concept action) {
+	void query() {
 		if (broker == null) lookupBroker();
 		if (broker == null) {
 			System.out.println("Unable to localize broker agent! \nOperation aborted!");
@@ -126,48 +166,62 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		}
 		
 		// Setup REQUEST message
-		ACLMessage msg = new ACLMessage(performative);
+		ACLMessage msg = new ACLMessage(ACLMessage.QUERY_REF);
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		msg.setReplyByDate(new Date(System.currentTimeMillis() + 5000));
 		msg.addReceiver(broker);
-		msg.setLanguage(codec.getName());
-		msg.setOntology(ontology.getName());
 		
-		try {
-			getContentManager().fillContent(msg, new Action(broker, action));
-		} catch(Exception e) {
-			e.printStackTrace();
+		addBehaviour(new AchieveREInitiator(this, msg) {
+			protected void handleAgree(ACLMessage agree) {	
+				System.out.println("Agent " + agree.getSender().getName() + 
+						" agreed to find the best price.");
+			}
+			
+			protected void handleInform(ACLMessage inform) {
+					System.out.println("Agent " + inform.getSender().getName() + 
+							" has retrieved the best price " + Integer.parseInt(inform.getContent()));
+			}
+			
+			protected void handleAllResultNotifications(Vector notifications) {
+				System.out.println("Query communication concluded");
+				queryFinished = true;
+					
+				if (notifications.size() == 0) {
+					// Some responder didn't reply within the specified timeout
+					System.out.println("Timeout expired: no response received");
+				}
+			}
+		});
+	}
+	
+	void purchase() {
+		if (broker == null) lookupBroker();
+		if (broker == null) {
+			System.out.println("Unable to localize broker agent! \nOperation aborted!");
 			return;
 		}
+		
+		// Setup REQUEST message
+		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+		msg.setReplyByDate(new Date(System.currentTimeMillis() + 5000));
+		msg.addReceiver(broker);
 		
 		addBehaviour(new AchieveREInitiator(this, msg) {
 			protected void handleAgree(ACLMessage agree) {
 				System.out.println("Agent " + agree.getSender().getName() + 
-						" agreed to perform the requested action");
+						" agreed to purchase units on our behalf.");
 			}
 			
 			protected void handleInform(ACLMessage inform) {
 				System.out.println("Agent " + inform.getSender().getName() + 
-						" successfully performed the requested action");
-			}
-			
-			protected void handleRefuse(ACLMessage refuse) {
-				System.out.println("Agent " + refuse.getSender().getName() + 
-						" refused to perform the requested action");
-			}
-			
-			protected void handleFailure(ACLMessage failure) {
-				if (failure.getSender().equals(myAgent.getAMS())) {
-					System.out.println("Responder does not exist");
-				}
-				else {
-					System.out.println("Agent " + failure.getSender().getName() + 
-							" failed to perform the requested action");
-				}
+						" has purchased some energy units.");
 			}
 			
 			protected void handleAllResultNotifications(Vector notifications) {
-				System.out.println("Broker communication concluded\n");
+				System.out.println("Purchase communication concluded");
+				purchaseFinished = true;
+				
 				if (notifications.size() == 0) {
 					// Some responder didn't reply within the specified timeout
 					System.out.println("Timeout expired: no response received");

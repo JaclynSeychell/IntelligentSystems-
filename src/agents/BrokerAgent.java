@@ -7,6 +7,7 @@ import jade.domain.FIPAAgentManagement.*;
 import jade.lang.acl.*;
 import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
+import jade.proto.ContractNetInitiator;
 import jade.proto.SubscriptionInitiator;
 import jade.content.Concept;
 import jade.content.ContentElement;
@@ -17,16 +18,18 @@ import jade.content.onto.basic.Action;
 
 import java.sql.Date;
 import java.util.*;
+import java.util.Map.Entry;
 
 import ontologies.*;
 import utility.*;
 
 @SuppressWarnings("serial")
 public class BrokerAgent extends Agent implements SupplierVocabulary {
-	private ArrayList<AID> retailers = new ArrayList<AID>();
+	private HashMap<AID, Integer> retailers = new HashMap<AID, Integer>();
+	private AID bestOffer;
+	
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
-	private ACLMessage homeRequest;
 	
 	@Override
 	protected void setup() {
@@ -41,7 +44,8 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		subscribeToRetailers();
 		
 		// Run agent
-		process();
+		query();
+		purchase();
 	}
 	
 	@Override
@@ -50,13 +54,48 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 	}
 	
-	void process() {
-		System.out.println("Agent " + getLocalName() + " waiting for requests...");
+	void query() {
+		System.out.println("Agent " + getLocalName() + " waiting for query requests...");
+		MessageTemplate template = MessageTemplate.and(
+		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
+		  		MessageTemplate.MatchPerformative(ACLMessage.QUERY_REF) );
+		
+		AchieveREResponder arer = new AchieveREResponder(this, template) {
+			@Override
+			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
+				System.out.println("Agent " + getLocalName() + ": QUERY_REF received from " + 
+						request.getSender().getName() + ". Action is " + request.getContent());
+				
+				// Request fails if their are no retailers
+				ACLMessage response = request.createReply();
+			
+				if(retailers.size() > 0) {
+					response.setPerformative(ACLMessage.AGREE);
+				} else {
+					response.setPerformative(ACLMessage.REFUSE);
+				}
+				
+				return response;
+			}
+			
+			@Override
+			protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
+				System.out.println("Agent " + getLocalName() + ": returning best price");
+				ACLMessage result = request.createReply();
+				result.setPerformative(ACLMessage.INFORM);
+				result.setContent(Integer.toString(retailers.get(bestOffer)));
+				return result;
+			}
+		};
+		
+		addBehaviour(arer);
+	}
+	
+	void purchase() {
+		System.out.println("Agent " + getLocalName() + " waiting for purchase requests...");
 	  	MessageTemplate template = MessageTemplate.and(
 	  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 	  		MessageTemplate.MatchPerformative(ACLMessage.REQUEST) );
-	  	
-	  	
 	  		
 		AchieveREResponder arer = new AchieveREResponder(this, template) {
 			@Override
@@ -66,10 +105,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 				
 				// Request fails if their are no retailers
 				ACLMessage response = request.createReply();
-				
-				// Store the initial request
-				homeRequest = request;
-				
+			
 				if(retailers.size() > 0) {
 					response.setPerformative(ACLMessage.AGREE);
 				} else {
@@ -82,26 +118,16 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			
 		// Register an AchieveREInitiator in the PREPARE_RESULT_NOTIFICATION state
 		arer.registerPrepareResultNotification(new AchieveREInitiator(this, null) {
-			// Since we don't know what message to send to the responder
-			// when we construct this AchieveREInitiator, we redefine this 
-			// method to build the request on the fly
-			
 			@Override
 			protected Vector prepareRequests(ACLMessage request) {
-				
 				// Retrieve the incoming request from the DataStore
 				String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
 				ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestKey);
-				ACLMessage outgoingRequest = new ACLMessage(ACLMessage.QUERY_REF);
+				// Prepare the request to forward to the responder
+				System.out.println("Agent "+getLocalName()+": Forward the request to "+bestOffer.getName());
+				ACLMessage outgoingRequest = new ACLMessage(ACLMessage.REQUEST);
 				outgoingRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-				
-				request = incomingRequest;
-				for(AID retailer: retailers){
-					// Prepare the request to forward to the responder
-					System.out.println("Agent " + getLocalName() + ": Forward the request to " + retailer.getName());
-					outgoingRequest.addReceiver(retailer);
-				}
-				
+				outgoingRequest.addReceiver(bestOffer);
 				outgoingRequest.setContent(incomingRequest.getContent());
 				outgoingRequest.setReplyByDate(incomingRequest.getReplyByDate());
 				Vector v = new Vector(1);
@@ -111,8 +137,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			
 			@Override
 			protected void handleInform(ACLMessage inform) {
-				System.out.println("Quote received from " + inform.getSender().getName() + 
-						".\n\tPrice per unit: " + Integer.parseInt(inform.getContent()));
+				storeNotification(ACLMessage.INFORM);
 			}
 			
 			@Override
@@ -133,85 +158,29 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			@Override
 			protected void handleAllResultNotifications(Vector notifications) {
 				if (notifications.size() == 0) {
+					// Timeout
 					storeNotification(ACLMessage.FAILURE);
-				} else {
-					System.out.println("Evaluating quotes \n...");
-					
-					// Find the best quote
-					try {
-						Iterator i = notifications.iterator();
-						ACLMessage bestOffer = (ACLMessage)i.next();
-						int bestPrice = Integer.parseInt(bestOffer.getContent());
-						while(i.hasNext()) {
-							ACLMessage notification = (ACLMessage)i.next();
-							if(Integer.parseInt(notification.getContent()) < bestPrice) {
-								bestPrice = Integer.parseInt(notification.getContent());
-								bestOffer = notification;
-							}
-						}
-						
-						System.out.println("\t Best quote found: \n\t\tOffered by " 
-								+ bestOffer.getSender().getName() + "\n\t\tPrice " + bestPrice);
-						
-						ACLMessage purchase = new ACLMessage(ACLMessage.REQUEST);
-						purchase.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-						purchase.setReplyByDate(new Date(System.currentTimeMillis() + 5000));
-						purchase.addReceiver(bestOffer.getSender());
-						purchase.setLanguage(codec.getName());
-						purchase.setOntology(ontology.getName());
-						
-						String incomingRequestkey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
-						ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestkey);
-						purchase.setContent(incomingRequest.getContent());
-						purchase.setReplyByDate(incomingRequest.getReplyByDate());
-						
-						// Retrieve the incoming request from the DataStore
-						String notificationkey = (String) ((AchieveREResponder) parent).RESULT_NOTIFICATION_KEY;
-						
-						ACLMessage notification = incomingRequest.createReply();
-						
-						addBehaviour(new AchieveREInitiator(myAgent, purchase) {
-							public void handleAgree(ACLMessage agree) {
-								System.out.println("Retailer has accepted our purchase");
-							}
-							
-							public void handleRefuse(ACLMessage refuse) {
-								System.out.println("Retailer has rejected our purchase");
-							}
-							
-							public void handleInform(ACLMessage inform) {
-								System.out.println("Informing home agent of succesful purchase");	
-						
-								notification.setPerformative(ACLMessage.INFORM);
-								try {
-									notification.setPerformative(ACLMessage.INFORM);
-									setNotification(notificationkey, notification);
-									//getDataStore().put(notificationkey, notification);
-								} catch(Exception e) {
-									e.printStackTrace();
-								}
-							}
-						});
-						
-					} catch(Exception e) {
-						e.printStackTrace();
-					}
 				}
-			}
-			
-			private void setNotification(String nk, ACLMessage n) {
-				getDataStore().put(nk, n);
 			}
 			
 			private void storeNotification(int performative) {
 				if (performative == ACLMessage.INFORM) {
-					System.out.println("Agent " + getLocalName() + ": brokerage successful");
+					System.out.println("Agent "+getLocalName()+": brokerage successful");
 				}
 				else {
-					System.out.println("Agent " + getLocalName() + ": brokerage failed");
+					System.out.println("Agent "+getLocalName()+": brokerage failed");
 				}
+					
+				// Retrieve the incoming request from the DataStore
+				String incomingRequestkey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
+				ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestkey);
+				// Prepare the notification to the request originator and store it in the DataStore
+				ACLMessage notification = incomingRequest.createReply();
+				notification.setPerformative(performative);
+				String notificationkey = (String) ((AchieveREResponder) parent).RESULT_NOTIFICATION_KEY;
+				getDataStore().put(notificationkey, notification);
 			}
-		} );
+		});
 
 		addBehaviour(arer);
   	}
@@ -226,37 +195,86 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		// Handle registration of new retailers
   		addBehaviour(new SubscriptionInitiator(this,
 			DFService.createSubscriptionMessage(this, getDefaultDF(), dfd, null)) {
+  			ACLMessage retailSub = new ACLMessage(ACLMessage.QUERY_REF);
   			
   			@Override
   			protected void handleInform(ACLMessage inform) {
   				try {
   					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
   					DFAgentDescription[] df = DFService.search(myAgent, dfd);
+  					retailSub.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
   					
-  					if(dfds.length > 0) {
-  						for(int i = 0; i < dfds.length; i++) {
-  							boolean exists = false;
+  					// Register additional price update subscription
+  					SubscriptionInitiator priceChanges = new SubscriptionInitiator(myAgent, retailSub) {		
+  						@Override
+  						protected void handleInform(ACLMessage inform) {
+  							System.out.println("Price updated: " + inform.getSender().getName() +
+  									" to $" + Integer.parseInt(inform.getContent()) + " per unit");
+  							retailers.put(inform.getSender(), Integer.parseInt(inform.getContent()));
   							
-  							for(int j = 0; j < df.length; j++) {
-  								if(dfds[i].getName().hashCode() == df[j].getName().hashCode()) {
-  									exists = true;
-  									break;
-  								}
-  							}
-  							
-  							if(exists) {
-								System.out.println("\tNew retailer: " + dfds[i].getName());
-								retailers.add(dfds[i].getName());
-  							} else {
-  								System.out.println("\tDeleted retailer: " + dfds[i].getName());
-  								retailers.remove(dfds[i].getName());
-  							}
+  							storeBestOffer();
+  						}
+  					};
+  					
+  					// Check agent in the inform message exists before adding it
+					for(int i = 0; i < dfds.length; i++) {
+						boolean exists = false;
+						
+						for(int j = 0; j < df.length; j++) {
+							if(dfds[i].getName().hashCode() == df[j].getName().hashCode()) {
+								exists = true;
+								break;
+							}
 						}
-  					}
+						
+						removeBehaviour(priceChanges);
+						priceChanges.reset(retailSub);
+						
+						if(exists) {
+							System.out.println("\tNew retailer: " + dfds[i].getName());
+							if (retailers.size() == 0) { System.out.println("\tBroker listening for price changes..."); }
+							
+							retailers.put(dfds[i].getName(), null);
+							retailSub.addReceiver(dfds[i].getName());
+							
+							addBehaviour(priceChanges);
+						} else {
+							System.out.println("\tDeleted retailer: " + dfds[i].getName());
+							if(retailers.size() < 1) { System.out.println("\tBroker stopped listening for price changes."); }
+							
+							retailers.remove(dfds[i].getName());
+							retailSub.removeReceiver(dfds[i].getName());
+						}
+						
+						storeBestOffer();
+					}
   				} catch (Exception e) {
   					e.printStackTrace();
   				}
   			}
 		});
+	}
+	
+	private void storeBestOffer() {
+		Iterator<Entry<AID, Integer>> it = retailers.entrySet().iterator();
+		int bestPrice = Integer.MAX_VALUE;
+		bestOffer = null;
+		
+		try {
+			while(it.hasNext()) {
+				Map.Entry<AID, Integer> pair = (Map.Entry<AID, Integer>)it.next();
+				Integer price = (Integer)pair.getValue();
+				
+				if(price != null) {
+					if(price < bestPrice) {
+						bestPrice = price;
+						bestOffer = (AID)pair.getKey();
+						System.out.println("Best price offered by " + bestOffer.getName() + " at " + bestPrice);
+					} 
+				}
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
