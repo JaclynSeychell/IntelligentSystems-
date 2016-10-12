@@ -34,9 +34,25 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	private static final int TICK_TIME = (60000 * 5);
 	
 	void setupRetailer() {
-		retailer.setGenerationRate(rnd.nextInt(10));
-		retailer.setPricePerUnit(rnd.nextInt(5) + 1);
-		retailer.setSupply(rnd.nextInt(2000));
+		switch ( retailer.getRetailerType() ) {
+			case typeA: //price set to random between 3-5
+				retailer.setPricePerUnit(rnd.nextInt(2)+3);
+				break;
+			case typeB: //reduces 5% after each transaction
+				retailer.setPricePerUnit(4);
+				break;
+			case typeC: //based on demand... (need to figure out how we determine this)
+				//analyse previous unit prices from sales?
+				retailer.setPricePerUnit(rnd.nextInt(5));
+				break;
+			case typeD: //price fixed at $5 per unit
+				retailer.setPricePerUnit(5);
+				break;
+		}
+		retailer.setGenerationRate(rnd.nextInt(10)); //random int between 0-10
+//		retailer.setPricePerUnit(rnd.nextInt(5) + 1); //random int between 1-5
+		retailer.setSupply(rnd.nextInt(2000)); //initial supply random 0-2000
+		retailer.setRetailerType(Retailer.retailerType.typeA);
 		System.out.println(retailer.toString());
 		addBehaviour(updateRetailer);
 	}
@@ -83,7 +99,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	}
 	
 	void process() {
-		System.out.println("Agent " + getLocalName() + " waiting for requests...");
+		System.out.println("Agent " + getLocalName() + " of " + retailer.getRetailerType() + " waiting for requests...");
 		MessageTemplate template = MessageTemplate.and(
 		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 		  		MessageTemplate.MatchPerformative(ACLMessage.REQUEST) );
