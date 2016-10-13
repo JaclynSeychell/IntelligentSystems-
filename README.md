@@ -13,10 +13,10 @@
 ##Configuration Setup (for Running)
 
 1. In eclipse create an initial run configuration to start the Jade GUI
-* * arguments: -gui
+--* arguments: -gui
 	
 2. Using the Jade GUI, start running a sniffer agent to track all actions of agents
-* * Tools > Start Sniffer
+** Tools > Start Sniffer
 * * Select "Do sniff this agent" for applicable agents
 
 3. In eclipse, create a run configuration for a broker agent:
