@@ -13,20 +13,20 @@
 ##Configuration Setup (for Running)
 
 1. In eclipse create an initial run configuration to start the Jade GUI
---* arguments: -gui
-	
-2. Using the Jade GUI, start running a sniffer agent to track all actions of agents
-** Tools > Start Sniffer
-* * Select "Do sniff this agent" for applicable agents
+..* arguments: -gui
 
-3. In eclipse, create a run configuration for a broker agent:
-* * arguments: -agents b:agents.BrokerAgent
+2. In eclipse, create a run configuration for a broker agent:
+..* arguments: -container -container-name Brokers b:agents.BrokerAgent
 	
-4. Create a run configuration for 3 retailer agents:
-* * arguments: -agents r:agents.RetailerAgent
+3. Create a run configuration for 3 retailer agents:
+..* arguments: -container -container-name Retailers r1:agents.RetailerAgent;r2:agents.RetailerAgent;r3:agents.RetailerAgent
 	
-5. Create a run configuration for a home agent:
-* * arguments: -agents h:agents.HomeAgent
+4. Create a run configuration for a home agent:
+..* arguments: -container -container-name Homes h:agents.HomeAgent
 	
-6. Alternatively create a combined run configuration after step 2:
-* * arguments: -agents b:agents.BrokerAgent;r:agents.RetailerAgent; h:agents.HomeAgent
+5. Alternatively create a combined run configuration after step 2:
+..* arguments: -container -container-name Brokers b:agents.BrokerAgent -container -container-name Retailers r1:agents.RetailerAgent;r2:agents.RetailerAgent;r3:agents.RetailerAgent -container -container-name Homes h:agents.HomeAgent
+
+6. Using the Jade GUI, start running a sniffer agent to track all actions of agents
+..* Tools > Start Sniffer
+..* Select "Do sniff this agent" for applicable containers of agents in the order of Home, Broker, then Retailers R1, R2 & R3
