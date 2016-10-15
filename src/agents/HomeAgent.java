@@ -94,6 +94,18 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			}
 		});
 		
+		//Choose Units 
+		tradingSequence.addSubBehaviour(new OneShotBehaviour() {
+			@Override 
+			public void action() { 
+				if(queryFinished = true){
+					System.out.println("\nChoosing amount of Units\n");
+					unitsWanted();
+				}
+				
+			}
+		});
+		
 		// Buy units
 		tradingSequence.addSubBehaviour(new OneShotBehaviour() {
 			@Override 
@@ -228,5 +240,37 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 				}
 			}
 		});
+	}
+	
+	void  unitsWanted()
+	{
+		// Determine how many units it wants to purchase 
+		// Units are brought based off how much is needed to stock up if cheap,
+		// otherwise will only buy small amount if expensive 
+		
+		int supplyRate = home.getSupply();			 // Current supply the home holds
+		int homeCapacity = 30;   				// Presuming capacity of 30 units of energy 
+		int budget = home.getBudget();
+		int energyPrice = home.getGenerationRate();  		// Price in query (?)Unknown if correct method
+		int unitsBought = 0;					// Units of energy willing to buy 
+		
+		//Purchase 10 units regardless of price when empty 
+		if( supplyRate == 0){
+			unitsBought = 10;
+			purchase();
+		}
+		
+		//Purchase full stock up if price of energy is less than 5
+		if( energyPrice <= 5 && supplyRate != 0){
+			unitsBought = homeCapacity;
+			purchase();
+		}
+		
+		//Desperate Mode 
+		if(energyPrice > budget && supplyRate == 0){
+			unitsBought = 5;
+			purchase();
+		}
+		
 	}
 }
