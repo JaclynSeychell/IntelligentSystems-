@@ -9,6 +9,7 @@ public class Home implements Concept {
 	private int usageRate;
 	private int supply;
 	private int budget;
+	private int expenditure;
 	
 	public Home() {
 		generationRate = 0;
@@ -17,6 +18,7 @@ public class Home implements Concept {
 		budget = 0;
 	}
 	
+	// Generation getter & setter
 	public int getGenerationRate() {
 		return generationRate;
 	}
@@ -25,6 +27,7 @@ public class Home implements Concept {
 		this.generationRate = generationRate;
 	}
 
+	// Usage getter & setter
 	public int getUsageRate() {
 		return usageRate;
 	}
@@ -33,22 +36,36 @@ public class Home implements Concept {
 		this.usageRate = usageRate;
 	}
 
+	// Supply getter & setter
 	public int getSupply() {
 		return supply;
 	}
-
 
 	public void setSupply(int supply) {
 		this.supply = supply;
 		if (this.supply < 0) this.supply = 0; // Cannot be less than 0
 	}
 
+	// Budget getter & setter
 	public int getBudget() {
 		return budget;
 	}
 
 	public void setBudget(int budget) {
 		this.budget = budget;
+	}
+	
+	// Expenditure getter & setter
+	public int getExpenditure() {
+		return expenditure;
+	}
+	
+	public void setExpenditure(int expenditure) {
+		this.expenditure = expenditure;
+	}
+	
+	public int remainingBudget() {
+		return budget - expenditure;
 	}
 
 	@Override

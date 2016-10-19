@@ -13,13 +13,13 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREResponder;
 import jade.proto.SubscriptionResponder;
-import jade.proto.SubscriptionResponder.Subscription;
-import jade.util.leap.Iterator;
+import jade.content.ContentElement;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
+import jade.content.onto.basic.Action;
+
 import java.util.Random;
-import java.util.Vector;
 
 import ontologies.*;
 import ontologies.Retailer.retailerType;
@@ -32,7 +32,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	private Ontology ontology = SupplierOntology.getInstance();
 	private Random rnd = Utility.newRandom(hashCode());
 	
-	private static final int TICK_TIME = 3000;//(60000 * 2); //ticker <= 2 mins
+	private static final int TICK_TIME = (60000 * 5);
 	
 	retailerType determineTypeByName(String str) {
 		switch (str) {
@@ -138,9 +138,32 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			
 			@Override
 			protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
-				System.out.println("Agent " + getLocalName() + ": Action successfully performed");
 				ACLMessage inform = request.createReply();
 				inform.setPerformative(ACLMessage.INFORM);
+				request.setLanguage(codec.getName());
+				request.setOntology(ontology.getName());
+				
+				try {
+					ContentElement content = getContentManager().extractContent(request);
+					Exchange action = (Exchange)((Action)content).getAction();
+					
+					switch(action.getType()) {
+					case SupplierVocabulary.BUY:
+						int updatedSupply = retailer.getSupply() - action.getUnits();
+						System.out.println("Agent " + getLocalName() + ": Action successfully performed" + 
+								"\nSuppy sold: " + retailer.getSupply() + "\nRemaining supply: " + updatedSupply);
+						retailer.setSupply(updatedSupply);
+						
+						break;
+					case SupplierVocabulary.SELL:
+					}
+					
+				} catch(Exception e) {
+					inform.setPerformative(ACLMessage.FAILURE);
+					e.printStackTrace();
+				}
+				
+				System.out.println(inform.getContent());
 				return inform;
 			}
 		} );
@@ -185,7 +208,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			//Update price based on retailer type
 			setPriceFromType();
 			
-			reset(rnd.nextInt(3000));
+			reset(rnd.nextInt(TICK_TIME));
 		}
 	};
 	

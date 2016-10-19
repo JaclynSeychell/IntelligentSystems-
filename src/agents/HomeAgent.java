@@ -29,6 +29,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private Random rnd = Utility.newRandom(hashCode());	
 	
 	private int bestPrice;
+	private Exchange exchange;
 	
 	private boolean queryFinished;
 	private boolean purchaseFinished;
@@ -42,15 +43,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		home.setUsageRate(rnd.nextInt(100));
 		home.setSupply(rnd.nextInt(2000));
 		System.out.println(home.toString());
-		addBehaviour(updateHome);
-	}
-	
-	// Prepare message content
-	Exchange getExchange() {
-		Exchange ex = new Exchange();
-		ex.setType(SupplierVocabulary.BUY);
-		ex.setPrice(home.getBudget());
-		return ex;
+		addBehaviour(updateSupply);
+		addBehaviour(updateBudget);
 	}
 	
 	protected void setup() {
@@ -65,78 +59,77 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		lookupBroker();
 		
 		// Run agent
-		process();
+		query();
 	}
 	
-	void process() {
-		System.out.println("Contacting the broker");
+	void query() {
+		System.out.println("--\tInitiating Communication with Broker\t--");
 		
-		SequentialBehaviour tradingSequence = new SequentialBehaviour();
-		addBehaviour(tradingSequence);
+		SequentialBehaviour querySequence = new SequentialBehaviour();
+		addBehaviour(querySequence);
 	
-		// Get prices
-		tradingSequence.addSubBehaviour(new OneShotBehaviour() {
+		// Get Quotes
+		querySequence.addSubBehaviour(new OneShotBehaviour() {
 			@Override 
 			public void action() { 
-				System.out.println("\n\nCommencing Query");
-				query();
+				System.out.println("--\tSending query request\t--");
+				sendQuery();
 			}
 		});
 		
-		tradingSequence.addSubBehaviour(new SimpleBehaviour() {
+		querySequence.addSubBehaviour(new SimpleBehaviour() {
 			@Override
 			public void action() {};
 			
 			@Override 
 			public boolean done() { 
-				if (queryFinished) System.out.println("Finished Query");
-				return queryFinished; 
-			}
-		});
-		
-		//Choose Units 
-		tradingSequence.addSubBehaviour(new OneShotBehaviour() {
-			@Override 
-			public void action() { 
-				if(queryFinished = true){
-					System.out.println("\nChoosing amount of Units\n");
-					unitsWanted();
+				if (queryFinished) {
+					System.out.println("--\tQuery request complete\t--");
+					purchase();
 				}
-				
-			}
-		});
-		
-		// Buy units
-		tradingSequence.addSubBehaviour(new OneShotBehaviour() {
-			@Override 
-			public void action() { 
-				System.out.println("\nCommencing Purchase\n");
-				purchase();
-			}
-		});
-		
-		tradingSequence.addSubBehaviour(new SimpleBehaviour() {
-			@Override
-			public void action() {}
-			
-			@Override 
-			public boolean done() { 
-				if (purchaseFinished) System.out.println("\n\nFinished Purchase");
-				return purchaseFinished; 
-			}
-		});
-		
-		// Wait to restart behaviour
-		tradingSequence.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(10000)) {
-			@Override 
-			public void handleElapsedTimeout() { 
-				queryFinished = purchaseFinished = false;
-				process(); 
+				return queryFinished; 
 			}
 		});
 	}
 	
-	TickerBehaviour updateHome = new TickerBehaviour(this, rnd.nextInt(TICK_TIME)) {
+	void purchase() {
+		SequentialBehaviour purchaseSequence = new SequentialBehaviour();
+		addBehaviour(purchaseSequence);
+		
+		if (bestPrice < home.remainingBudget()) {
+			// Make Purchases
+			purchaseSequence.addSubBehaviour(new OneShotBehaviour() {
+				@Override 
+				public void action() { 
+					System.out.println("--Sending purchase request--");
+					exchange = buyUnits();
+					purchaseRequest(exchange);
+				}
+			});
+			
+			purchaseSequence.addSubBehaviour(new SimpleBehaviour() {
+				@Override
+				public void action() {}
+				
+				@Override 
+				public boolean done() { 
+					if (purchaseFinished) System.out.println("--\tPurchase request complete\t--");
+					return purchaseFinished; 
+				}
+			});
+		} 
+		
+		purchaseSequence.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(60000)) {
+			@Override 
+			public void handleElapsedTimeout() { 
+				queryFinished = purchaseFinished = false;
+				System.out.println("--\tConcluding Communication with Broker\t--\n");
+				query(); 
+			}
+		});
+	}
+	
+	TickerBehaviour updateSupply = new TickerBehaviour(this, rnd.nextInt(TICK_TIME)) {
 		@Override
 		public void onTick() {
 			int supplyChange = (home.getGenerationRate() + home.getUsageRate());
@@ -146,6 +139,15 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 					+ supplyChange + "\n Supply = " + home.getSupply());
 			
 			reset(rnd.nextInt(TICK_TIME));
+		}
+	};
+	
+	TickerBehaviour updateBudget = new TickerBehaviour(this, 60000) {
+		@Override
+		public void onTick() {
+			home.setExpenditure(0);
+			System.out.println(myAgent.getLocalName() + " budget reset");
+			reset(60000);
 		}
 	};
 
@@ -170,7 +172,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		}
 	}
 	
-	void query() {
+	void sendQuery() {
 		if (broker == null) lookupBroker();
 		if (broker == null) {
 			System.out.println("Unable to localize broker agent! \nOperation aborted!");
@@ -192,10 +194,10 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			protected void handleInform(ACLMessage inform) {
 					System.out.println("Agent " + inform.getSender().getName() + 
 							" has retrieved the best price " + Integer.parseInt(inform.getContent()));
+					bestPrice = Integer.parseInt(inform.getContent());
 			}
 			
 			protected void handleAllResultNotifications(Vector notifications) {
-				System.out.println("Query communication concluded");
 				queryFinished = true;
 					
 				if (notifications.size() == 0) {
@@ -206,7 +208,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		});
 	}
 	
-	void purchase() {
+	void purchaseRequest(Exchange ex) {
 		if (broker == null) lookupBroker();
 		if (broker == null) {
 			System.out.println("Unable to localize broker agent! \nOperation aborted!");
@@ -217,60 +219,72 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
 		msg.setReplyByDate(new Date(System.currentTimeMillis() + 5000));
-		msg.addReceiver(broker);
+		msg.setLanguage(codec.getName());
+		msg.setOntology(ontology.getName());
 		
-		addBehaviour(new AchieveREInitiator(this, msg) {
-			protected void handleAgree(ACLMessage agree) {
-				System.out.println("Agent " + agree.getSender().getName() + 
-						" agreed to purchase units on our behalf.");
-			}
-			
-			protected void handleInform(ACLMessage inform) {
-				System.out.println("Agent " + inform.getSender().getName() + 
-						" has purchased some energy units.");
-			}
-			
-			protected void handleAllResultNotifications(Vector notifications) {
-				System.out.println("Purchase communication concluded");
-				purchaseFinished = true;
-				
-				if (notifications.size() == 0) {
-					// Some responder didn't reply within the specified timeout
-					System.out.println("Timeout expired: no response received");
+		try {
+			getContentManager().fillContent(msg, new Action(broker, ex));
+			msg.addReceiver(broker);
+		
+			addBehaviour(new AchieveREInitiator(this, msg) {
+				protected void handleAgree(ACLMessage agree) {
+					System.out.println("Agent " + agree.getSender().getName() + 
+							" agreed to purchase units on our behalf.");
 				}
-			}
-		});
+				
+				protected void handleInform(ACLMessage inform) {
+					System.out.println("Agent " + inform.getSender().getName() + 
+							" has purchased some energy units.");
+					
+					home.setExpenditure(home.getExpenditure() + (exchange.getPrice() * exchange.getUnits()));
+					
+					System.out.println("\tBudget: " + home.getBudget() + 
+							"\n\tExpenditure: " + home.getExpenditure());
+				}
+				
+				protected void handleAllResultNotifications(Vector notifications) {
+					purchaseFinished = true;
+					
+					if (notifications.size() == 0) {
+						// Some responder didn't reply within the specified timeout
+						System.out.println("Timeout expired: no response received");
+					}
+				}
+			});
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
-	void  unitsWanted()
-	{
-		// Determine how many units it wants to purchase 
-		// Units are brought based off how much is needed to stock up if cheap,
-		// otherwise will only buy small amount if expensive 
+	Exchange buyUnits() {
+		Exchange ex = new Exchange();
+		ex.setType(SupplierVocabulary.BUY);
+		ex.setPrice(bestPrice);
+		int max = home.remainingBudget() / bestPrice;
+		int result = 0;
 		
-		int supplyRate = home.getSupply();			 // Current supply the home holds
-		int homeCapacity = 30;   				// Presuming capacity of 30 units of energy 
-		int budget = home.getBudget();
-		int energyPrice = home.getGenerationRate();  		// Price in query (?)Unknown if correct method
-		int unitsBought = 0;					// Units of energy willing to buy 
-		
-		//Purchase 10 units regardless of price when empty 
-		if( supplyRate == 0){
-			unitsBought = 10;
-			purchase();
+		// Purchase an amount if allowed when running low or purchase all units at a good price.
+		if (home.getSupply() < 50) {
+			if (max > 10) {
+				result = 10;
+			} else {
+				result = max;
+			}
+		} else if (bestPrice <= 5) {
+			result = max;
 		}
 		
-		//Purchase full stock up if price of energy is less than 5
-		if( energyPrice <= 5 && supplyRate != 0){
-			unitsBought = homeCapacity;
-			purchase();
-		}
-		
-		//Desperate Mode 
-		if(energyPrice > budget && supplyRate == 0){
-			unitsBought = 5;
-			purchase();
-		}
-		
+		ex.setUnits(result);
+		return ex;
+	}
+	
+	// TO-DO: Selling of units
+	Exchange sellUnits() {
+		Exchange ex = new Exchange();
+		ex.setType(SupplierVocabulary.SELL);
+		ex.setPrice(bestPrice);
+		int result = 0;
+		ex.setUnits(result);
+		return ex;
 	}
 }
