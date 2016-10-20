@@ -29,6 +29,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private Random rnd = Utility.newRandom(hashCode());	
 	
 	private int bestPrice;
+	private int homeCapacity;
 	private Exchange exchange;
 	
 	private boolean queryFinished;
@@ -254,6 +255,43 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	void  unitsWanted()
+	{
+		// Determine how many units it wants to purchase 
+		// Units are brought based off how much is needed to stock up if cheap,
+		// otherwise will only buy small amount if expensive 
+		
+		int supplyRate = home.getSupply();			 // Current supply the home holds
+		int budget = home.getBudget();
+		int energyPrice = getExchange().getPrice();  // Price in query (?)Unknown if correct method
+		int homeCapacity = home.getCapacity();
+		int unitsBought = getExchange().getUnits();			        // Units of energy willing to buy
+		
+		//Purchase 10 units regardless of price when empty 
+		if( supplyRate == 0){
+			unitsBought = supplyRate + 10;
+			purchase(unitsBought);
+		}
+		
+		//Purchase full stock up if price of energy is less than 5
+		if( energyPrice <= 5 && supplyRate != 0){
+			unitsBought = homeCapacity;
+			purchase(unitsBought);
+		}
+		
+		//Desperate Mode 
+		
+		if(energyPrice > budget && supplyRate == 0){
+			unitsBought = ACLMessage.getInteger(QUOTE_PRICE_PER_UNIT);
+		
+			
+		}
+		
+		//Need to find a way to use the unitsBought to connect to the purchase 
+		
+		
 	}
 	
 	Exchange buyUnits() {
