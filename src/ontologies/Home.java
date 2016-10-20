@@ -9,6 +9,7 @@ public class Home implements Concept {
 	private int usageRate;
 	private int supply;
 	private int budget;
+	private int capacity;
 	private int expenditure;
 	
 	public Home() {
@@ -16,6 +17,7 @@ public class Home implements Concept {
 		usageRate = 0;
 		supply = 0;
 		budget = 0;
+		capacity = 0;
 	}
 	
 	// Generation getter & setter
@@ -66,6 +68,15 @@ public class Home implements Concept {
 	
 	public int remainingBudget() {
 		return budget - expenditure;
+	}
+	
+	public int getCapacity()
+	{
+		return capacity;
+	}
+	
+	public void setCapcity (int capacity) {
+		this.capacity = capacity;
 	}
 
 	@Override
