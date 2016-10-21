@@ -259,8 +259,9 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	Exchange buyUnits() {
 		Exchange ex = new Exchange();
 		ex.setType(SupplierVocabulary.BUY);
-		ex.setPrice(bestPrice);
-		int max = home.remainingBudget() / bestPrice;
+		ex.setPrice(bestPrice); 
+		
+		int max = (bestPrice != 0) ? home.remainingBudget() / bestPrice : 0;
 		int result = 0;
 		
 		// Purchase an amount if allowed when running low or purchase all units at a good price.
