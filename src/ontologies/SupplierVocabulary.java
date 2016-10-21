@@ -30,4 +30,10 @@ public interface SupplierVocabulary {
 	public static final String PROBLEM = "Problem";
 	public static final String PROBLEM_NUM = "num";
 	public static final String PROBLEM_MSG = "msg";
+	
+	public static final String APPLIANCE_AGENT = "Applicance";
+	public static final String APPLIANCE_GENERATION_RATE = "generationRate";
+	public static final String APPLIANCE_USAGE_RATE = "usageRate";
+	public static final String APPLIANCE_SUPPLY = "supply";
+	
 }
