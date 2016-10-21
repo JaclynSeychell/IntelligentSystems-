@@ -29,6 +29,7 @@ public class SupplierOntology extends Ontology implements SupplierVocabulary {
 			cs.add(HOME_USAGE_RATE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			cs.add(HOME_SUPPLY, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			cs.add(HOME_BUDGET, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			cs.add(HOME_EXPENDITURE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			
 			// Retailer
 			add(new ConceptSchema(RETAILER), Retailer.class);
@@ -48,6 +49,7 @@ public class SupplierOntology extends Ontology implements SupplierVocabulary {
 			add(as, Exchange.class);
 			as.add(EXCHANGE_TYPE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 	        as.add(EXCHANGE_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+	        as.add(EXCHANGE_UNITS, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 	         
 		} catch (OntologyException oe) {
 			oe.printStackTrace();

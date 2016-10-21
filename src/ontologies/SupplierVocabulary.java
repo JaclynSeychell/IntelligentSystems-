@@ -15,6 +15,7 @@ public interface SupplierVocabulary {
 	public static final String HOME_USAGE_RATE = "usageRate";
 	public static final String HOME_SUPPLY = "supply";
 	public static final String HOME_BUDGET = "budget";
+	public static final String HOME_EXPENDITURE = "expenditure";
 	
 	public static final String RETAILER = "Retailer";
 	public static final String RETAILER_GENERATION_RATE = "generationRate";
@@ -24,9 +25,7 @@ public interface SupplierVocabulary {
 	public static final String EXCHANGE = "Exchange";
 	public static final String EXCHANGE_TYPE = "type";
 	public static final String EXCHANGE_PRICE = "price";
-	
-	public static final String QUOTE = "Quote";
-	public static final String QUOTE_PRICE_PER_UNIT = "pricePerUnit";
+	public static final String EXCHANGE_UNITS = "units";
 	
 	public static final String PROBLEM = "Problem";
 	public static final String PROBLEM_NUM = "num";
