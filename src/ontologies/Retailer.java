@@ -26,6 +26,13 @@ public class Retailer implements Concept {
 		rType = retailerType.typeA; //defaulted to typeA
 	}
 	
+	public Retailer(int generationRate, int pricePerUnit, int supply) {
+		this.generationRate = generationRate;
+		this.pricePerUnit = pricePerUnit;
+		this.supply = supply;
+		rType = retailerType.typeA;
+	}
+	
 	public int getGenerationRate() {
 		return generationRate;
 	}

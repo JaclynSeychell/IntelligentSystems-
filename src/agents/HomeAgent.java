@@ -42,9 +42,6 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		home.setGenerationRate(rnd.nextInt(10));
 		home.setUsageRate(rnd.nextInt(100));
 		home.setSupply(rnd.nextInt(2000));
-		System.out.println(home.toString());
-		addBehaviour(updateSupply);
-		addBehaviour(updateBudget);
 	}
 	
 	protected void setup() {
@@ -53,7 +50,18 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		getContentManager().registerOntology(ontology);
 
 		// Setup home state
-		setupHome();
+		Object[] args = getArguments();
+		if(args != null && args.length > 0) {
+			home = (Home)args[0];
+		} else {
+			setupHome();
+		}
+		
+		System.out.println(home.toString());
+		
+		addBehaviour(updateSupply);
+		addBehaviour(updateBudget);
+		
 		
 		// Find the broker agent
 		lookupBroker();

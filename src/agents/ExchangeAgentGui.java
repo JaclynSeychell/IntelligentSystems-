@@ -20,10 +20,10 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 	private Random rnd = Utility.newRandom(hashCode());
 	
 	// Save radio button settings
-	private String[] aRetailerName = new String[3];
-	private int[] aRetailerGenRate = new int[3];
-	private int[] aRetailerPrice = new int[3];
-	private int[] aRetailerSupply = new int[3];
+	private String[] aRetailerNames = new String[3];
+	private int[] aRetailerGenRates = new int[3];
+	private int[] aRetailerPrices = new int[3];
+	private int[] aRetailerSupplies = new int[3];
 	
 	// Components
 	// Retailers
@@ -53,21 +53,25 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 	
 	// Home
 	private JTextField fHomeName;
+	private JSlider sHomeGenRate;
+	private JSlider sHomeUseRate;
+	private JSlider sHomeIncome;
+	private JSlider sHomeSupply;
 
 	public ExchangeAgentGui() {
 		JPanel pHeader = new JPanel();
 		getContentPane().add(pHeader, BorderLayout.NORTH);
 		pHeader.setLayout(new BoxLayout(pHeader, BoxLayout.Y_AXIS));
 		
-		JLabel lblHomeEnergyTrading = new JLabel("Home Energy Trading System");
-		lblHomeEnergyTrading.setFont(new Font("Calibri", Font.BOLD, 32));
-		lblHomeEnergyTrading.setAlignmentX(Component.CENTER_ALIGNMENT);
-		pHeader.add(lblHomeEnergyTrading);
+		JLabel lTitle = new JLabel("Home Energy Trading System");
+		lTitle.setFont(new Font("Calibri", Font.BOLD, 32));
+		lTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+		pHeader.add(lTitle);
 		
-		JLabel lblNewLabel = new JLabel("Designed by James Martin, Nathan Harris & Jacyln Seychell");
-		lblNewLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-		lblNewLabel.setFont(new Font("Calibri", Font.PLAIN, 24));
-		pHeader.add(lblNewLabel);
+		JLabel lNames = new JLabel("Designed by James Martin, Nathan Harris & Jacyln Seychell");
+		lNames.setAlignmentX(Component.CENTER_ALIGNMENT);
+		lNames.setFont(new Font("Calibri", Font.PLAIN, 24));
+		pHeader.add(lNames);
 		
 		JSeparator separator = new JSeparator();
 		pHeader.add(separator);
@@ -86,9 +90,9 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		pHome.setLayout(gbl_pHome);
 		
 		JLabel lHomeTitle = new JLabel("Home Agent Parameters");
+		lHomeTitle.setFont(new Font("Calibri", Font.PLAIN, 24));
 		GridBagConstraints gbc_lHomeTitle = new GridBagConstraints();
 		gbc_lHomeTitle.gridwidth = 4;
-		gbc_lHomeTitle.gridheight = 2;
 		gbc_lHomeTitle.insets = new Insets(0, 0, 5, 0);
 		gbc_lHomeTitle.gridx = 0;
 		gbc_lHomeTitle.gridy = 0;
@@ -99,15 +103,16 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_lHomeName.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeName.anchor = GridBagConstraints.EAST;
 		gbc_lHomeName.gridx = 0;
-		gbc_lHomeName.gridy = 3;
+		gbc_lHomeName.gridy = 2;
 		pHome.add(lHomeName, gbc_lHomeName);
 		
 		fHomeName = new JTextField();
+		fHomeName.setText("HomeAgent");
 		GridBagConstraints gbc_fHomeName = new GridBagConstraints();
 		gbc_fHomeName.insets = new Insets(0, 0, 5, 5);
 		gbc_fHomeName.fill = GridBagConstraints.HORIZONTAL;
 		gbc_fHomeName.gridx = 1;
-		gbc_fHomeName.gridy = 3;
+		gbc_fHomeName.gridy = 2;
 		pHome.add(fHomeName, gbc_fHomeName);
 		fHomeName.setColumns(10);
 		
@@ -116,34 +121,34 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_lHomeGenRate.anchor = GridBagConstraints.EAST;
 		gbc_lHomeGenRate.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeGenRate.gridx = 0;
-		gbc_lHomeGenRate.gridy = 4;
+		gbc_lHomeGenRate.gridy = 3;
 		pHome.add(lHomeGenRate, gbc_lHomeGenRate);
 		
-		JSlider sHomeGenRate = new JSlider();
+		sHomeGenRate = new JSlider();
 		sHomeGenRate.setMajorTickSpacing(10);
 		sHomeGenRate.setPaintTicks(true);
 		GridBagConstraints gbc_sHomeGenRate = new GridBagConstraints();
 		gbc_sHomeGenRate.fill = GridBagConstraints.HORIZONTAL;
 		gbc_sHomeGenRate.insets = new Insets(0, 0, 5, 5);
 		gbc_sHomeGenRate.gridx = 1;
-		gbc_sHomeGenRate.gridy = 4;
+		gbc_sHomeGenRate.gridy = 3;
 		pHome.add(sHomeGenRate, gbc_sHomeGenRate);
 		
 		JLabel lHomeGenValue = new JLabel("genValue");
 		lHomeGenValue.setHorizontalAlignment(SwingConstants.LEFT);
-		lHomeGenValue.setText(Integer.toString(sHomeGenRate.getValue()));
 		GridBagConstraints gbc_lHomeGenValue = new GridBagConstraints();
 		gbc_lHomeGenValue.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeGenValue.gridx = 2;
-		gbc_lHomeGenValue.gridy = 4;
+		gbc_lHomeGenValue.gridy = 3;
 		
 		pHome.add(lHomeGenValue, gbc_lHomeGenValue);
+		lHomeGenValue.setText(Integer.toString(sHomeGenRate.getValue()));
 		
 		JCheckBox cbRandHomeGenRate = new JCheckBox("Randomize");
 		GridBagConstraints gbc_cbRandHomeGenRate = new GridBagConstraints();
 		gbc_cbRandHomeGenRate.insets = new Insets(0, 0, 5, 0);
 		gbc_cbRandHomeGenRate.gridx = 3;
-		gbc_cbRandHomeGenRate.gridy = 4;
+		gbc_cbRandHomeGenRate.gridy = 3;
 		pHome.add(cbRandHomeGenRate, gbc_cbRandHomeGenRate);
 		
 		JLabel lHomeUseRate = new JLabel("Usage Rate:");
@@ -151,10 +156,10 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_lHomeUseRate.anchor = GridBagConstraints.EAST;
 		gbc_lHomeUseRate.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeUseRate.gridx = 0;
-		gbc_lHomeUseRate.gridy = 5;
+		gbc_lHomeUseRate.gridy = 4;
 		pHome.add(lHomeUseRate, gbc_lHomeUseRate);
 		
-		JSlider sHomeUseRate = new JSlider();
+		sHomeUseRate = new JSlider();
 		sHomeUseRate.setMajorTickSpacing(10);
 		sHomeUseRate.setValue(55);
 		sHomeUseRate.setMinimum(10);
@@ -163,22 +168,22 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_sHomeUseRate.fill = GridBagConstraints.HORIZONTAL;
 		gbc_sHomeUseRate.insets = new Insets(0, 0, 5, 5);
 		gbc_sHomeUseRate.gridx = 1;
-		gbc_sHomeUseRate.gridy = 5;
+		gbc_sHomeUseRate.gridy = 4;
 		pHome.add(sHomeUseRate, gbc_sHomeUseRate);
 		
-		JLabel lHomeUseValue = new JLabel("New label");
+		JLabel lHomeUseValue = new JLabel();
 		lHomeUseValue.setText(Integer.toString(sHomeUseRate.getValue()));
 		GridBagConstraints gbc_lHomeUseValue = new GridBagConstraints();
 		gbc_lHomeUseValue.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeUseValue.gridx = 2;
-		gbc_lHomeUseValue.gridy = 5;
+		gbc_lHomeUseValue.gridy = 4;
 		pHome.add(lHomeUseValue, gbc_lHomeUseValue);
 		
 		JCheckBox cbRandHomeUseRate = new JCheckBox("Randomize");
 		GridBagConstraints gbc_cbRandHomeUseRate = new GridBagConstraints();
 		gbc_cbRandHomeUseRate.insets = new Insets(0, 0, 5, 0);
 		gbc_cbRandHomeUseRate.gridx = 3;
-		gbc_cbRandHomeUseRate.gridy = 5;
+		gbc_cbRandHomeUseRate.gridy = 4;
 		pHome.add(cbRandHomeUseRate, gbc_cbRandHomeUseRate);
 		
 		JLabel lHomeSupply = new JLabel("Supply:");
@@ -186,10 +191,10 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_lHomeSupply.anchor = GridBagConstraints.EAST;
 		gbc_lHomeSupply.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeSupply.gridx = 0;
-		gbc_lHomeSupply.gridy = 6;
+		gbc_lHomeSupply.gridy = 5;
 		pHome.add(lHomeSupply, gbc_lHomeSupply);
 		
-		JSlider sHomeSupply = new JSlider();
+		sHomeSupply = new JSlider();
 		sHomeSupply.setMaximum(2000);
 		sHomeSupply.setPaintTicks(true);
 		sHomeSupply.setValue(1000);
@@ -198,56 +203,58 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_sHomeSupply.fill = GridBagConstraints.HORIZONTAL;
 		gbc_sHomeSupply.insets = new Insets(0, 0, 5, 5);
 		gbc_sHomeSupply.gridx = 1;
-		gbc_sHomeSupply.gridy = 6;
+		gbc_sHomeSupply.gridy = 5;
 		pHome.add(sHomeSupply, gbc_sHomeSupply);
 		
-		JLabel lHomeSupplyValue = new JLabel("New label");
+		JLabel lHomeSupplyValue = new JLabel();
 		lHomeSupplyValue.setText(Integer.toString(sHomeSupply.getValue()));
 		GridBagConstraints gbc_lHomeSupplyValue = new GridBagConstraints();
 		gbc_lHomeSupplyValue.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeSupplyValue.gridx = 2;
-		gbc_lHomeSupplyValue.gridy = 6;
+		gbc_lHomeSupplyValue.gridy = 5;
 		pHome.add(lHomeSupplyValue, gbc_lHomeSupplyValue);
+		
 		
 		JCheckBox cbRandHomeSupply = new JCheckBox("Randomize");
 		GridBagConstraints gbc_cbRandHomeSupply = new GridBagConstraints();
 		gbc_cbRandHomeSupply.insets = new Insets(0, 0, 5, 0);
 		gbc_cbRandHomeSupply.gridx = 3;
-		gbc_cbRandHomeSupply.gridy = 6;
+		gbc_cbRandHomeSupply.gridy = 5;
 		pHome.add(cbRandHomeSupply, gbc_cbRandHomeSupply);
 		
 		JLabel lHomeIncome = new JLabel("Income:");
 		GridBagConstraints gbc_lHomeIncome = new GridBagConstraints();
 		gbc_lHomeIncome.anchor = GridBagConstraints.EAST;
-		gbc_lHomeIncome.insets = new Insets(0, 0, 0, 5);
+		gbc_lHomeIncome.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeIncome.gridx = 0;
-		gbc_lHomeIncome.gridy = 7;
+		gbc_lHomeIncome.gridy = 6;
 		pHome.add(lHomeIncome, gbc_lHomeIncome);
 		
-		JSlider sHomeIncome = new JSlider();
+		sHomeIncome = new JSlider();
 		sHomeIncome.setMinimum(10);
 		sHomeIncome.setValue(55);
 		sHomeIncome.setMajorTickSpacing(10);
 		sHomeIncome.setPaintTicks(true);
 		GridBagConstraints gbc_sHomeIncome = new GridBagConstraints();
 		gbc_sHomeIncome.fill = GridBagConstraints.HORIZONTAL;
-		gbc_sHomeIncome.insets = new Insets(0, 0, 0, 5);
+		gbc_sHomeIncome.insets = new Insets(0, 0, 5, 5);
 		gbc_sHomeIncome.gridx = 1;
-		gbc_sHomeIncome.gridy = 7;
+		gbc_sHomeIncome.gridy = 6;
 		pHome.add(sHomeIncome, gbc_sHomeIncome);
 		
 		JLabel lHomeIncomeValue = new JLabel("");
 		lHomeIncomeValue.setText(Integer.toString(sHomeIncome.getValue()));
 		GridBagConstraints gbc_lHomeIncomeValue = new GridBagConstraints();
-		gbc_lHomeIncomeValue.insets = new Insets(0, 0, 0, 5);
+		gbc_lHomeIncomeValue.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeIncomeValue.gridx = 2;
-		gbc_lHomeIncomeValue.gridy = 7;
+		gbc_lHomeIncomeValue.gridy = 6;
 		pHome.add(lHomeIncomeValue, gbc_lHomeIncomeValue);
-		
+				
 		JCheckBox cbRandHomeIncome = new JCheckBox("Randomize");
 		GridBagConstraints gbc_cbRandHomeIncome = new GridBagConstraints();
+		gbc_cbRandHomeIncome.insets = new Insets(0, 0, 5, 0);
 		gbc_cbRandHomeIncome.gridx = 3;
-		gbc_cbRandHomeIncome.gridy = 7;
+		gbc_cbRandHomeIncome.gridy = 6;
 		pHome.add(cbRandHomeIncome, gbc_cbRandHomeIncome);
 		
 		JPanel pRetailers = new JPanel();
@@ -260,6 +267,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		pRetailers.setLayout(gbl_pRetailers);
 		
 		JLabel lRetailerTitle = new JLabel("Retailer Agents Parameters");
+		lRetailerTitle.setFont(new Font("Calibri", Font.PLAIN, 24));
 		GridBagConstraints gbc_lRetailerTitle = new GridBagConstraints();
 		gbc_lRetailerTitle.gridheight = 2;
 		gbc_lRetailerTitle.gridwidth = 4;
@@ -311,6 +319,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		pRetailers.add(lRetailerName, gbc_lRetailerName);
 		
 		fRetailerName = new JTextField();
+		fRetailerName.setText("R1");
 		fRetailerName.setColumns(10);
 		GridBagConstraints gbc_fRetailerName = new GridBagConstraints();
 		gbc_fRetailerName.fill = GridBagConstraints.HORIZONTAL;
@@ -422,16 +431,17 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		
 		// Setup default retailer settings
 		for(int i = 0; i < 3; i++) {
-			aRetailerGenRate[i] = sRetailerGenRate.getValue();
-			aRetailerPrice[i] = sRetailerPrice.getValue();
-			aRetailerSupply[i] = sRetailerSupply.getValue();
+			aRetailerNames[i] = "R"+(i+1);
+			aRetailerGenRates[i] = sRetailerGenRate.getValue();
+			aRetailerPrices[i] = sRetailerPrice.getValue();
+			aRetailerSupplies[i] = sRetailerSupply.getValue();
 		}
 		
 		// Handle Slider events
+		sHomeIncome.addChangeListener(new SliderListener(lHomeIncomeValue));
+		sHomeSupply.addChangeListener(new SliderListener(lHomeSupplyValue));
 		sHomeGenRate.addChangeListener(new SliderListener(lHomeGenValue));
 		sHomeUseRate.addChangeListener(new SliderListener(lHomeUseValue));
-		sHomeSupply.addChangeListener(new SliderListener(lHomeSupplyValue));
-		sHomeIncome.addChangeListener(new SliderListener(lHomeIncomeValue));
 		
 		slRetailerGenRate = new SliderListener(lRetailerGenRateValue);
 		slRetailerPrice = new SliderListener(lRetailerPriceValue);
@@ -442,14 +452,41 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		sRetailerSupply.addChangeListener(slRetailerSupply);
 		
 		// Handle CheckBox events
-		cbRandHomeGenRate.addChangeListener(new CheckBoxListener(lHomeGenValue, sHomeGenRate));
 		cbRandHomeUseRate.addChangeListener(new CheckBoxListener(lHomeUseValue, sHomeUseRate));
-		cbRandHomeSupply.addChangeListener(new CheckBoxListener(lHomeSupplyValue, sHomeSupply));
+		cbRandHomeGenRate.addChangeListener(new CheckBoxListener(lHomeGenValue, sHomeGenRate));
 		cbRandHomeIncome.addChangeListener(new CheckBoxListener(lHomeIncomeValue, sHomeIncome));
-		
+		cbRandHomeSupply.addChangeListener(new CheckBoxListener(lHomeSupplyValue, sHomeSupply));
+
 		cblRetailerGenRate = new CheckBoxListener(lRetailerGenRateValue, sRetailerGenRate);
 		cblRetailerPrice = new CheckBoxListener(lRetailerPriceValue, sRetailerPrice);
 		cblRetailerSupply = new CheckBoxListener(lRetailerSupplyValue, sRetailerSupply);
+		
+		JPanel pSetup = new JPanel();
+		getContentPane().add(pSetup, BorderLayout.SOUTH);
+		
+		JButton bQuickStart = new JButton("Quickstart!");
+		pSetup.add(bQuickStart);
+		
+		JButton bStart = new JButton("Start");
+		pSetup.add(bStart);
+		
+		bQuickStart.addActionListener(new ActionListener() {
+			@Override 
+			public void actionPerformed(ActionEvent e) {
+				initalizeJade(true);
+				bStart.setEnabled(false);
+				bQuickStart.setEnabled(false);
+			}
+		});
+		
+		bStart.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				initalizeJade(false);
+				bStart.setEnabled(false);
+				bQuickStart.setEnabled(false);
+			}
+		});
 		
 		cbRandRetailerGenRate.addChangeListener(cblRetailerGenRate);
 		cbRandRetailerPrice.addChangeListener(cblRetailerPrice);
@@ -524,37 +561,40 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 			if (source.isSelected() && retailer != selectedRetailer) {
 				try {
 					// Save last settings
+					aRetailerNames[selectedRetailer] = fRetailerName.getText();
+					
 					if(cbRandRetailerGenRate.isSelected()) {
 						cbRandRetailerGenRate.setSelected(false);
-						aRetailerGenRate[selectedRetailer] = randomSliderValue(sRetailerGenRate);
+						aRetailerGenRates[selectedRetailer] = randomSliderValue(sRetailerGenRate);
 					} else {
-						aRetailerGenRate[selectedRetailer] = sRetailerGenRate.getValue();
+						aRetailerGenRates[selectedRetailer] = sRetailerGenRate.getValue();
 					}
 					
 					if(cbRandRetailerPrice.isSelected()) {
 						cbRandRetailerPrice.setSelected(false);
-						aRetailerPrice[selectedRetailer] = randomSliderValue(sRetailerPrice);
+						aRetailerPrices[selectedRetailer] = randomSliderValue(sRetailerPrice);
 					} else {
 						
-						aRetailerPrice[selectedRetailer] = sRetailerPrice.getValue();
+						aRetailerPrices[selectedRetailer] = sRetailerPrice.getValue();
 					}
 					
 					if(cbRandRetailerSupply.isSelected()) {
 						cbRandRetailerSupply.setSelected(false);
-						aRetailerSupply[selectedRetailer] = randomSliderValue(sRetailerSupply);
+						aRetailerSupplies[selectedRetailer] = randomSliderValue(sRetailerSupply);
 					} else {
-						aRetailerSupply[selectedRetailer] = sRetailerSupply.getValue();
+						aRetailerSupplies[selectedRetailer] = sRetailerSupply.getValue();
 					}
 					
 					selectedRetailer = retailer;
 					
 					// Update to new retailer values
-					sRetailerGenRate.setValue(aRetailerGenRate[retailer]);
-					lRetailerGenRateValue.setText(Integer.toString(aRetailerGenRate[retailer]));
-					sRetailerPrice.setValue(aRetailerPrice[retailer]);
-					lRetailerPriceValue.setText(Integer.toString(aRetailerPrice[retailer]));
-					sRetailerSupply.setValue(aRetailerSupply[retailer]);
-					lRetailerSupplyValue.setText(Integer.toString(aRetailerSupply[retailer]));
+					fRetailerName.setText(aRetailerNames[retailer]);
+					sRetailerGenRate.setValue(aRetailerGenRates[retailer]);
+					lRetailerGenRateValue.setText(Integer.toString(aRetailerGenRates[retailer]));
+					sRetailerPrice.setValue(aRetailerPrices[retailer]);
+					lRetailerPriceValue.setText(Integer.toString(aRetailerPrices[retailer]));
+					sRetailerSupply.setValue(aRetailerSupplies[retailer]);
+					lRetailerSupplyValue.setText(Integer.toString(aRetailerSupplies[retailer]));
 					
 					// Update listeners
 					slRetailerGenRate = new SliderListener(lRetailerGenRateValue);
@@ -571,7 +611,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		}
 	}
 	
-	private void initalizeJade() {
+	private void initalizeJade(boolean bQuickStart) {
 		Runtime rt = Runtime.instance();
 		rt.setCloseVM(true);
 		
@@ -587,23 +627,49 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		ProfileImpl rp = new ProfileImpl(null, 1200, "retailers");
 		jade.wrapper.AgentContainer rc = rt.createAgentContainer(rp);
 		
+		String homeName = "Home";
+		String[] retailerNames = new String[3];
+		Object[] homeArguments;
+		Object[][] retailerArguments;
+		
+		// Use default values or set ones
+		if(!bQuickStart) {
+			retailerNames = aRetailerNames;
+			homeArguments = new Object[1];
+			homeArguments[0] = new Home(sHomeGenRate.getValue(), sHomeUseRate.getValue(), 
+					sHomeSupply.getValue(), sHomeIncome.getValue());
+			
+			retailerNames = aRetailerNames;
+			retailerArguments = new Object[3][1];
+			for(int i = 0; i < 3; i++) {
+				retailerArguments[i][0] = new Retailer(aRetailerGenRates[i], aRetailerPrices[i], aRetailerSupplies[i]);
+			}
+		} else {
+			homeArguments = new Object[0];
+			retailerArguments = new Object[3][0];
+			
+			for(int i = 0; i < 3; i++) {
+				retailerNames[i] = "Retailer " + i; 
+			}
+		}
+		
 		// Create and start agents
 		try {
 			AgentController rma = mc.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]);
 			rma.start();
 			AgentController ba = mc.createNewAgent("Broker", "agents.BrokerAgent", new Object[0]);
 			ba.start();
-			AgentController ha = hc.createNewAgent("Home", "agents.HomeAgent", new Object[0]);
-			ha.start();
 			
 			AgentController ra;
 			for(int i = 0; i < 3; i++) {
-				ra = rc.createNewAgent("Retailer" + i, "agents.RetailerAgent", new Object[0]);
+				ra = rc.createNewAgent(retailerNames[i], "agents.RetailerAgent", retailerArguments[i]);
 				ra.start();
 			}
 			
-		} catch (StaleProxyException e) {
-			// TODO Auto-generated catch block
+			AgentController ha = hc.createNewAgent(homeName, "agents.HomeAgent", homeArguments);
+			ha.start();
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 		}	
 	}
@@ -621,12 +687,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gui.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
 		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-		        if (JOptionPane.showConfirmDialog(gui, 
-		            "Are you sure you want to close this window?", "Goodbye", 
-		            JOptionPane.YES_NO_OPTION,
-		            JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
-		            System.exit(0);
-		        }
+				System.exit(0);
 		    }
 		});
 	}
