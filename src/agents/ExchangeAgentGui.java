@@ -5,51 +5,52 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.table.*;
-import javax.swing.border.*;
 
 import jade.core.*;
 import jade.core.Runtime;
-import jade.gui.*;
 import jade.wrapper.AgentController;
-import jade.wrapper.StaleProxyException;
 import ontologies.*;
+import ontologies.Retailer.RetailerType;
 import utility.Utility;
 
+@SuppressWarnings("serial")
 public class ExchangeAgentGui extends JFrame implements ActionListener, SupplierVocabulary {
 	private Random rnd = Utility.newRandom(hashCode());
 	
 	// Save radio button settings
+	private int selectedRetailer = 0;
 	private String[] aRetailerNames = new String[3];
 	private int[] aRetailerGenRates = new int[3];
 	private int[] aRetailerPrices = new int[3];
 	private int[] aRetailerSupplies = new int[3];
+	private RetailerType[] aRetailerTypes = new RetailerType[3];
+	private boolean[] aRetailerUpdateRangeCB = new boolean[3];
+	private float aRetailerUpdateMinTimes[] = new float[3];
+	private float aRetailerUpdateMaxTimes[] = new float[3];
 	
 	// Components
 	// Retailers
 	private JRadioButton rb1, rb2, rb3;
-	private int selectedRetailer = 0;
 	private JTextField fRetailerName;
-	
+	private JComboBox ddRetailerType;
 	private JSlider sRetailerGenRate;
 	private JSlider sRetailerPrice;
 	private JSlider sRetailerSupply;
-	
 	private JLabel lRetailerGenRateValue;
 	private JLabel lRetailerPriceValue;
 	private JLabel lRetailerSupplyValue; 
-	
 	private JCheckBox cbRandRetailerGenRate;
 	private JCheckBox cbRandRetailerPrice;
 	private JCheckBox cbRandRetailerSupply;
-	
 	private SliderListener slRetailerGenRate;
 	private SliderListener slRetailerPrice;
 	private SliderListener slRetailerSupply;
-	
 	private CheckBoxListener cblRetailerGenRate;
 	private CheckBoxListener cblRetailerPrice;
 	private CheckBoxListener cblRetailerSupply;
+	private JSpinner spRetailerUpdateMinTime;
+	private JSpinner spRetailerUpdateMaxTime;
+	private JCheckBox cbRangeRetailerUpdateTime;
 	
 	// Home
 	private JTextField fHomeName;
@@ -57,6 +58,13 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 	private JSlider sHomeUseRate;
 	private JSlider sHomeIncome;
 	private JSlider sHomeSupply;
+	private JSpinner spHomeTradeMinTime;
+	private JSpinner spHomeTradeMaxTime;
+	private JSpinner spHomeUpdateMinTime;
+	private JSpinner spHomeUpdateMaxTime;
+	private JCheckBox cbRangeHomeTradeTime;
+	private JCheckBox cbRangeHomeUpdateTime;
+	
 
 	public ExchangeAgentGui() {
 		JPanel pHeader = new JPanel();
@@ -84,9 +92,9 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		pBody.add(pHome);
 		GridBagLayout gbl_pHome = new GridBagLayout();
 		gbl_pHome.columnWidths = new int[]{0, 0};
-		gbl_pHome.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_pHome.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_pHome.columnWeights = new double[]{1.0, 1.0};
-		gbl_pHome.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_pHome.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		pHome.setLayout(gbl_pHome);
 		
 		JLabel lHomeTitle = new JLabel("Home Agent Parameters");
@@ -261,9 +269,9 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		pBody.add(pRetailers);
 		GridBagLayout gbl_pRetailers = new GridBagLayout();
 		gbl_pRetailers.columnWidths = new int[]{0, 0, 0, 0, 0};
-		gbl_pRetailers.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_pRetailers.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_pRetailers.columnWeights = new double[]{1.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_pRetailers.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_pRetailers.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		pRetailers.setLayout(gbl_pRetailers);
 		
 		JLabel lRetailerTitle = new JLabel("Retailer Agents Parameters");
@@ -415,7 +423,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_sRetailerSupply.gridy = 6;
 		pRetailers.add(sRetailerSupply, gbc_sRetailerSupply);
 		
-		lRetailerSupplyValue = new JLabel("1000");
+		lRetailerSupplyValue = new JLabel("2500");
 		GridBagConstraints gbc_lRetailerSupplyValue = new GridBagConstraints();
 		gbc_lRetailerSupplyValue.insets = new Insets(0, 0, 5, 5);
 		gbc_lRetailerSupplyValue.gridx = 2;
@@ -429,12 +437,122 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_cbRandRetailerSupply.gridy = 6;
 		pRetailers.add(cbRandRetailerSupply, gbc_cbRandRetailerSupply);
 		
+		JLabel lHomeTradeFrequency = new JLabel("Trading Frequency (min):");
+		GridBagConstraints gbc_lHomeTradeFrequency = new GridBagConstraints();
+		gbc_lHomeTradeFrequency.anchor = GridBagConstraints.EAST;
+		gbc_lHomeTradeFrequency.insets = new Insets(0, 0, 5, 5);
+		gbc_lHomeTradeFrequency.gridx = 0;
+		gbc_lHomeTradeFrequency.gridy = 7;
+		pHome.add(lHomeTradeFrequency, gbc_lHomeTradeFrequency);
+		
+		JPanel pHomeTradeTime = new JPanel();
+		GridBagConstraints gbc_pHomeTradeTime = new GridBagConstraints();
+		gbc_pHomeTradeTime.fill = GridBagConstraints.BOTH;
+		gbc_pHomeTradeTime.insets = new Insets(0, 0, 5, 5);
+		gbc_pHomeTradeTime.gridx = 1;
+		gbc_pHomeTradeTime.gridy = 7;
+		pHome.add(pHomeTradeTime, gbc_pHomeTradeTime);
+		
+		spHomeTradeMinTime = new JSpinner();
+		spHomeTradeMinTime.setModel(new SpinnerNumberModel(new Float(0.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
+		spHomeTradeMinTime.setEnabled(false);
+		pHomeTradeTime.add(spHomeTradeMinTime);
+		
+		spHomeTradeMaxTime = new JSpinner();
+		spHomeTradeMaxTime.setModel(new SpinnerNumberModel(new Float(5.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
+		pHomeTradeTime.add(spHomeTradeMaxTime);
+		
+		cbRangeHomeTradeTime = new JCheckBox("Range");
+		GridBagConstraints gbc_cbRangeHomeTradeTime = new GridBagConstraints();
+		gbc_cbRangeHomeTradeTime.anchor = GridBagConstraints.WEST;
+		gbc_cbRangeHomeTradeTime.insets = new Insets(0, 0, 5, 0);
+		gbc_cbRangeHomeTradeTime.gridx = 3;
+		gbc_cbRangeHomeTradeTime.gridy = 7;
+		pHome.add(cbRangeHomeTradeTime, gbc_cbRangeHomeTradeTime);
+		
+		JLabel lHomeUpdateFrequency = new JLabel("Update Frequency (min):");
+		GridBagConstraints gbc_lHomeUpdateFrequency = new GridBagConstraints();
+		gbc_lHomeUpdateFrequency.anchor = GridBagConstraints.EAST;
+		gbc_lHomeUpdateFrequency.insets = new Insets(0, 0, 0, 5);
+		gbc_lHomeUpdateFrequency.gridx = 0;
+		gbc_lHomeUpdateFrequency.gridy = 8;
+		pHome.add(lHomeUpdateFrequency, gbc_lHomeUpdateFrequency);
+		
+		JPanel pHomeUpdateTime = new JPanel();
+		GridBagConstraints gbc_pHomeUpdateTime = new GridBagConstraints();
+		gbc_pHomeUpdateTime.insets = new Insets(0, 0, 0, 5);
+		gbc_pHomeUpdateTime.fill = GridBagConstraints.BOTH;
+		gbc_pHomeUpdateTime.gridx = 1;
+		gbc_pHomeUpdateTime.gridy = 8;
+		pHome.add(pHomeUpdateTime, gbc_pHomeUpdateTime);
+		
+		spHomeUpdateMinTime = new JSpinner();
+		spHomeUpdateMinTime.setModel(new SpinnerNumberModel(new Float(0.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
+		spHomeUpdateMinTime.setEnabled(false);
+		pHomeUpdateTime.add(spHomeUpdateMinTime);
+		
+		spHomeUpdateMaxTime = new JSpinner();
+		spHomeUpdateMaxTime.setModel(new SpinnerNumberModel(new Float(5.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
+		pHomeUpdateTime.add(spHomeUpdateMaxTime);
+		
+		cbRangeHomeUpdateTime = new JCheckBox("Range");
+		GridBagConstraints gbc_cbRangeHomeUpdateTime = new GridBagConstraints();
+		gbc_cbRangeHomeUpdateTime.anchor = GridBagConstraints.WEST;
+		gbc_cbRangeHomeUpdateTime.gridx = 3;
+		gbc_cbRangeHomeUpdateTime.gridy = 8;
+		pHome.add(cbRangeHomeUpdateTime, gbc_cbRangeHomeUpdateTime);
+		
+		JLabel lblType = new JLabel("Type:");
+		GridBagConstraints gbc_lblType = new GridBagConstraints();
+		gbc_lblType.insets = new Insets(0, 0, 5, 5);
+		gbc_lblType.anchor = GridBagConstraints.EAST;
+		gbc_lblType.gridx = 0;
+		gbc_lblType.gridy = 7;
+		pRetailers.add(lblType, gbc_lblType);
+		
+		ddRetailerType = new JComboBox();
+		GridBagConstraints gbc_ddRetailerType = new GridBagConstraints();
+		gbc_ddRetailerType.insets = new Insets(0, 0, 5, 5);
+		gbc_ddRetailerType.fill = GridBagConstraints.HORIZONTAL;
+		gbc_ddRetailerType.gridx = 1;
+		gbc_ddRetailerType.gridy = 7;
+		pRetailers.add(ddRetailerType, gbc_ddRetailerType);
+		
+		JLabel lRetailerUpdateFrequency = new JLabel("Update Frequency (min):");
+		GridBagConstraints gbc_lRetailerUpdateFrequency = new GridBagConstraints();
+		gbc_lRetailerUpdateFrequency.anchor = GridBagConstraints.EAST;
+		gbc_lRetailerUpdateFrequency.insets = new Insets(0, 0, 5, 5);
+		gbc_lRetailerUpdateFrequency.gridx = 0;
+		gbc_lRetailerUpdateFrequency.gridy = 8;
+		pRetailers.add(lRetailerUpdateFrequency, gbc_lRetailerUpdateFrequency);
+		
+		JPanel pRetailerUpdateTime = new JPanel();
+		GridBagConstraints gbc_pRetailerUpdateTime = new GridBagConstraints();
+		gbc_pRetailerUpdateTime.insets = new Insets(0, 0, 5, 5);
+		gbc_pRetailerUpdateTime.fill = GridBagConstraints.BOTH;
+		gbc_pRetailerUpdateTime.gridx = 1;
+		gbc_pRetailerUpdateTime.gridy = 8;
+		pRetailers.add(pRetailerUpdateTime, gbc_pRetailerUpdateTime);
+		
+		spRetailerUpdateMinTime = new JSpinner();
+		spRetailerUpdateMinTime.setModel(new SpinnerNumberModel(new Float(0.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
+		spRetailerUpdateMinTime.setEnabled(false);
+		pRetailerUpdateTime.add(spRetailerUpdateMinTime);
+		
+		spRetailerUpdateMaxTime = new JSpinner();
+		spRetailerUpdateMaxTime.setModel(new SpinnerNumberModel(new Float(5.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
+		pRetailerUpdateTime.add(spRetailerUpdateMaxTime);
+		
 		// Setup default retailer settings
 		for(int i = 0; i < 3; i++) {
 			aRetailerNames[i] = "R"+(i+1);
+			aRetailerTypes[i] = RetailerType.FIXED;
 			aRetailerGenRates[i] = sRetailerGenRate.getValue();
 			aRetailerPrices[i] = sRetailerPrice.getValue();
 			aRetailerSupplies[i] = sRetailerSupply.getValue();
+			aRetailerUpdateRangeCB[i] = false;
+			aRetailerUpdateMinTimes[i] = (float)spRetailerUpdateMinTime.getValue();
+			aRetailerUpdateMaxTimes[i] = (float)spRetailerUpdateMaxTime.getValue();
 		}
 		
 		// Handle Slider events
@@ -447,6 +565,14 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		slRetailerPrice = new SliderListener(lRetailerPriceValue);
 		slRetailerSupply = new SliderListener(lRetailerSupplyValue);
 		
+		cbRangeRetailerUpdateTime = new JCheckBox("Range");
+		GridBagConstraints gbc_cbRangeRetailerUpdateTime = new GridBagConstraints();
+		gbc_cbRangeRetailerUpdateTime.insets = new Insets(0, 0, 5, 0);
+		gbc_cbRangeRetailerUpdateTime.anchor = GridBagConstraints.WEST;
+		gbc_cbRangeRetailerUpdateTime.gridx = 3;
+		gbc_cbRangeRetailerUpdateTime.gridy = 8;
+		pRetailers.add(cbRangeRetailerUpdateTime, gbc_cbRangeRetailerUpdateTime);
+		
 		sRetailerGenRate.addChangeListener(slRetailerGenRate);
 		sRetailerPrice.addChangeListener(slRetailerPrice);
 		sRetailerSupply.addChangeListener(slRetailerSupply);
@@ -456,10 +582,35 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		cbRandHomeGenRate.addChangeListener(new CheckBoxListener(lHomeGenValue, sHomeGenRate));
 		cbRandHomeIncome.addChangeListener(new CheckBoxListener(lHomeIncomeValue, sHomeIncome));
 		cbRandHomeSupply.addChangeListener(new CheckBoxListener(lHomeSupplyValue, sHomeSupply));
-
+		cbRangeHomeTradeTime.addChangeListener(new RangeCheckBoxListener(spHomeTradeMinTime));
+		cbRangeHomeUpdateTime.addChangeListener(new RangeCheckBoxListener(spHomeUpdateMinTime));
+		
 		cblRetailerGenRate = new CheckBoxListener(lRetailerGenRateValue, sRetailerGenRate);
 		cblRetailerPrice = new CheckBoxListener(lRetailerPriceValue, sRetailerPrice);
 		cblRetailerSupply = new CheckBoxListener(lRetailerSupplyValue, sRetailerSupply);
+		
+		cbRandRetailerGenRate.addChangeListener(cblRetailerGenRate);
+		cbRandRetailerPrice.addChangeListener(cblRetailerPrice);
+		cbRandRetailerSupply.addChangeListener(cblRetailerSupply);
+		cbRangeRetailerUpdateTime.addChangeListener(new RangeCheckBoxListener(spRetailerUpdateMinTime));
+		
+		// Handle RadioButton events
+		rb1.addActionListener(new RadioButtonListener(0));
+		rb2.addActionListener(new RadioButtonListener(1));
+		rb3.addActionListener(new RadioButtonListener(2));
+		
+		// Handle Spinner events
+		spRetailerUpdateMinTime.addChangeListener(new RangeSpinnerListener(spRetailerUpdateMaxTime, true));
+		spHomeTradeMinTime.addChangeListener(new RangeSpinnerListener(spHomeTradeMaxTime, true));
+		spHomeUpdateMinTime.addChangeListener(new RangeSpinnerListener(spHomeUpdateMaxTime, true));
+		
+		spRetailerUpdateMaxTime.addChangeListener(new RangeSpinnerListener(spRetailerUpdateMinTime, false));
+		spHomeTradeMaxTime.addChangeListener(new RangeSpinnerListener(spHomeTradeMinTime, false));
+		spHomeUpdateMaxTime.addChangeListener(new RangeSpinnerListener(spHomeUpdateMinTime, false));
+		
+		for (RetailerType type : RetailerType.values()) {
+			ddRetailerType.addItem(type);
+		}
 		
 		JPanel pSetup = new JPanel();
 		getContentPane().add(pSetup, BorderLayout.SOUTH);
@@ -467,7 +618,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		JButton bQuickStart = new JButton("Quickstart!");
 		pSetup.add(bQuickStart);
 		
-		JButton bStart = new JButton("Start");
+		JButton bStart = new JButton("Run Configuration");
 		pSetup.add(bStart);
 		
 		bQuickStart.addActionListener(new ActionListener() {
@@ -488,15 +639,6 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 			}
 		});
 		
-		cbRandRetailerGenRate.addChangeListener(cblRetailerGenRate);
-		cbRandRetailerPrice.addChangeListener(cblRetailerPrice);
-		cbRandRetailerSupply.addChangeListener(cblRetailerSupply);
-		
-		// Handle RadioButton events
-		rb1.addActionListener(new RadioButtonListener(0));
-		rb2.addActionListener(new RadioButtonListener(1));
-		rb3.addActionListener(new RadioButtonListener(2));
-		
 		setSize(1280, 720);
 	} 
 	
@@ -505,10 +647,15 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		return (rnd.nextInt(slider.getMaximum()) + slider.getMinimum()) % slider.getMaximum(); 
 	}
 	
+	float randomSpinnerValue(JSpinner sMin, JSpinner sMax) { 
+		float min = (Float)sMin.getValue();
+		float max = (Float)sMax.getValue();
+		return (rnd.nextFloat() * (max - min) + min);
+	}
+	
 	// Custom JSlider listener
 	public class SliderListener implements ChangeListener {
 		private JLabel label;
-		private int value;
 		
 		SliderListener(JLabel label) {
 			super();
@@ -546,6 +693,53 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		}
 	}
 	
+	// Custom JCheckBox listener for 'range' style checkboxes
+	public class RangeCheckBoxListener implements ChangeListener {
+		private JSpinner spinner;
+		
+		RangeCheckBoxListener(JSpinner spinner) {
+			this.spinner = spinner;
+		}
+		
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			JCheckBox source = (JCheckBox)e.getSource();
+			if(source.isSelected()) {
+				spinner.setEnabled(true);
+			} else {
+				spinner.setEnabled(false);
+			}
+		}
+	}
+	
+	// Custom JSpinner listener
+	public class RangeSpinnerListener implements ChangeListener {
+		private JSpinner spinner;
+		private boolean max = false;
+		
+		RangeSpinnerListener(JSpinner spinner, boolean max) {
+			this.spinner = spinner;
+			this.max = max;
+		}
+		
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			float cap = (float)spinner.getValue();
+			JSpinner source = (JSpinner)e.getSource();
+			
+			if(max) {
+				if((float)source.getValue() > (float)spinner.getValue()) {
+					source.setValue(cap);
+				}
+			} else {
+				if((float)source.getValue() < (float)spinner.getValue()) {
+					source.setValue(cap);
+				}
+			}
+			
+		}
+	}
+	
 	// Custom JRadioButton listener
 	public class RadioButtonListener implements ActionListener {
 		private int retailer;
@@ -562,6 +756,9 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 				try {
 					// Save last settings
 					aRetailerNames[selectedRetailer] = fRetailerName.getText();
+					aRetailerTypes[selectedRetailer] = (RetailerType)ddRetailerType.getSelectedItem();
+					aRetailerUpdateMinTimes[selectedRetailer] = (float)spRetailerUpdateMinTime.getValue();
+					aRetailerUpdateMaxTimes[selectedRetailer] = (float)spRetailerUpdateMaxTime.getValue();
 					
 					if(cbRandRetailerGenRate.isSelected()) {
 						cbRandRetailerGenRate.setSelected(false);
@@ -585,16 +782,27 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 						aRetailerSupplies[selectedRetailer] = sRetailerSupply.getValue();
 					}
 					
+					if (cbRangeRetailerUpdateTime.isSelected()) {
+						cbRangeRetailerUpdateTime.setSelected(false);
+						aRetailerUpdateRangeCB[selectedRetailer] = true;
+					} else {
+						aRetailerUpdateRangeCB[selectedRetailer] = false;
+					}
+					
 					selectedRetailer = retailer;
 					
 					// Update to new retailer values
 					fRetailerName.setText(aRetailerNames[retailer]);
+					ddRetailerType.setSelectedItem(aRetailerTypes[retailer]);
 					sRetailerGenRate.setValue(aRetailerGenRates[retailer]);
 					lRetailerGenRateValue.setText(Integer.toString(aRetailerGenRates[retailer]));
 					sRetailerPrice.setValue(aRetailerPrices[retailer]);
 					lRetailerPriceValue.setText(Integer.toString(aRetailerPrices[retailer]));
 					sRetailerSupply.setValue(aRetailerSupplies[retailer]);
 					lRetailerSupplyValue.setText(Integer.toString(aRetailerSupplies[retailer]));
+					spRetailerUpdateMinTime.setValue(aRetailerUpdateMinTimes[retailer]);
+					spRetailerUpdateMaxTime.setValue(aRetailerUpdateMaxTimes[retailer]);
+					cbRangeRetailerUpdateTime.setSelected(aRetailerUpdateRangeCB[retailer]);
 					
 					// Update listeners
 					slRetailerGenRate = new SliderListener(lRetailerGenRateValue);
@@ -635,14 +843,36 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		// Use default values or set ones
 		if(!bQuickStart) {
 			retailerNames = aRetailerNames;
-			homeArguments = new Object[1];
+			homeArguments = new Object[3];
 			homeArguments[0] = new Home(sHomeGenRate.getValue(), sHomeUseRate.getValue(), 
 					sHomeSupply.getValue(), sHomeIncome.getValue());
 			
+			Object[] homeTradeData = new Object[] { 
+				cbRangeHomeTradeTime.isSelected(), 
+				(float)spHomeTradeMinTime.getValue(), 
+				(float)spHomeTradeMaxTime.getValue()
+			};
+			
+			Object[] homeUpdateData = new Object[] {
+				cbRangeHomeTradeTime.isSelected(),
+				(float)spHomeUpdateMinTime.getValue(),
+				(float)spHomeUpdateMaxTime.getValue()
+			};
+			
+			homeArguments[1] = homeTradeData;
+			homeArguments[2] = homeUpdateData;
+			
 			retailerNames = aRetailerNames;
-			retailerArguments = new Object[3][1];
+			retailerArguments = new Object[3][2];
+			Object retailerUpdateData[];
 			for(int i = 0; i < 3; i++) {
-				retailerArguments[i][0] = new Retailer(aRetailerGenRates[i], aRetailerPrices[i], aRetailerSupplies[i]);
+				retailerArguments[i][0] = new Retailer(aRetailerGenRates[i], aRetailerPrices[i], 
+						aRetailerSupplies[i], aRetailerTypes[i]);
+				
+				retailerUpdateData = new Object[] {
+					aRetailerUpdateRangeCB[i], aRetailerUpdateMinTimes[i], aRetailerUpdateMaxTimes[i]
+				};
+				retailerArguments[i][1] = retailerUpdateData;
 			}
 		} else {
 			homeArguments = new Object[0];
