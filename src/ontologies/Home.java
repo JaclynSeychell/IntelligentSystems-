@@ -18,6 +18,13 @@ public class Home implements Concept {
 		budget = 0;
 	}
 	
+	public Home(int generationRate, int usageRate, int supply, int budget) {
+		this.generationRate = generationRate;
+		this.usageRate = usageRate;
+		this.supply = supply;
+		this.budget = budget;
+	}
+	
 	// Generation getter & setter
 	public int getGenerationRate() {
 		return generationRate;

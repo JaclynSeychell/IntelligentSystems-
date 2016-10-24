@@ -71,9 +71,6 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		setPriceFromType(); //initiates price based on the type of retailer
 		retailer.setGenerationRate(rnd.nextInt(10)); //random int between 0-10
 		retailer.setSupply(rnd.nextInt(2000)); //initial supply random 0-2000
-		
-		System.out.println(retailer.toString());
-		addBehaviour(updateRetailer);
 	}
 	
 	protected void setup() {
@@ -82,7 +79,17 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		getContentManager().registerOntology(ontology);
 		
 		// Setup retailer state
-		setupRetailer();
+		Object[] args = getArguments();
+		if(args != null && args.length > 0) {
+			retailer = (Retailer)args[0];
+		} else {
+			setupRetailer();
+		}
+		
+		System.out.println(retailer.toString());
+		
+		addBehaviour(updateRetailer);
+		
 		
 		// Register in the DF
 		DFRegistry.register(this, RETAILER_AGENT);
