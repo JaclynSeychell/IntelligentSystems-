@@ -208,6 +208,73 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		});
 	}
 	
+	void subscribeToAppliances() {
+	DFAgentDescription dfd = new DFAgentDescription();
+	ServiceDescription sd = new ServiceDescription();
+	sd.setType(APPLIANCE_AGENT);
+	dfd.addServices(sd);
+
+	// Handle registration of new retailers
+		addBehaviour(new SubscriptionInitiator(this,
+		DFService.createSubscriptionMessage(this, getDefaultDF(), dfd, null)) {
+			ACLMessage applianceSub = new ACLMessage(ACLMessage.QUERY_REF);
+			
+			@Override
+			protected void handleInform(ACLMessage inform) {
+				try {
+					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
+					DFAgentDescription[] df = DFService.search(myAgent, dfd);
+					applianceSub.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+					
+					// Register additional price update subscription
+					SubscriptionInitiator priceChanges = new SubscriptionInitiator(myAgent, applianceSub) {		
+						@Override
+						protected void handleInform(ACLMessage inform) {
+							System.out.println("Price updated: " + inform.getSender().getName() +
+									" to $" + Integer.parseInt(inform.getContent()) + " per unit");
+							appliances.put(inform.getSender(), Integer.parseInt(inform.getContent()));
+							
+							storeBestOffer();
+						}
+					};
+					
+					// Check agent in the inform message exists before adding it
+				for(int i = 0; i < dfds.length; i++) {
+					boolean exists = false;
+					
+					for(int j = 0; j < df.length; j++) {
+						if(dfds[i].getName().hashCode() == df[j].getName().hashCode()) {
+							exists = true;
+							break;
+						}
+					}
+					
+					removeBehaviour(priceChanges);
+					priceChanges.reset(applianceSub);
+					
+					if(exists) {
+						System.out.println("\tNew retailer: " + dfds[i].getName());
+						if (appliances.size() == 0) { System.out.println("\tBroker listening for price changes..."); }
+						
+						appliances.put(dfds[i].getName(), null);
+						applianceSub.addReceiver(dfds[i].getName());
+						
+						addBehaviour(priceChanges);
+					} else {
+						System.out.println("\tDeleted retailer: " + dfds[i].getName());
+						if(appliances.size() < 1) { System.out.println("\tBroker stopped listening for price changes."); }
+						
+						appliances.remove(dfds[i].getName());
+						applianceSub.removeReceiver(dfds[i].getName());
+					}
+					
+					storeBestOffer();
+				}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+	
 	void purchaseRequest(Exchange ex) {
 		if (broker == null) lookupBroker();
 		if (broker == null) {
