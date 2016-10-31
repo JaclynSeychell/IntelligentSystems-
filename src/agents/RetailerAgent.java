@@ -22,58 +22,24 @@ import jade.content.onto.basic.Action;
 import java.util.Random;
 
 import ontologies.*;
-import ontologies.Retailer.retailerType;
+import ontologies.Retailer.RetailerType;
 import utility.*;
 
 @SuppressWarnings("serial")
 public class RetailerAgent extends Agent implements SupplierVocabulary {
-	private Retailer retailer = new Retailer();
+	private Retailer retailer;
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
 	private Random rnd = Utility.newRandom(hashCode());
 	
-	private static final int TICK_TIME = (60000 * 5);
+	private int updateTicks = 60000;
+	private boolean updateTickRange = false;
+	private float updateTickMin;
+	private float updateTickMax;
 	
-	retailerType determineTypeByName(String str) {
-		switch (str) {
-			case "R1":
-				return retailerType.typeA;
-			case "R2":
-				return retailerType.typeB;
-			case "R3":
-				return retailerType.typeC;
-			default:
-				return retailerType.typeD;
-		}
-	}
-	
-	void setPriceFromType() {
-		switch ( retailer.getRetailerType() ) {
-			case typeA: //price set to random between 3-5
-				retailer.setPricePerUnit(rnd.nextInt(2)+3);
-				break;
-			case typeB: //reduces 5% after each transaction
-				retailer.setPricePerUnit(4);
-				break;
-			case typeC: //based on demand... (need to figure out how we determine this)
-				//analyse previous unit prices from sales?
-				retailer.setPricePerUnit(rnd.nextInt(5));
-				break;
-			case typeD: //price fixed at $5 per unit
-				retailer.setPricePerUnit(5);
-				break;
-		}
-	}
-	
-	void setupRetailer() {
-		//sets the retailer type based on the agent's name (e.g. R1)
-		retailer.setRetailerType(determineTypeByName(this.getLocalName())); 
-		setPriceFromType(); //initiates price based on the type of retailer
-		retailer.setGenerationRate(rnd.nextInt(10)); //random int between 0-10
-		retailer.setSupply(rnd.nextInt(2000)); //initial supply random 0-2000
-		
-		System.out.println(retailer.toString());
-		addBehaviour(updateRetailer);
+	public int randomRange(float min, float max) {
+		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
+		return (int)result;
 	}
 	
 	protected void setup() {
@@ -82,7 +48,24 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		getContentManager().registerOntology(ontology);
 		
 		// Setup retailer state
-		setupRetailer();
+		Object[] args = getArguments();
+		if(args != null && args.length > 0) {
+			retailer = (Retailer)args[0];
+			Object[] updateData = (Object[])args[1];
+			
+			updateTickRange = (boolean)updateData[0];
+			updateTickMin = (float)updateData[1];
+			updateTickMax = (float)updateData[2];
+			
+			updateTicks = updateTickRange ? randomRange(updateTickMin, updateTickMax) : (int)updateTickMax * 60000;
+		} else {
+			retailer = new Retailer();
+			updateTicks = 60000 * 5;
+		}
+		
+		System.out.println(retailer.toString());
+		
+		addBehaviour(updateRetailer);
 		
 		// Register in the DF
 		DFRegistry.register(this, RETAILER_AGENT);
@@ -196,7 +179,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		} );
 	}
 	
-	TickerBehaviour updateRetailer = new TickerBehaviour(this, rnd.nextInt(TICK_TIME)) {
+	TickerBehaviour updateRetailer = new TickerBehaviour(this, updateTicks) {
 		@Override
 		public void onTick() {
 			//Update supply based on generation rate
@@ -205,10 +188,10 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			System.out.println(myAgent.getLocalName() + " updating supply...\n Change = " + 
 					retailer.getGenerationRate() + "\n Supply = " + retailer.getSupply());
 			
-			//Update price based on retailer type
-			setPriceFromType();
-			
-			reset(rnd.nextInt(TICK_TIME));
+			if(updateTickRange) {
+				updateTicks = randomRange(updateTickMin, updateTickMax);
+			}
+			reset(updateTicks);
 		}
 	};
 	

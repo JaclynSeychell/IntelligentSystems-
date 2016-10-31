@@ -5,25 +5,31 @@ import jade.content.*;
 @SuppressWarnings("serial")
 
 public class Retailer implements Concept {
+	// Determine retailer behaviour
+	public enum RetailerType { 
+		FIXED,
+		RANDOM,
+		DROPPING, 
+		DEMAND;
+	}
+	
 	private int generationRate;
 	private int pricePerUnit;
 	private int supply;
-	public enum retailerType { //determines how the retailer sets its prices
-		typeA, typeB, typeC, typeD
-	}
-	//Price-setting methods currently as follows:
-	//typeA - randomly generated (but hovering around a price point)
-	//typeB - reduce by 5% after each request/sale, until it hits a set minimum.
-	//typeC - based on measuring demand... (need to work out how we do this)
-	//typeD - completely fixed
-	
-	private retailerType rType;
+	private RetailerType type;
 	
 	public Retailer() { 
 		generationRate = 0;
 		pricePerUnit = 0;
 		supply = 0;
-		rType = retailerType.typeA; //defaulted to typeA
+		type = RetailerType.FIXED; // Default to fixed price
+	}
+	
+	public Retailer(int generationRate, int pricePerUnit, int supply, RetailerType type) {
+		this.generationRate = generationRate;
+		this.pricePerUnit = pricePerUnit;
+		this.supply = supply;
+		this.type = type;
 	}
 	
 	public int getGenerationRate() {
@@ -51,17 +57,17 @@ public class Retailer implements Concept {
 		if (this.supply < 0) this.supply = 0; // Cannot be less than 0
 	}
 	
-	public retailerType getRetailerType() {
-		return rType;
+	public RetailerType getRetailerType() {
+		return type;
 	}
 	
-	public void setRetailerType(retailerType rt) {
-		rType = rt;
+	public void setRetailerType(RetailerType type) {
+		this.type = type;
 	}
 
 	@Override
 	public String toString() {
-		return "Retailer [generationRate=" + generationRate + ", pricePerUnit=" + pricePerUnit + ", supply=" + supply
-				+ "]";
+		return "Retailer [generationRate=" + generationRate + ", pricePerUnit=" 
+				+ pricePerUnit + ", supply=" + supply + ", type=" + type + "]";
 	}
 }

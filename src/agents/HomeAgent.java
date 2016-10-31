@@ -38,17 +38,20 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private int bestPrice;
 	private boolean queryFinished;
 	private boolean purchaseFinished;
-	private static final int TICK_TIME = (60000 * 5);
 	
-	// Initialize home values
-	void setupHome() {
-		home.setBudget(rnd.nextInt(100));
-		home.setGenerationRate(rnd.nextInt(10));
-		home.setUsageRate(rnd.nextInt(100));
-		home.setSupply(rnd.nextInt(2000));
-		System.out.println(home.toString());
-		addBehaviour(updateSupply);
-		addBehaviour(updateBudget);
+	// Run parameters
+	private int tradeTicks = 60000;
+	private int updateTicks = 60000;
+	private boolean tradeTickRange = false;
+	private boolean updateTickRange = false;
+	private float tradeTickMin;
+	private float tradeTickMax;
+	private float updateTickMin;
+	private float updateTickMax;
+	
+	public int randomRange(float min, float max) {
+		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
+		return (int)result;
 	}
 	
 	protected void setup() {
@@ -57,7 +60,30 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		getContentManager().registerOntology(ontology);
 
 		// Setup home state
-		setupHome();
+		Object[] args = getArguments();
+		if(args != null && args.length > 0) {
+			home = (Home)args[0];
+			Object[] tradeData = (Object[])args[1];
+			Object[] updateData = (Object[])args[2];
+			
+			tradeTickRange = (boolean)tradeData[0];
+			tradeTickMin = (float)tradeData[1];
+			tradeTickMax = (float)tradeData[2];
+			
+			updateTickRange = (boolean)updateData[0];
+			updateTickMin = (float)updateData[1];
+			updateTickMax = (float)updateData[2];
+			
+			tradeTicks = tradeTickRange ? randomRange(tradeTickMin, tradeTickMax) : (int)tradeTickMax * 60000;
+			updateTicks = updateTickRange ? randomRange(updateTickMin, updateTickMax) : (int)updateTickMax * 60000;
+		} else {
+			home = new Home();
+			tradeTicks = 60000 * 5;
+			updateTicks = 60000 * 5;
+		}
+		
+		System.out.println(home.toString());
+		addBehaviour(update);
 		
 		// Find the broker agent
 		lookupBroker();
@@ -123,17 +149,21 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			});
 		} 
 		
-		purchaseSequence.addSubBehaviour(new DelayBehaviour(this, rnd.nextInt(60000)) {
+		purchaseSequence.addSubBehaviour(new DelayBehaviour(this, tradeTicks) {
 			@Override 
 			public void handleElapsedTimeout() { 
 				queryFinished = purchaseFinished = false;
 				System.out.println("--\tConcluding Communication with Broker\t--\n");
 				query(); 
+				
+				if(tradeTickRange) {
+					tradeTicks = randomRange(tradeTickMin, tradeTickMax);
+				}
 			}
 		});
 	}
 	
-	TickerBehaviour updateSupply = new TickerBehaviour(this, rnd.nextInt(TICK_TIME)) {
+	TickerBehaviour update = new TickerBehaviour(this, updateTicks) {
 		@Override
 		public void onTick() {
 			int supplyChange = (home.getGenerationRate() + home.getUsageRate());
@@ -142,16 +172,13 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			System.out.println(myAgent.getLocalName() + " updating supply...\n Change = " 
 					+ supplyChange + "\n Supply = " + home.getSupply());
 			
-			reset(rnd.nextInt(TICK_TIME));
-		}
-	};
-	
-	TickerBehaviour updateBudget = new TickerBehaviour(this, 60000) {
-		@Override
-		public void onTick() {
 			home.setExpenditure(0);
 			System.out.println(myAgent.getLocalName() + " budget reset");
-			reset(60000);
+			
+			if(updateTickRange) {
+				updateTicks = randomRange(updateTickMin, updateTickMax);
+			}
+			reset(updateTicks);
 		}
 	};
 
@@ -263,8 +290,9 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	Exchange buyUnits() {
 		Exchange ex = new Exchange();
 		ex.setType(SupplierVocabulary.BUY);
-		ex.setPrice(bestPrice);
-		int max = home.remainingBudget() / bestPrice;
+		ex.setPrice(bestPrice); 
+		
+		int max = (bestPrice != 0) ? home.remainingBudget() / bestPrice : 0;
 		int result = 0;
 		
 		// Purchase an amount if allowed when running low or purchase all units at a good price.
