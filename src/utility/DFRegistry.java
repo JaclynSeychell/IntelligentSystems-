@@ -3,9 +3,7 @@ package utility;
 import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.proto.SubscriptionInitiator;
 
 public class DFRegistry {
 	public static void register(Agent agent, String type) {

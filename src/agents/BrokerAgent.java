@@ -1,22 +1,16 @@
 package agents;
 
 import jade.core.*;
-import jade.core.behaviours.*;
 import jade.domain.*;
 import jade.domain.FIPAAgentManagement.*;
 import jade.lang.acl.*;
 import jade.proto.AchieveREInitiator;
 import jade.proto.AchieveREResponder;
-import jade.proto.ContractNetInitiator;
 import jade.proto.SubscriptionInitiator;
-import jade.content.Concept;
-import jade.content.ContentElement;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
-import jade.content.onto.basic.Action;
 
-import java.sql.Date;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -195,6 +189,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		// Handle registration of new retailers
   		addBehaviour(new SubscriptionInitiator(this,
 			DFService.createSubscriptionMessage(this, getDefaultDF(), dfd, null)) {
+  			
   			ACLMessage retailSub = new ACLMessage(ACLMessage.QUERY_REF);
   			
   			@Override
