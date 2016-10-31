@@ -37,10 +37,16 @@ public class SupplierOntology extends Ontology implements SupplierVocabulary {
 			cs.add(RETAILER_SUPPLY, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			cs.add(RETAILER_PRICE_PER_UNIT, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			
+			//Appliances
+			add(new ConceptSchema(APPLIANCE), Appliance.class);
+			cs.add(APPLIANCE_GENERATION_RATE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			cs.add(APPLIANCE_USAGE_RATE,(PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			
 			// Problem
 			add(new ConceptSchema(PROBLEM), Problem.class);
 			cs.add(PROBLEM_NUM, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			cs.add(PROBLEM_MSG, (PrimitiveSchema) getSchema(BasicOntology.STRING), ObjectSchema.MANDATORY);
+			
 			
 			// -- Actions -- 
 			

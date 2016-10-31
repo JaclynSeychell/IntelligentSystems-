@@ -6,12 +6,14 @@ import jade.domain.*;
 import jade.domain.FIPAAgentManagement.*;
 import jade.lang.acl.*;
 import jade.proto.AchieveREInitiator;
+import jade.proto.SubscriptionInitiator;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import jade.content.onto.basic.*;
 
 import java.sql.Date;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
 
@@ -21,18 +23,23 @@ import utility.*;
 
 @SuppressWarnings("serial")
 public class HomeAgent extends Agent implements SupplierVocabulary {
-	private Home home;
+	// Agents
+	private HashMap<AID, Integer> appliances = new HashMap<AID, Integer>();
+	private Home home = new Home();
 	private AID broker;
+	
+	// Language
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
-	private Random rnd = Utility.newRandom(hashCode());	
-	
-	private int bestPrice;
 	private Exchange exchange;
 	
+	// Utility
+	private Random rnd = Utility.newRandom(hashCode());	
+	private int bestPrice;
 	private boolean queryFinished;
 	private boolean purchaseFinished;
 	
+	// Run parameters
 	private int tradeTicks = 60000;
 	private int updateTicks = 60000;
 	private boolean tradeTickRange = false;
@@ -311,5 +318,72 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		int result = 0;
 		ex.setUnits(result);
 		return ex;
+	}
+	
+	// -- Utility Methods --
+	void subscribeToRetailers() {
+		DFAgentDescription dfd = new DFAgentDescription();
+		ServiceDescription sd = new ServiceDescription();
+		sd.setType(APPLIANCE_AGENT);
+		dfd.addServices(sd);
+	
+		// Handle registration of new retailers
+  		addBehaviour(new SubscriptionInitiator(this,
+			DFService.createSubscriptionMessage(this, getDefaultDF(), dfd, null)) {
+  			
+  			ACLMessage applianceSub = new ACLMessage(ACLMessage.QUERY_REF);
+  			
+  			@Override
+  			protected void handleInform(ACLMessage inform) {
+  				try {
+  					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
+  					DFAgentDescription[] df = DFService.search(myAgent, dfd);
+  					applianceSub.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+  					
+  					// Register additional price update subscription
+  					SubscriptionInitiator rateUpdate = new SubscriptionInitiator(myAgent, applianceSub) {		
+  						@Override
+  						protected void handleInform(ACLMessage inform) {
+  							System.out.println("Rate update: " + inform.getSender().getName() +
+  									" to $" + Integer.parseInt(inform.getContent()) + " per unit");
+  							appliances.put(inform.getSender(), Integer.parseInt(inform.getContent()));
+  						}
+  					};
+  					
+  					// Check agent in the inform message exists before adding it
+					for(int i = 0; i < dfds.length; i++) {
+						boolean exists = false;
+						
+						for(int j = 0; j < df.length; j++) {
+							if(dfds[i].getName().hashCode() == df[j].getName().hashCode()) {
+								exists = true;
+								break;
+							}
+						}
+						
+						removeBehaviour(rateUpdate);
+						rateUpdate.reset(applianceSub);
+						
+						if(exists) {
+							System.out.println("\tNew retailer: " + dfds[i].getName());
+							if (appliances.size() == 0) { System.out.println("\tHome listening for rate data..."); }
+							
+							appliances.put(dfds[i].getName(), null);
+							applianceSub.addReceiver(dfds[i].getName());
+							
+							addBehaviour(rateUpdate);
+						} else {
+							System.out.println("\tDeleted retailer: " + dfds[i].getName());
+							if(appliances.size() < 1) { System.out.println("\tHome stopped listening for rate data."); }
+							
+							appliances.remove(dfds[i].getName());
+							applianceSub.removeReceiver(dfds[i].getName());
+						}
+					}
+  				} catch (Exception e) {
+  					e.printStackTrace();
+  				}
+  			}
+		});
 	}
 }

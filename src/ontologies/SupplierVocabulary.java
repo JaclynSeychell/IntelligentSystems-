@@ -7,6 +7,7 @@ public interface SupplierVocabulary {
 	public static final int NO_RETAILERS = 3;
 	public static final String BROKER_AGENT = "Broker agent";
 	public static final String RETAILER_AGENT = "Retailer agent";
+	public static final String APPLIANCE_AGENT = "Appliance agent";
 	public static final String PB_NO_RETAILERS = "No retailers to trade with";
 	
 	// Ontology Vocabulary
@@ -21,6 +22,10 @@ public interface SupplierVocabulary {
 	public static final String RETAILER_GENERATION_RATE = "generationRate";
 	public static final String RETAILER_SUPPLY = "supply";
 	public static final String RETAILER_PRICE_PER_UNIT = "pricePerUnit";
+	
+	public static final String APPLIANCE = "Applicance";
+	public static final String APPLIANCE_GENERATION_RATE = "generationRate";
+	public static final String APPLIANCE_USAGE_RATE = "usageRate";
 	
 	public static final String EXCHANGE = "Exchange";
 	public static final String EXCHANGE_TYPE = "type";

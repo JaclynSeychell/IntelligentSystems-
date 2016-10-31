@@ -189,6 +189,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		// Handle registration of new retailers
   		addBehaviour(new SubscriptionInitiator(this,
 			DFService.createSubscriptionMessage(this, getDefaultDF(), dfd, null)) {
+  			
   			ACLMessage retailSub = new ACLMessage(ACLMessage.QUERY_REF);
   			
   			@Override
