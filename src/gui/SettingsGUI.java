@@ -1,4 +1,4 @@
-package agents;
+package gui;
 
 import java.util.*;
 import java.awt.*;
@@ -14,7 +14,7 @@ import ontologies.Retailer.RetailerType;
 import utility.Utility;
 
 @SuppressWarnings("serial")
-public class ExchangeAgentGui extends JFrame implements ActionListener, SupplierVocabulary {
+public class SettingsGUI extends JFrame implements ActionListener, SupplierVocabulary {
 	private Random rnd = Utility.newRandom(hashCode());
 	
 	// Store data between radio button selections
@@ -90,7 +90,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 	private CheckBoxListener cblApplianceGenRate;
 	private CheckBoxListener cblApplianceUseRate;
 	
-	public ExchangeAgentGui() {
+	public SettingsGUI() {
 		JPanel pHeader = new JPanel();
 		getContentPane().add(pHeader, BorderLayout.NORTH);
 		pHeader.setLayout(new BoxLayout(pHeader, BoxLayout.Y_AXIS));
@@ -1226,7 +1226,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 	}
 	
 	public static void main(String[] args) {
-		ExchangeAgentGui gui = new ExchangeAgentGui();
+		SettingsGUI gui = new SettingsGUI();
 		gui.setVisible(true);
 		
 		// Terminate when the main window is closed
