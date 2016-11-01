@@ -12,12 +12,14 @@ import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import jade.content.onto.basic.*;
 
+import java.awt.Color;
 import java.sql.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
 
 import behaviours.*;
+import gui.ProgramGUI;
 import ontologies.*;
 import utility.*;
 
@@ -82,7 +84,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			updateTicks = 60000 * 5;
 		}
 		
-		System.out.println(home.toString());
+		ProgramGUI.printToLog(home.toString() + "\n", Color.GREEN);
 		addBehaviour(update);
 		
 		// Find the broker agent

@@ -19,8 +19,10 @@ import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import jade.content.onto.basic.Action;
 
+import java.awt.Color;
 import java.util.Random;
 
+import gui.ProgramGUI;
 import ontologies.*;
 import utility.*;
 
@@ -62,7 +64,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			updateTicks = 60000 * 5;
 		}
 		
-		System.out.println(retailer.toString());
+		ProgramGUI.printToLog(retailer.toString() + "\n", Color.GREEN);
 		addBehaviour(updateRetailer);
 		
 		// Register in the DF

@@ -16,6 +16,8 @@ import jade.proto.SubscriptionResponder;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
+
+import java.awt.Color;
 import java.util.Random;
 
 import gui.ProgramGUI;
@@ -62,7 +64,7 @@ public class ApplianceAgent extends GuiAgent implements SupplierVocabulary{
 			appliance = new Appliance();
 		}
 		
-		System.out.println(appliance.toString());
+		ProgramGUI.printToLog(appliance.toString() + "\n", Color.GREEN);
 		
 		// Register in the DF
 		DFRegistry.register(this, APPLIANCE_AGENT);
@@ -118,6 +120,10 @@ public class ApplianceAgent extends GuiAgent implements SupplierVocabulary{
 			@Override
 			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
 				super.handleSubscription(subscription);
+				
+				ProgramGUI.printToLog("Subscription: \n\t" + 
+						subscription.getSender().getName() + " successfully subscribed to " + myAgent.getName(), Color.GREEN);
+				
 				System.out.println("Subscription: \n\t" + 
 						subscription.getSender().getName() + " successfully subscribed to " + myAgent.getName());
 				

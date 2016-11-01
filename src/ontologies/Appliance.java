@@ -39,7 +39,7 @@ public class Appliance implements Concept {
 
 	@Override
 	public String toString() {
-		return "Appliances [generationRate=" + generationRate + ", " + 
+		return "Appliance [generationRate=" + generationRate + ", " + 
 				"usageRate=" + usageRate + "]";
 	}
 }

@@ -96,6 +96,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 	}
 	
 	private SettingsGUI() {
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		// HEADER
 		JPanel pHeader = new JPanel();
 		getContentPane().add(pHeader, BorderLayout.NORTH);
@@ -858,8 +859,10 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 			@Override 
 			public void actionPerformed(ActionEvent e) {
 				initalizeJade(true);
-				bStart.setEnabled(false);
-				bQuickStart.setEnabled(false);
+				//bStart.setEnabled(false);
+				//bQuickStart.setEnabled(false);
+				setVisible(false);
+				ProgramGUI.getInstance().setVisible(true);
 			}
 		});
 		
@@ -867,8 +870,10 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				initalizeJade(false);
-				bStart.setEnabled(false);
-				bQuickStart.setEnabled(false);
+				//bStart.setEnabled(false);
+				//bQuickStart.setEnabled(false);
+				setVisible(false);
+				ProgramGUI.getInstance().setVisible(true);
 			}
 		});
 		

@@ -5,6 +5,7 @@ public interface SupplierVocabulary {
 	public static final int BUY = 1;
 	public static final int SELL = 2;
 	public static final int NO_RETAILERS = 3;
+	public static final String HOME_AGENT = "Home agent";
 	public static final String BROKER_AGENT = "Broker agent";
 	public static final String RETAILER_AGENT = "Retailer agent";
 	public static final String APPLIANCE_AGENT = "Appliance agent";

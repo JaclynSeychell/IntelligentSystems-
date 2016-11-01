@@ -11,9 +11,11 @@ import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
 
+import java.awt.Color;
 import java.util.*;
 import java.util.Map.Entry;
 
+import gui.ProgramGUI;
 import ontologies.*;
 import utility.*;
 
@@ -30,6 +32,8 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		// Register language and ontology
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
+		
+		ProgramGUI.printToLog("Broker agent successfully created" + "\n", Color.GREEN);
 		
 		// Register in the DF
 		DFRegistry.register(this, BROKER_AGENT);
