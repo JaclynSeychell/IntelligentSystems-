@@ -14,7 +14,8 @@ import ontologies.Retailer.RetailerType;
 import utility.Utility;
 
 @SuppressWarnings("serial")
-public class SettingsGUI extends JFrame implements ActionListener, SupplierVocabulary {
+public class SettingsGUI extends JFrame implements SupplierVocabulary {
+	private static SettingsGUI singleton = new SettingsGUI();
 	private Random rnd = Utility.newRandom(hashCode());
 	
 	// Store data between radio button selections
@@ -90,7 +91,12 @@ public class SettingsGUI extends JFrame implements ActionListener, SupplierVocab
 	private CheckBoxListener cblApplianceGenRate;
 	private CheckBoxListener cblApplianceUseRate;
 	
-	public SettingsGUI() {
+	public static SettingsGUI getInstance() {
+		return singleton;
+	}
+	
+	private SettingsGUI() {
+		// HEADER
 		JPanel pHeader = new JPanel();
 		getContentPane().add(pHeader, BorderLayout.NORTH);
 		pHeader.setLayout(new BoxLayout(pHeader, BoxLayout.Y_AXIS));
@@ -866,7 +872,7 @@ public class SettingsGUI extends JFrame implements ActionListener, SupplierVocab
 			}
 		});
 		
-		setSize(1810, 1062);
+		setSize(1920, 1080);
 	} 
 	
 	// Random slider value
@@ -1218,23 +1224,5 @@ public class SettingsGUI extends JFrame implements ActionListener, SupplierVocab
 		} catch (Exception e) {
 			e.printStackTrace();
 		}	
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	
-	}
-	
-	public static void main(String[] args) {
-		SettingsGUI gui = new SettingsGUI();
-		gui.setVisible(true);
-		
-		// Terminate when the main window is closed
-		gui.addWindowListener(new java.awt.event.WindowAdapter() {
-			@Override
-		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-				System.exit(0);
-		    }
-		});
 	}
 }

@@ -8,6 +8,8 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.gui.GuiAgent;
+import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.SubscriptionResponder;
@@ -16,11 +18,12 @@ import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import java.util.Random;
 
+import gui.ProgramGUI;
 import ontologies.*;
 import utility.*;
 
 @SuppressWarnings("serial")
-public class ApplianceAgent extends Agent implements SupplierVocabulary{
+public class ApplianceAgent extends GuiAgent implements SupplierVocabulary{
 	private Appliance appliance;
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
@@ -31,11 +34,14 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 	private float updateTickMin;
 	private float updateTickMax;
 	
+	transient protected ProgramGUI myGui; 
+	
 	public int randomRange(float min, float max) {
 		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
 		return (int)result;
 	}
 	
+	@Override
 	protected void setup() {
 		// Register language and ontology
 		getContentManager().registerLanguage(codec);
@@ -64,6 +70,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 	}
 	
 	// Deregister this agent
+	@Override
 	protected void takeDown() {
 		System.out.println("Shutting down " + this.getName() + ".");
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
@@ -86,6 +93,15 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 				System.out.print("\t" + dfds[i].getName());
 			}
 		} catch (Exception e) { e.printStackTrace(); }
+	}
+	
+	@Override
+	protected void onGuiEvent(GuiEvent ev) {
+	
+	}
+	
+	void alertGui(Object response) {
+		
 	}
 	
 	// -- Utility Methods -- 
