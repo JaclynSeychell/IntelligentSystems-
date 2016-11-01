@@ -17,7 +17,7 @@ import utility.Utility;
 public class ExchangeAgentGui extends JFrame implements ActionListener, SupplierVocabulary {
 	private Random rnd = Utility.newRandom(hashCode());
 	
-	// Save radio button settings
+	// Store data between radio button selections
 	private int selectedRetailer = 0;
 	private String[] aRetailerNames = new String[3];
 	private int[] aRetailerGenRates = new int[3];
@@ -28,9 +28,17 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 	private float aRetailerUpdateMinTimes[] = new float[3];
 	private float aRetailerUpdateMaxTimes[] = new float[3];
 	
+	private int selectedAppliance = 0;
+	private String[] aApplianceNames = new String[3];
+	private int[] aApplianceGenRates = new int[3];
+	private int[] aApplianceUseRates = new int[3];
+	private boolean[] aApplianceUpdateRangeCB = new boolean[3];
+	private float aApplianceUpdateMinTimes[] = new float[3];
+	private float aApplianceUpdateMaxTimes[] = new float[3];
+	
 	// Components
 	// Retailers
-	private JRadioButton rb1, rb2, rb3;
+	private JRadioButton rbR1, rbR2, rbR3;
 	private JTextField fRetailerName;
 	private JComboBox ddRetailerType;
 	private JSlider sRetailerGenRate;
@@ -65,7 +73,23 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 	private JCheckBox cbRangeHomeTradeTime;
 	private JCheckBox cbRangeHomeUpdateTime;
 	
-
+	// Appliances
+	private JRadioButton rbA1, rbA2, rbA3;
+	private JTextField fApplianceName;
+	private JSlider sApplianceGenRate;
+	private JSlider sApplianceUseRate;
+	private JLabel lApplianceGenRateValue;
+	private JLabel lApplianceUseRateValue;
+	private JCheckBox cbRandApplianceGenRate;
+	private JCheckBox cbRandApplianceUseRate;
+	private JSpinner spApplianceUpdateMinTime;
+	private JSpinner spApplianceUpdateMaxTime;
+	private JCheckBox cbRangeApplianceUpdateTime;
+	private SliderListener slApplianceGenRate;
+	private SliderListener slApplianceUseRate;
+	private CheckBoxListener cblApplianceGenRate;
+	private CheckBoxListener cblApplianceUseRate;
+	
 	public ExchangeAgentGui() {
 		JPanel pHeader = new JPanel();
 		getContentPane().add(pHeader, BorderLayout.NORTH);
@@ -84,10 +108,186 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		JSeparator separator = new JSeparator();
 		pHeader.add(separator);
 		
+		// BODY
 		JPanel pBody = new JPanel();
 		getContentPane().add(pBody, BorderLayout.CENTER);
 		pBody.setLayout(new GridLayout(1, 3, 0, 0));
 		
+		// APPLIANCES FORM
+		JPanel pAppliances = new JPanel();
+		pBody.add(pAppliances);
+		GridBagLayout gbl_pAppliances = new GridBagLayout();
+		gbl_pAppliances.columnWidths = new int[]{0, 0};
+		gbl_pAppliances.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_pAppliances.columnWeights = new double[]{1.0, 1.0};
+		gbl_pAppliances.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		pAppliances.setLayout(gbl_pAppliances);
+		
+		JLabel lAppliancesTitle = new JLabel("Appliance Agents Parameters");
+		lAppliancesTitle.setFont(new Font("Calibri", Font.PLAIN, 24));
+		GridBagConstraints gbc_lAppliancesTitle = new GridBagConstraints();
+		gbc_lAppliancesTitle.gridwidth = 4;
+		gbc_lAppliancesTitle.insets = new Insets(0, 0, 5, 0);
+		gbc_lAppliancesTitle.gridx = 0;
+		gbc_lAppliancesTitle.gridy = 0;
+		pAppliances.add(lAppliancesTitle, gbc_lAppliancesTitle);
+		
+		JLabel lApplianceSelect = new JLabel("Appliance:");
+		GridBagConstraints gbc_lApplianceSelect = new GridBagConstraints();
+		gbc_lApplianceSelect.anchor = GridBagConstraints.EAST;
+		gbc_lApplianceSelect.insets = new Insets(0, 0, 5, 5);
+		gbc_lApplianceSelect.gridx = 0;
+		gbc_lApplianceSelect.gridy = 1;
+		pAppliances.add(lApplianceSelect, gbc_lApplianceSelect);
+		
+		JPanel pApplianceSelect = new JPanel();
+		FlowLayout flApplianceSelect = (FlowLayout) pApplianceSelect.getLayout();
+		flApplianceSelect.setVgap(0);
+		flApplianceSelect.setHgap(0);
+		GridBagConstraints gbc_pApplianceSelect = new GridBagConstraints();
+		gbc_pApplianceSelect.fill = GridBagConstraints.BOTH;
+		gbc_pApplianceSelect.insets = new Insets(0, 0, 5, 5);
+		gbc_pApplianceSelect.gridx = 1;
+		gbc_pApplianceSelect.gridy = 1;
+		pAppliances.add(pApplianceSelect, gbc_pApplianceSelect);
+		
+		rbA1 = new JRadioButton("1");
+		rbA1.setSelected(true);
+		pApplianceSelect.add(rbA1);
+		
+		rbA2 = new JRadioButton("2");
+		pApplianceSelect.add(rbA2);
+		
+		rbA3 = new JRadioButton("3");
+		pApplianceSelect.add(rbA3);
+		
+		ButtonGroup rbgApplianceSelect = new ButtonGroup();
+		rbgApplianceSelect.add(rbA1);
+		rbgApplianceSelect.add(rbA2);
+		rbgApplianceSelect.add(rbA3);
+		
+		JLabel lApplianceName = new JLabel("Name:");
+		GridBagConstraints gbc_lApplianceName = new GridBagConstraints();
+		gbc_lApplianceName.anchor = GridBagConstraints.EAST;
+		gbc_lApplianceName.insets = new Insets(0, 0, 5, 5);
+		gbc_lApplianceName.gridx = 0;
+		gbc_lApplianceName.gridy = 2;
+		pAppliances.add(lApplianceName, gbc_lApplianceName);
+		
+		fApplianceName = new JTextField();
+		fApplianceName.setText("A1");
+		fApplianceName.setColumns(10);
+		GridBagConstraints gbc_fApplianceName = new GridBagConstraints();
+		gbc_fApplianceName.fill = GridBagConstraints.HORIZONTAL;
+		gbc_fApplianceName.insets = new Insets(0, 0, 5, 5);
+		gbc_fApplianceName.gridx = 1;
+		gbc_fApplianceName.gridy = 2;
+		pAppliances.add(fApplianceName, gbc_fApplianceName);
+		
+		JLabel lApplianceGenRate = new JLabel("Generation Rate:");
+		GridBagConstraints gbc_lApplianceGenRate = new GridBagConstraints();
+		gbc_lApplianceGenRate.anchor = GridBagConstraints.EAST;
+		gbc_lApplianceGenRate.insets = new Insets(0, 0, 5, 5);
+		gbc_lApplianceGenRate.gridx = 0;
+		gbc_lApplianceGenRate.gridy = 3;
+		pAppliances.add(lApplianceGenRate, gbc_lApplianceGenRate);
+		
+		sApplianceGenRate = new JSlider();
+		sApplianceGenRate.setValue(10);
+		sApplianceGenRate.setMaximum(20);
+		sApplianceGenRate.setPaintTicks(true);
+		sApplianceGenRate.setMajorTickSpacing(5);
+		GridBagConstraints gbc_sApplianceGenRate = new GridBagConstraints();
+		gbc_sApplianceGenRate.fill = GridBagConstraints.HORIZONTAL;
+		gbc_sApplianceGenRate.insets = new Insets(0, 0, 5, 5);
+		gbc_sApplianceGenRate.gridx = 1;
+		gbc_sApplianceGenRate.gridy = 3;
+		pAppliances.add(sApplianceGenRate, gbc_sApplianceGenRate);
+		
+		lApplianceGenRateValue = new JLabel("10");
+		lApplianceGenRateValue.setHorizontalAlignment(SwingConstants.LEFT);
+		GridBagConstraints gbc_lApplianceGenRateValue = new GridBagConstraints();
+		gbc_lApplianceGenRateValue.insets = new Insets(0, 0, 5, 5);
+		gbc_lApplianceGenRateValue.gridx = 2;
+		gbc_lApplianceGenRateValue.gridy = 3;
+		pAppliances.add(lApplianceGenRateValue, gbc_lApplianceGenRateValue);
+		
+		cbRandApplianceGenRate = new JCheckBox("Randomize");
+		GridBagConstraints gbc_cbRandApplianceGenRate = new GridBagConstraints();
+		gbc_cbRandApplianceGenRate.insets = new Insets(0, 0, 5, 0);
+		gbc_cbRandApplianceGenRate.gridx = 3;
+		gbc_cbRandApplianceGenRate.gridy = 3;
+		pAppliances.add(cbRandApplianceGenRate, gbc_cbRandApplianceGenRate);
+		
+		JLabel lApplianceUseRate = new JLabel("Usage Rate:");
+		GridBagConstraints gbc_lApplianceUseRate = new GridBagConstraints();
+		gbc_lApplianceUseRate.anchor = GridBagConstraints.EAST;
+		gbc_lApplianceUseRate.insets = new Insets(0, 0, 5, 5);
+		gbc_lApplianceUseRate.gridx = 0;
+		gbc_lApplianceUseRate.gridy = 4;
+		pAppliances.add(lApplianceUseRate, gbc_lApplianceUseRate);
+		
+		sApplianceUseRate = new JSlider();
+		sApplianceUseRate.setValue(10);
+		sApplianceUseRate.setMaximum(20);
+		sApplianceUseRate.setPaintTicks(true);
+		sApplianceUseRate.setMajorTickSpacing(5);
+		GridBagConstraints gbc_sApplianceUseRate = new GridBagConstraints();
+		gbc_sApplianceUseRate.fill = GridBagConstraints.HORIZONTAL;
+		gbc_sApplianceUseRate.insets = new Insets(0, 0, 5, 5);
+		gbc_sApplianceUseRate.gridx = 1;
+		gbc_sApplianceUseRate.gridy = 4;
+		pAppliances.add(sApplianceUseRate, gbc_sApplianceUseRate);
+		
+		lApplianceUseRateValue = new JLabel("10");
+		lApplianceUseRateValue.setHorizontalAlignment(SwingConstants.LEFT);
+		GridBagConstraints gbc_lApplianceUseRateValue = new GridBagConstraints();
+		gbc_lApplianceUseRateValue.insets = new Insets(0, 0, 5, 5);
+		gbc_lApplianceUseRateValue.gridx = 2;
+		gbc_lApplianceUseRateValue.gridy = 4;
+		pAppliances.add(lApplianceUseRateValue, gbc_lApplianceUseRateValue);
+		
+		cbRandApplianceUseRate = new JCheckBox("Randomize");
+		GridBagConstraints gbc_cbRandApplianceUseRate = new GridBagConstraints();
+		gbc_cbRandApplianceUseRate.insets = new Insets(0, 0, 5, 0);
+		gbc_cbRandApplianceUseRate.gridx = 3;
+		gbc_cbRandApplianceUseRate.gridy = 4;
+		pAppliances.add(cbRandApplianceUseRate, gbc_cbRandApplianceUseRate);
+		
+		JLabel lApplianceUpdateFrequency = new JLabel("Update Frequency (min):");
+		GridBagConstraints gbc_lApplianceUpdateFrequency = new GridBagConstraints();
+		gbc_lApplianceUpdateFrequency.anchor = GridBagConstraints.EAST;
+		gbc_lApplianceUpdateFrequency.insets = new Insets(0, 0, 5, 5);
+		gbc_lApplianceUpdateFrequency.gridx = 0;
+		gbc_lApplianceUpdateFrequency.gridy = 5;
+		pAppliances.add(lApplianceUpdateFrequency, gbc_lApplianceUpdateFrequency);
+		
+		JPanel pApplianceUpdateTime = new JPanel();
+		GridBagConstraints gbc_pApplianceUpdateTime = new GridBagConstraints();
+		gbc_pApplianceUpdateTime.insets = new Insets(0, 0, 5, 5);
+		gbc_pApplianceUpdateTime.fill = GridBagConstraints.BOTH;
+		gbc_pApplianceUpdateTime.gridx = 1;
+		gbc_pApplianceUpdateTime.gridy = 5;
+		pAppliances.add(pApplianceUpdateTime, gbc_pApplianceUpdateTime);
+		
+		spApplianceUpdateMinTime = new JSpinner();
+		spApplianceUpdateMinTime.setModel(new SpinnerNumberModel(new Float(0.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
+		spApplianceUpdateMinTime.setEnabled(false);
+		pApplianceUpdateTime.add(spApplianceUpdateMinTime);
+		
+		spApplianceUpdateMaxTime = new JSpinner();
+		spApplianceUpdateMaxTime.setModel(new SpinnerNumberModel(new Float(5.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
+		pApplianceUpdateTime.add(spApplianceUpdateMaxTime);
+		
+		cbRangeApplianceUpdateTime = new JCheckBox("Range");
+		GridBagConstraints gbc_cbRangeApplianceUpdateTime = new GridBagConstraints();
+		gbc_cbRangeApplianceUpdateTime.insets = new Insets(0, 0, 5, 0);
+		gbc_cbRangeApplianceUpdateTime.anchor = GridBagConstraints.WEST;
+		gbc_cbRangeApplianceUpdateTime.gridx = 3;
+		gbc_cbRangeApplianceUpdateTime.gridy = 5;
+		pAppliances.add(cbRangeApplianceUpdateTime, gbc_cbRangeApplianceUpdateTime);
+		
+		// HOMES FORM
 		JPanel pHome = new JPanel();
 		pBody.add(pHome);
 		GridBagLayout gbl_pHome = new GridBagLayout();
@@ -222,7 +422,6 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_lHomeSupplyValue.gridy = 5;
 		pHome.add(lHomeSupplyValue, gbc_lHomeSupplyValue);
 		
-		
 		JCheckBox cbRandHomeSupply = new JCheckBox("Randomize");
 		GridBagConstraints gbc_cbRandHomeSupply = new GridBagConstraints();
 		gbc_cbRandHomeSupply.insets = new Insets(0, 0, 5, 0);
@@ -265,6 +464,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_cbRandHomeIncome.gridy = 6;
 		pHome.add(cbRandHomeIncome, gbc_cbRandHomeIncome);
 		
+		// RETAILERS FORM
 		JPanel pRetailers = new JPanel();
 		pBody.add(pRetailers);
 		GridBagLayout gbl_pRetailers = new GridBagLayout();
@@ -292,31 +492,31 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		gbc_lRetailerSelect.gridy = 2;
 		pRetailers.add(lRetailerSelect, gbc_lRetailerSelect);
 		
-		JPanel panel = new JPanel();
-		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
-		flowLayout.setVgap(0);
-		flowLayout.setHgap(0);
-		GridBagConstraints gbc_panel = new GridBagConstraints();
-		gbc_panel.fill = GridBagConstraints.BOTH;
-		gbc_panel.insets = new Insets(0, 0, 5, 5);
-		gbc_panel.gridx = 1;
-		gbc_panel.gridy = 2;
-		pRetailers.add(panel, gbc_panel);
+		JPanel pRetailerSelect = new JPanel();
+		FlowLayout flRetailerSelect = (FlowLayout) pRetailerSelect.getLayout();
+		flRetailerSelect.setVgap(0);
+		flRetailerSelect.setHgap(0);
+		GridBagConstraints gbc_pRetailerSelect = new GridBagConstraints();
+		gbc_pRetailerSelect.fill = GridBagConstraints.BOTH;
+		gbc_pRetailerSelect.insets = new Insets(0, 0, 5, 5);
+		gbc_pRetailerSelect.gridx = 1;
+		gbc_pRetailerSelect.gridy = 2;
+		pRetailers.add(pRetailerSelect, gbc_pRetailerSelect);
 		
-		rb1 = new JRadioButton("1");
-		rb1.setSelected(true);
-		panel.add(rb1);
+		rbR1 = new JRadioButton("1");
+		rbR1.setSelected(true);
+		pRetailerSelect.add(rbR1);
 		
-		rb2 = new JRadioButton("2");
-		panel.add(rb2);
+		rbR2 = new JRadioButton("2");
+		pRetailerSelect.add(rbR2);
 		
-		rb3 = new JRadioButton("3");
-		panel.add(rb3);
+		rbR3 = new JRadioButton("3");
+		pRetailerSelect.add(rbR3);
 		
-		ButtonGroup rbg = new ButtonGroup();
-		rbg.add(rb1);
-		rbg.add(rb2);
-		rbg.add(rb3);
+		ButtonGroup rbgRetailerSelect = new ButtonGroup();
+		rbgRetailerSelect.add(rbR1);
+		rbgRetailerSelect.add(rbR2);
+		rbgRetailerSelect.add(rbR3);
 		
 		JLabel lRetailerName = new JLabel("Name:");
 		GridBagConstraints gbc_lRetailerName = new GridBagConstraints();
@@ -355,7 +555,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		pRetailers.add(sRetailerGenRate, gbc_sRetailerGenRate);
 		
 		lRetailerGenRateValue = new JLabel("50");
-		lRetailerGenRateValue.setHorizontalAlignment(SwingConstants.LEFT);
+		lRetailerGenRate.setHorizontalAlignment(SwingConstants.LEFT);
 		GridBagConstraints gbc_lRetailerGenRateValue = new GridBagConstraints();
 		gbc_lRetailerGenRateValue.insets = new Insets(0, 0, 5, 5);
 		gbc_lRetailerGenRateValue.gridx = 2;
@@ -543,6 +743,14 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		spRetailerUpdateMaxTime.setModel(new SpinnerNumberModel(new Float(5.0f), new Float(0.0f), new Float(120.0f), new Float(0.5f)));
 		pRetailerUpdateTime.add(spRetailerUpdateMaxTime);
 		
+		cbRangeRetailerUpdateTime = new JCheckBox("Range");
+		GridBagConstraints gbc_cbRangeRetailerUpdateTime = new GridBagConstraints();
+		gbc_cbRangeRetailerUpdateTime.insets = new Insets(0, 0, 5, 0);
+		gbc_cbRangeRetailerUpdateTime.anchor = GridBagConstraints.WEST;
+		gbc_cbRangeRetailerUpdateTime.gridx = 3;
+		gbc_cbRangeRetailerUpdateTime.gridy = 8;
+		pRetailers.add(cbRangeRetailerUpdateTime, gbc_cbRangeRetailerUpdateTime);
+		
 		// Setup default retailer settings
 		for(int i = 0; i < 3; i++) {
 			aRetailerNames[i] = "R"+(i+1);
@@ -553,6 +761,13 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 			aRetailerUpdateRangeCB[i] = false;
 			aRetailerUpdateMinTimes[i] = (float)spRetailerUpdateMinTime.getValue();
 			aRetailerUpdateMaxTimes[i] = (float)spRetailerUpdateMaxTime.getValue();
+			
+			aApplianceNames[i] = "A"+(i+1);
+			aApplianceGenRates[i] = sApplianceGenRate.getValue();
+			aApplianceUseRates[i] = sApplianceUseRate.getValue();
+			aApplianceUpdateRangeCB[i] = false;
+			aApplianceUpdateMinTimes[i] = (float)spApplianceUpdateMinTime.getValue();
+			aApplianceUpdateMaxTimes[i] = (float)spApplianceUpdateMaxTime.getValue();
 		}
 		
 		// Handle Slider events
@@ -565,17 +780,15 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		slRetailerPrice = new SliderListener(lRetailerPriceValue);
 		slRetailerSupply = new SliderListener(lRetailerSupplyValue);
 		
-		cbRangeRetailerUpdateTime = new JCheckBox("Range");
-		GridBagConstraints gbc_cbRangeRetailerUpdateTime = new GridBagConstraints();
-		gbc_cbRangeRetailerUpdateTime.insets = new Insets(0, 0, 5, 0);
-		gbc_cbRangeRetailerUpdateTime.anchor = GridBagConstraints.WEST;
-		gbc_cbRangeRetailerUpdateTime.gridx = 3;
-		gbc_cbRangeRetailerUpdateTime.gridy = 8;
-		pRetailers.add(cbRangeRetailerUpdateTime, gbc_cbRangeRetailerUpdateTime);
-		
 		sRetailerGenRate.addChangeListener(slRetailerGenRate);
 		sRetailerPrice.addChangeListener(slRetailerPrice);
 		sRetailerSupply.addChangeListener(slRetailerSupply);
+		
+		slApplianceGenRate = new SliderListener(lApplianceGenRateValue);
+		slApplianceUseRate = new SliderListener(lApplianceUseRateValue);
+		
+		sApplianceGenRate.addChangeListener(slApplianceGenRate);
+		sApplianceUseRate.addChangeListener(slApplianceUseRate);
 		
 		// Handle CheckBox events
 		cbRandHomeUseRate.addChangeListener(new CheckBoxListener(lHomeUseValue, sHomeUseRate));
@@ -588,25 +801,39 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		cblRetailerGenRate = new CheckBoxListener(lRetailerGenRateValue, sRetailerGenRate);
 		cblRetailerPrice = new CheckBoxListener(lRetailerPriceValue, sRetailerPrice);
 		cblRetailerSupply = new CheckBoxListener(lRetailerSupplyValue, sRetailerSupply);
-		
+
 		cbRandRetailerGenRate.addChangeListener(cblRetailerGenRate);
 		cbRandRetailerPrice.addChangeListener(cblRetailerPrice);
 		cbRandRetailerSupply.addChangeListener(cblRetailerSupply);
 		cbRangeRetailerUpdateTime.addChangeListener(new RangeCheckBoxListener(spRetailerUpdateMinTime));
 		
+		cblApplianceGenRate = new CheckBoxListener(lApplianceGenRateValue, sApplianceGenRate);
+		cblApplianceUseRate = new CheckBoxListener(lApplianceUseRateValue, sApplianceUseRate);
+		
+		cbRandApplianceGenRate.addChangeListener(cblApplianceGenRate);
+		cbRandApplianceUseRate.addChangeListener(cblApplianceUseRate);
+		cbRangeApplianceUpdateTime.addChangeListener(new RangeCheckBoxListener(spApplianceUpdateMinTime));
+		
 		// Handle RadioButton events
-		rb1.addActionListener(new RadioButtonListener(0));
-		rb2.addActionListener(new RadioButtonListener(1));
-		rb3.addActionListener(new RadioButtonListener(2));
+		rbR1.addActionListener(new RetailerRadioButtonListener(0));
+		rbR2.addActionListener(new RetailerRadioButtonListener(1));
+		rbR3.addActionListener(new RetailerRadioButtonListener(2));
+		
+		rbA1.addActionListener(new ApplianceRadioButtonListener(0));
+		rbA2.addActionListener(new ApplianceRadioButtonListener(1));
+		rbA3.addActionListener(new ApplianceRadioButtonListener(2));
 		
 		// Handle Spinner events
-		spRetailerUpdateMinTime.addChangeListener(new RangeSpinnerListener(spRetailerUpdateMaxTime, true));
+		spApplianceUpdateMinTime.addChangeListener(new RangeSpinnerListener(spApplianceUpdateMaxTime, true));
 		spHomeTradeMinTime.addChangeListener(new RangeSpinnerListener(spHomeTradeMaxTime, true));
 		spHomeUpdateMinTime.addChangeListener(new RangeSpinnerListener(spHomeUpdateMaxTime, true));
+		spRetailerUpdateMinTime.addChangeListener(new RangeSpinnerListener(spRetailerUpdateMaxTime, true));
 		
-		spRetailerUpdateMaxTime.addChangeListener(new RangeSpinnerListener(spRetailerUpdateMinTime, false));
+		spApplianceUpdateMaxTime.addChangeListener(new RangeSpinnerListener(spApplianceUpdateMaxTime, false));
 		spHomeTradeMaxTime.addChangeListener(new RangeSpinnerListener(spHomeTradeMinTime, false));
 		spHomeUpdateMaxTime.addChangeListener(new RangeSpinnerListener(spHomeUpdateMinTime, false));
+		spRetailerUpdateMaxTime.addChangeListener(new RangeSpinnerListener(spRetailerUpdateMinTime, false));
+		
 		
 		for (RetailerType type : RetailerType.values()) {
 			ddRetailerType.addItem(type);
@@ -639,7 +866,7 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 			}
 		});
 		
-		setSize(1280, 720);
+		setSize(1810, 1062);
 	} 
 	
 	// Random slider value
@@ -736,15 +963,14 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 					source.setValue(cap);
 				}
 			}
-			
 		}
 	}
 	
-	// Custom JRadioButton listener
-	public class RadioButtonListener implements ActionListener {
+	// Custom JRadioButton listener for retailers
+	public class RetailerRadioButtonListener implements ActionListener {
 		private int retailer;
 		
-		RadioButtonListener(int retailer) {
+		RetailerRadioButtonListener(int retailer) {
 			super();
 			this.retailer = retailer;
 		}
@@ -819,6 +1045,69 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		}
 	}
 	
+	// Custom JRadioButton listener for appliances
+		public class ApplianceRadioButtonListener implements ActionListener {
+			private int appliance;
+			
+			ApplianceRadioButtonListener(int appliance) {
+				super();
+				this.appliance = appliance;
+			}
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JRadioButton source = (JRadioButton)e.getSource();
+				if (source.isSelected() && appliance != selectedAppliance) {
+					try {
+						// Save last settings
+						aApplianceNames[selectedAppliance] = fApplianceName.getText();
+						aApplianceUpdateMinTimes[selectedAppliance] = (float)spApplianceUpdateMinTime.getValue();
+						aApplianceUpdateMaxTimes[selectedAppliance] = (float)spApplianceUpdateMaxTime.getValue();
+						
+						if(cbRandApplianceGenRate.isSelected()) {
+							cbRandApplianceGenRate.setSelected(false);
+							aApplianceGenRates[selectedAppliance] = randomSliderValue(sApplianceGenRate);
+						} else {
+							aApplianceGenRates[selectedAppliance] = sApplianceGenRate.getValue();
+						}
+						
+						if(cbRandApplianceUseRate.isSelected()) {
+							cbRandApplianceUseRate.setSelected(false);
+							aApplianceUseRates[selectedAppliance] = randomSliderValue(sApplianceUseRate);
+						} else {
+							aApplianceUseRates[selectedAppliance] = sApplianceUseRate.getValue();
+						}
+						
+						if (cbRangeApplianceUpdateTime.isSelected()) {
+							cbRangeApplianceUpdateTime.setSelected(false);
+							aApplianceUpdateRangeCB[selectedAppliance] = true;
+						} else {
+							aApplianceUpdateRangeCB[selectedAppliance] = false;
+						}
+						
+						selectedAppliance = appliance;
+						
+						// Update to new appliance values
+						fApplianceName.setText(aApplianceNames[appliance]);
+						sApplianceGenRate.setValue(aApplianceGenRates[appliance]);
+						lApplianceGenRateValue.setText(Integer.toString(aApplianceGenRates[appliance]));
+						sApplianceUseRate.setValue(aApplianceUseRates[appliance]);
+						lApplianceUseRateValue.setText(Integer.toString(aApplianceUseRates[appliance]));
+						spApplianceUpdateMinTime.setValue(aApplianceUpdateMinTimes[appliance]);
+						spApplianceUpdateMaxTime.setValue(aApplianceUpdateMaxTimes[appliance]);
+						cbRangeApplianceUpdateTime.setSelected(aApplianceUpdateRangeCB[appliance]);
+						
+						// Update listeners
+						slApplianceGenRate = new SliderListener(lRetailerGenRateValue);
+						cblApplianceGenRate = new CheckBoxListener(lRetailerGenRateValue, sRetailerGenRate);
+						
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+			}
+		}
+	
 	private void initalizeJade(boolean bQuickStart) {
 		Runtime rt = Runtime.instance();
 		rt.setCloseVM(true);
@@ -828,17 +1117,26 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 		jade.wrapper.AgentContainer mc = rt.createMainContainer(p);
 		
 		// Create container for home agents
-		ProfileImpl hp = new ProfileImpl(null, 1200, "homes");
+		ProfileImpl hp = new ProfileImpl(null, 1200, "home");
+		hp.setParameter(Profile.CONTAINER_NAME, "Home-Container");
 		jade.wrapper.AgentContainer hc = rt.createAgentContainer(hp);
 		
 		// Create container for retailer agents
 		ProfileImpl rp = new ProfileImpl(null, 1200, "retailers");
+		rp.setParameter(Profile.CONTAINER_NAME, "Retailer-Container");
 		jade.wrapper.AgentContainer rc = rt.createAgentContainer(rp);
+		
+		// Create container for appliance agents
+		ProfileImpl ap = new ProfileImpl(null, 1200, "appliances");
+		ap.setParameter(Profile.CONTAINER_NAME, "Appliance-Container");
+		jade.wrapper.AgentContainer ac = rt.createAgentContainer(ap);
 		
 		String homeName = "Home";
 		String[] retailerNames = new String[3];
+		String[] applianceNames = new String[3];
 		Object[] homeArguments;
 		Object[][] retailerArguments;
+		Object[][] applianceArguments;
 		
 		// Use default values or set ones
 		if(!bQuickStart) {
@@ -874,12 +1172,26 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 				};
 				retailerArguments[i][1] = retailerUpdateData;
 			}
+			
+			applianceNames = aApplianceNames;
+			applianceArguments = new Object[3][2];
+			Object applianceUpdateData[];
+			for(int i = 0; i < 3; i++) {
+				applianceArguments[i][0] = new Appliance(aApplianceGenRates[i], aApplianceUseRates[i]);
+				
+				applianceUpdateData = new Object[] {
+					aApplianceUpdateRangeCB[i], aApplianceUpdateMinTimes[i], aApplianceUpdateMaxTimes[i]
+				};
+				applianceArguments[i][1] = applianceUpdateData;
+			}
 		} else {
 			homeArguments = new Object[0];
 			retailerArguments = new Object[3][0];
+			applianceArguments = new Object[3][0];
 			
 			for(int i = 0; i < 3; i++) {
-				retailerNames[i] = "Retailer " + i; 
+				retailerNames[i] = "R" + i; 
+				applianceNames[i] = "A" + i;
 			}
 		}
 		
@@ -888,16 +1200,20 @@ public class ExchangeAgentGui extends JFrame implements ActionListener, Supplier
 			AgentController rma = mc.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]);
 			rma.start();
 			AgentController ba = mc.createNewAgent("Broker", "agents.BrokerAgent", new Object[0]);
-			ba.start();
 			
-			AgentController ra;
+			AgentController ra, aa;
 			for(int i = 0; i < 3; i++) {
 				ra = rc.createNewAgent(retailerNames[i], "agents.RetailerAgent", retailerArguments[i]);
 				ra.start();
+				
+				aa = ac.createNewAgent(applianceNames[i], "agents.ApplianceAgent", applianceArguments[i]);
+				aa.start();
 			}
 			
 			AgentController ha = hc.createNewAgent(homeName, "agents.HomeAgent", homeArguments);
 			ha.start();
+			
+			ba.start();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

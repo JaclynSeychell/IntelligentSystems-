@@ -21,18 +21,19 @@ import utility.*;
 
 @SuppressWarnings("serial")
 public class ApplianceAgent extends Agent implements SupplierVocabulary{
-	private Appliance appliance = new Appliance();
+	private Appliance appliance;
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
 	private Random rnd = Utility.newRandom(hashCode());
 	
-	private static final int TICK_TIME = (60000 * 5);
+	private int updateTicks = 60000;
+	private boolean updateTickRange = false;
+	private float updateTickMin;
+	private float updateTickMax;
 	
-	void setupAppliance() {
-		appliance.setGenerationRate(rnd.nextInt(10)); 	//random int between 0-10
-		appliance.setUsageRate(rnd.nextInt(30));    	//random int between 0-30
-		
-		System.out.println(appliance.toString());
+	public int randomRange(float min, float max) {
+		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
+		return (int)result;
 	}
 	
 	protected void setup() {
@@ -40,8 +41,22 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		
-		// Setup retailer state
-		setupAppliance();
+		// Setup appliance state
+		Object[] args = getArguments();
+		if(args != null && args.length > 0) {
+			appliance = (Appliance)args[0];
+			Object[] updateData = (Object[])args[1];
+			
+			updateTickRange = (boolean)updateData[0];
+			updateTickMin = (float)updateData[1];
+			updateTickMax = (float)updateData[2];
+			
+			updateTicks = updateTickRange ? randomRange(updateTickMin, updateTickMax) : (int)updateTickMax * 60000;
+		} else {
+			appliance = new Appliance();
+		}
+		
+		System.out.println(appliance.toString());
 		
 		// Register in the DF
 		DFRegistry.register(this, APPLIANCE_AGENT);
@@ -96,7 +111,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 				
 				
 				// Send rate data out to subscribers
-				addBehaviour(new TickerBehaviour(myAgent, rnd.nextInt(TICK_TIME)) {
+				addBehaviour(new TickerBehaviour(myAgent, updateTicks) {
 					@Override
 					public void onTick() {
 						System.out.println(myAgent.getLocalName() + " rate: " 
@@ -104,6 +119,12 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 						
 						notification.setContent(Integer.toString(appliance.getRate()));
 						sub.notify(notification);
+						
+						if(updateTickRange) {
+							updateTicks = randomRange(updateTickMin, updateTickMax);
+						}
+						reset(updateTicks);
+
 					}
 				});
 				

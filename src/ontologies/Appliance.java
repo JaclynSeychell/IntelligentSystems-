@@ -12,6 +12,11 @@ public class Appliance implements Concept {
 		usageRate = 0;
 	}
 	
+	public Appliance(int generationRate, int usageRate) {
+		this.generationRate = generationRate;
+		this.usageRate = usageRate;
+	}
+	
 	public int getGenerationRate() {
 		return generationRate;
 	}

@@ -22,7 +22,6 @@ import jade.content.onto.basic.Action;
 import java.util.Random;
 
 import ontologies.*;
-import ontologies.Retailer.RetailerType;
 import utility.*;
 
 @SuppressWarnings("serial")
@@ -64,7 +63,6 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		}
 		
 		System.out.println(retailer.toString());
-		
 		addBehaviour(updateRetailer);
 		
 		// Register in the DF
