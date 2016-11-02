@@ -58,6 +58,12 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 	private JLabel lR3SupplyValue;
 	private JLabel lR3TypeValue;
 	private JButton bRetailer3;
+	private JButton bHome;
+	private JLabel lHomeGenerationRateValue;
+	private JLabel lHomeUsageRateValue;
+	private JLabel lHomeSupplyValue;
+	private JLabel lHomeBudgetValue;
+	private JLabel lHomeExpenditureValue;
 	
 	public static ProgramGUI getInstance() {
 		return singleton;
@@ -389,6 +395,114 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		gbl_pHome.columnWeights = new double[]{Double.MIN_VALUE};
 		gbl_pHome.rowWeights = new double[]{Double.MIN_VALUE};
 		pHome.setLayout(gbl_pHome);
+		
+		bHome = new JButton("Home Agent");
+		bHome.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		GridBagConstraints gbc_bHome = new GridBagConstraints();
+		gbc_bHome.weighty = 25.0;
+		gbc_bHome.gridwidth = 2;
+		gbc_bHome.insets = new Insets(0, 0, 5, 0);
+		gbc_bHome.fill = GridBagConstraints.BOTH;
+		gbc_bHome.weightx = 100.0;
+		gbc_bHome.gridx = 0;
+		gbc_bHome.gridy = 0;
+		pHome.add(bHome, gbc_bHome);
+	
+		JLabel lHomeGenerationRate = new JLabel("Generation Rate:");
+		GridBagConstraints gbc_lHomeGenerationRate = new GridBagConstraints();
+		gbc_lHomeGenerationRate.weighty = 5.0;
+		gbc_lHomeGenerationRate.weightx = 60.0;
+		gbc_lHomeGenerationRate.insets = new Insets(5, 10, 5, 5);
+		gbc_lHomeGenerationRate.gridx = 0;
+		gbc_lHomeGenerationRate.gridy = 1;
+		pHome.add(lHomeGenerationRate, gbc_lHomeGenerationRate);
+		
+		lHomeGenerationRateValue = new JLabel("value");
+		GridBagConstraints gbc_lHomeGenerationRateValue = new GridBagConstraints();
+		gbc_lHomeGenerationRateValue.insets = new Insets(0, 0, 5, 0);
+		gbc_lHomeGenerationRateValue.weightx = 40.0;
+		gbc_lHomeGenerationRateValue.gridx = 1;
+		gbc_lHomeGenerationRateValue.gridy = 1;
+		pHome.add(lHomeGenerationRateValue, gbc_lHomeGenerationRateValue);
+		
+		JLabel lHomeUsageRate = new JLabel("Price Per Unit:");
+		GridBagConstraints gbc_lHomeUsageRate = new GridBagConstraints();
+		gbc_lHomeUsageRate.weighty = 5.0;
+		gbc_lHomeUsageRate.weightx = 60.0;
+		gbc_lHomeUsageRate.insets = new Insets(0, 0, 5, 5);
+		gbc_lHomeUsageRate.gridx = 0;
+		gbc_lHomeUsageRate.gridy = 2;
+		pHome.add(lHomeUsageRate, gbc_lHomeUsageRate);
+		
+		lHomeUsageRateValue = new JLabel("value");
+		GridBagConstraints gbc_lHomeUsageRateValue = new GridBagConstraints();
+		gbc_lHomeUsageRateValue.insets = new Insets(0, 0, 5, 0);
+		gbc_lHomeUsageRateValue.gridx = 1;
+		gbc_lHomeUsageRateValue.gridy = 2;
+		pHome.add(lHomeUsageRateValue, gbc_lHomeUsageRateValue);
+		
+		JLabel lHomeSupply = new JLabel("Supply:");
+		GridBagConstraints gbc_lHomeSupply = new GridBagConstraints();
+		gbc_lHomeSupply.weighty = 5.0;
+		gbc_lHomeSupply.weightx = 60.0;
+		gbc_lHomeSupply.insets = new Insets(0, 0, 5, 5);
+		gbc_lHomeSupply.gridx = 0;
+		gbc_lHomeSupply.gridy = 3;
+		pHome.add(lHomeSupply, gbc_lHomeSupply);
+		
+		lHomeSupplyValue = new JLabel("value");
+		GridBagConstraints gbc_lHomeSupplyValue = new GridBagConstraints();
+		gbc_lHomeSupplyValue.insets = new Insets(0, 0, 5, 0);
+		gbc_lHomeSupplyValue.gridx = 1;
+		gbc_lHomeSupplyValue.gridy = 3;
+		pHome.add(lHomeSupplyValue, gbc_lHomeSupplyValue);
+		
+		JLabel lHomeBudget = new JLabel("Budget:");
+		GridBagConstraints gbc_lHomeBudget = new GridBagConstraints();
+		gbc_lHomeBudget.weighty = 5.0;
+		gbc_lHomeBudget.weightx = 60.0;
+		gbc_lHomeBudget.insets = new Insets(0, 0, 5, 5);
+		gbc_lHomeBudget.gridx = 0;
+		gbc_lHomeBudget.gridy = 4;
+		pHome.add(lHomeBudget, gbc_lHomeBudget);
+		
+		lHomeBudgetValue = new JLabel("value");
+		GridBagConstraints gbc_lHomeBudgetValue = new GridBagConstraints();
+		gbc_lHomeBudgetValue.insets = new Insets(0, 0, 5, 0);
+		gbc_lHomeBudgetValue.gridx = 1;
+		gbc_lHomeBudgetValue.gridy = 4;
+		pHome.add(lHomeBudgetValue, gbc_lHomeBudgetValue);
+		
+		JLabel lHomeExpediture = new JLabel("Expenditure:");
+		GridBagConstraints gbc_lHomeExpenditure = new GridBagConstraints();
+		gbc_lHomeExpenditure.weighty = 5.0;
+		gbc_lHomeExpenditure.weightx = 60.0;
+		gbc_lHomeExpenditure.insets = new Insets(0, 0, 5, 5);
+		gbc_lHomeExpenditure.gridx = 0;
+		gbc_lHomeExpenditure.gridy = 5;
+		pHome.add(lHomeExpediture, gbc_lHomeExpenditure);
+		
+		lHomeExpenditureValue = new JLabel("value");
+		GridBagConstraints gbc_lHomeExpenditureValue = new GridBagConstraints();
+		gbc_lHomeExpenditureValue.insets = new Insets(0, 0, 5, 0);
+		gbc_lHomeExpenditureValue.gridx = 1;
+		gbc_lHomeExpenditureValue.gridy = 5;
+		pHome.add(lHomeExpenditureValue, gbc_lHomeExpenditureValue);
+		
+		JPanel pHomeMessages = new JPanel();
+		pHomeMessages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		GridBagConstraints gbc_pHomeMessages = new GridBagConstraints();
+		gbc_pHomeMessages.weighty = 25.0;
+		gbc_pHomeMessages.fill = GridBagConstraints.BOTH;
+		gbc_pHomeMessages.gridwidth = 2;
+		gbc_pHomeMessages.insets = new Insets(5, 5, 5, 5);
+		gbc_pHomeMessages.gridx = 0;
+		gbc_pHomeMessages.gridy = 6;
+		pHome.add(pHomeMessages, gbc_pHomeMessages);
+		pHomeMessages.setLayout(new BorderLayout(0, 0));
+		
+		JTextPane tpHome = new JTextPane();
+		pHomeMessages.add(tpHome);
 		
 		// BROKER
 		JPanel pBroker = new JPanel();
