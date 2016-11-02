@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 import java.awt.event.ActionEvent;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -32,39 +33,57 @@ import ontologies.*;
 
 @SuppressWarnings("serial")
 public class ProgramGUI extends JFrame implements SupplierVocabulary {
-	private static JTextPane tpGlobalMessages;
+	private JTextPane tpGlobalMessages;
+	private HashMap<Integer, JTextPane> agentLogs = new HashMap<Integer, JTextPane>();
 	private static ProgramGUI singleton = new ProgramGUI();
+	
+	// Components
 	private JButton bAppliance1;
 	private JLabel lA1GenerationRateValue;
 	private JLabel lA1UsageRateValue;
+	private JTextPane tpAppliance1;
+	
 	private JButton bAppliance2;
 	private JLabel lA2GenerationRateValue;
 	private JLabel lA2UsageRateValue;
+	private JTextPane tpAppliance2;
+	
 	private JButton bAppliance3;
 	private JLabel lA3GenerationRateValue;
 	private JLabel lA3UsageRateValue;
+	private JTextPane tpAppliance3;
+	
 	private JButton bRetailer1;
 	private JLabel lR1GenerationRateValue;
 	private JLabel lR1PricePerUnitValue;
 	private JLabel lR1SupplyValue;
 	private JLabel lR1TypeValue;
+	private JTextPane tpRetailer1;
+	
 	private JButton bRetailer2;
 	private JLabel lR2GenerationRateValue;
 	private JLabel lR2PricePerUnitValue;
 	private JLabel lR2SupplyValue;
 	private JLabel lR2TypeValue;
+	private JTextPane tpRetailer2;
+	
+	private JButton bRetailer3;
 	private JLabel lR3GenerationRateValue;
 	private JLabel lR3PricePerUnitValue;
 	private JLabel lR3SupplyValue;
 	private JLabel lR3TypeValue;
-	private JButton bRetailer3;
+	private JTextPane tpRetailer3;
+	
 	private JButton bHome;
 	private JLabel lHomeGenerationRateValue;
 	private JLabel lHomeUsageRateValue;
 	private JLabel lHomeSupplyValue;
 	private JLabel lHomeBudgetValue;
 	private JLabel lHomeExpenditureValue;
+	private JTextPane tpHome;
+	
 	private JButton bBroker;
+	private JTextPane tpBroker;
 	
 	public static ProgramGUI getInstance() {
 		return singleton;
@@ -221,7 +240,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pAppliance1.add(pAppliance1Messages, gbc_pAppliance1Messages);
 		pAppliance1Messages.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane tpAppliance1 = new JTextPane();
+		tpAppliance1 = new JTextPane();
 		pAppliance1Messages.add(tpAppliance1);
 		
 		JPanel pAppliance2 = new JPanel();
@@ -299,7 +318,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pAppliance2.add(pAppliance2Messages, gbc_pAppliance2Messages);
 		pAppliance2Messages.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane tpAppliance2 = new JTextPane();
+		tpAppliance2 = new JTextPane();
 		pAppliance2Messages.add(tpAppliance2);
 		
 		JPanel pAppliance3 = new JPanel();
@@ -376,7 +395,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pAppliance3.add(pAppliance3Messages, gbc_pAppliance3Messages);
 		pAppliance3Messages.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane tpAppliance3 = new JTextPane();
+		tpAppliance3 = new JTextPane();
 		pAppliance3Messages.add(tpAppliance3);
 		
 		// HOME
@@ -502,7 +521,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pHome.add(pHomeMessages, gbc_pHomeMessages);
 		pHomeMessages.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane tpHome = new JTextPane();
+		tpHome = new JTextPane();
 		pHomeMessages.add(tpHome);
 		
 		// BROKER
@@ -527,6 +546,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		bBroker.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		GridBagConstraints gbc_bBroker = new GridBagConstraints();
 		gbc_bBroker.weighty = 25.0;
+		gbc_bBroker.anchor = GridBagConstraints.NORTH;
 		gbc_bBroker.gridwidth = 2;
 		gbc_bBroker.insets = new Insets(0, 0, 5, 0);
 		gbc_bBroker.fill = GridBagConstraints.BOTH;
@@ -538,16 +558,15 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JPanel pBrokerMessages = new JPanel();
 		pBrokerMessages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pBrokerMessages = new GridBagConstraints();
-		gbc_pBrokerMessages.weighty = 25.0;
 		gbc_pBrokerMessages.fill = GridBagConstraints.BOTH;
 		gbc_pBrokerMessages.gridwidth = 2;
 		gbc_pBrokerMessages.insets = new Insets(5, 5, 5, 5);
 		gbc_pBrokerMessages.gridx = 0;
-		gbc_pBrokerMessages.gridy = 5;
+		gbc_pBrokerMessages.gridy = 4;
 		pBroker.add(pBrokerMessages, gbc_pBrokerMessages);
 		pBrokerMessages.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane tpBroker = new JTextPane();
+		tpBroker = new JTextPane();
 		pBrokerMessages.add(tpBroker);
 		
 		// RETAILERS
@@ -657,7 +676,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pRetailer1.add(pRetailer1Messages, gbc_pRetailer1Messages);
 		pRetailer1Messages.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane tpRetailer1 = new JTextPane();
+		tpRetailer1 = new JTextPane();
 		pRetailer1Messages.add(tpRetailer1);
 		
 		JPanel pRetailer2 = new JPanel();
@@ -771,7 +790,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pRetailer2.add(pRetailer2Messages, gbc_pRetailer2Messages);
 		pRetailer2Messages.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane tpRetailer2 = new JTextPane();
+		tpRetailer2 = new JTextPane();
 		pRetailer2Messages.add(tpRetailer2);
 		
 		JPanel pRetailer3 = new JPanel();
@@ -880,7 +899,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pRetailer3.add(pRetailer3Messages, gbc_pRetailer3Messages);
 		pRetailer3Messages.setLayout(new BorderLayout(0, 0));
 		
-		JTextPane tpRetailer3 = new JTextPane();
+		tpRetailer3 = new JTextPane();
 		pRetailer3Messages.add(tpRetailer3);
 		
 		// Global log
@@ -915,12 +934,12 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 	}
 	
 	public void updateGui() {	
-		updateAppliance(0, bAppliance1, lA1GenerationRateValue, lA1UsageRateValue);
-		updateAppliance(1, bAppliance2, lA2GenerationRateValue, lA2UsageRateValue);
-		updateAppliance(2, bAppliance3, lA3GenerationRateValue, lA3UsageRateValue);
-		updateRetailer(0, bRetailer1, lR1GenerationRateValue, lR1PricePerUnitValue, lR1SupplyValue, lR1TypeValue);
-		updateRetailer(1, bRetailer2, lR2GenerationRateValue, lR2PricePerUnitValue, lR2SupplyValue, lR2TypeValue);
-		updateRetailer(2, bRetailer3, lR3GenerationRateValue, lR3PricePerUnitValue, lR3SupplyValue, lR3TypeValue);
+		updateAppliance(0, bAppliance1, lA1GenerationRateValue, lA1UsageRateValue, tpAppliance1);
+		updateAppliance(1, bAppliance2, lA2GenerationRateValue, lA2UsageRateValue, tpAppliance2);
+		updateAppliance(2, bAppliance3, lA3GenerationRateValue, lA3UsageRateValue, tpAppliance3);
+		updateRetailer(0, bRetailer1, lR1GenerationRateValue, lR1PricePerUnitValue, lR1SupplyValue, lR1TypeValue, tpRetailer1);
+		updateRetailer(1, bRetailer2, lR2GenerationRateValue, lR2PricePerUnitValue, lR2SupplyValue, lR2TypeValue, tpRetailer2);
+		updateRetailer(2, bRetailer3, lR3GenerationRateValue, lR3PricePerUnitValue, lR3SupplyValue, lR3TypeValue, tpRetailer3);
 		
 		// update home
 		try {
@@ -939,7 +958,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		}
 	}
 	
-	private void updateAppliance(int element, JButton bAppliance, JLabel lGenerationRate, JLabel lUsageRate) {
+	private void updateAppliance(int element, JButton bAppliance, JLabel lGenerationRate, JLabel lUsageRate, JTextPane tpLog) {
 		try {
 			Appliance[] appliances = getAppliances();
 			Appliance appliance = appliances[element];
@@ -948,13 +967,17 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 				bAppliance.setText(appliance.getName());
 				lGenerationRate.setText(Integer.toString(appliance.getGenerationRate()));
 				lUsageRate.setText(Integer.toString(appliance.getUsageRate()));
+				
+				if (!agentLogs.containsKey(appliance.hashCode())) {
+					agentLogs.put(appliance.hashCode(), tpLog);
+				}
 			}
 		} catch(Exception e) {
 			// Catch
 		}
 	}
 	
-	private void updateRetailer(int element, JButton bRetailer, JLabel lGenerationRate, JLabel lPricePerUnit, JLabel lSupply, JLabel lType) {
+	private void updateRetailer(int element, JButton bRetailer, JLabel lGenerationRate, JLabel lPricePerUnit, JLabel lSupply, JLabel lType, JTextPane tpLog) {
 		try {
 			Retailer[] retailers = getRetailers();
 			Retailer retailer = retailers[element];
@@ -964,14 +987,18 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 				lGenerationRate.setText(Integer.toString(retailer.getGenerationRate()));
 				lPricePerUnit.setText(Integer.toString(retailer.getPricePerUnit()));
 				lSupply.setText(Integer.toString(retailer.getSupply()));
-				lType.setText(retailer.getType().toString());
+				lType.setText(retailer.getRetailerType().toString());
+				
+				if(!agentLogs.containsKey(retailer.hashCode())) {
+					agentLogs.put(retailer.hashCode(), tpLog);
+				}
 			}
 		} catch(Exception e) {
 			// Catch
 		}
 	}
 	
-	private static void appendToPane(JTextPane tp, String msg, Color c) {
+	private void appendToPane(JTextPane tp, String msg, Color c) {
         StyleContext sc = StyleContext.getDefaultStyleContext();
         AttributeSet aset = sc.addAttribute(SimpleAttributeSet.EMPTY, StyleConstants.Foreground, c);
 
@@ -988,8 +1015,19 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
     }
 	
 	
-	public static void printToLog(String msg, Color c) {
-		System.out.println("\n\n\n PRINTING \n\n\n");
+	public void printToLog(int hash, String msg, Color c) {
+		// Log all to global pane
 		appendToPane(tpGlobalMessages, msg, c);
+		
+		// Log to individual agent pane
+		try {
+			JTextPane log = agentLogs.get(hash);
+			if (log != null) {
+				log.setText("");
+				appendToPane(log, msg, c);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

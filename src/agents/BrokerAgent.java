@@ -33,7 +33,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		
-		ProgramGUI.printToLog("Broker agent successfully created" + "\n", Color.GREEN);
+		//ProgramGUI.getInstance().printToLog("Broker agent successfully created" + "\n", Color.GREEN);
 		
 		// Register in the DF
 		DFRegistry.register(this, BROKER_AGENT);

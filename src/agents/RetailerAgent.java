@@ -64,7 +64,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			updateTicks = 60000 * 5;
 		}
 		
-		ProgramGUI.printToLog(retailer.toString() + "\n", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(retailer.hashCode(), retailer.toString() + "\n", Color.GREEN);
 		addBehaviour(updateRetailer);
 		
 		// Register in the DF

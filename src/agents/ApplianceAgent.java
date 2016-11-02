@@ -64,7 +64,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			appliance = new Appliance();
 		}
 		
-		ProgramGUI.printToLog(appliance.toString() + "\n", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(appliance.hashCode(), appliance.toString() + "\n", Color.GREEN);
 		
 		// Register in the DF
 		DFRegistry.register(this, APPLIANCE_AGENT);
@@ -112,7 +112,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
 				super.handleSubscription(subscription);
 				
-				ProgramGUI.printToLog("Subscription: \n\t" + 
+				ProgramGUI.getInstance().printToLog(appliance.hashCode(), "Subscription: \n\t" + 
 						subscription.getSender().getName() + " successfully subscribed to " + myAgent.getName(), Color.GREEN);
 				
 				System.out.println("Subscription: \n\t" + 
@@ -121,7 +121,6 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 				sub = getSubscription(subscription);
 				notification = subscription.createReply();
 				notification.setPerformative(ACLMessage.INFORM);
-				
 				
 				// Send rate data out to subscribers
 				addBehaviour(new TickerBehaviour(myAgent, updateTicks) {

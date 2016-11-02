@@ -84,7 +84,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			updateTicks = 60000 * 5;
 		}
 		
-		ProgramGUI.printToLog(home.toString() + "\n", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(home.hashCode(), home.toString() + "\n", Color.GREEN);
 		addBehaviour(update);
 		
 		// Find the broker agent
