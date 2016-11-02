@@ -79,7 +79,7 @@ public class Home extends Trader implements Concept, SupplierVocabulary {
 
 	@Override
 	public String toString() {
-		return "Home [generationRate=" + generationRate + ", usageRate=" + usageRate + ", supply=" + supply
-				+ ", budget=" + budget + "]";
+		return "[type=" + getType() + ", name=" + getName() + ", generationRate=" + 
+				generationRate + ", usageRate=" + usageRate + ", supply=" + supply + ", budget=" + budget + "]";
 	}
 }

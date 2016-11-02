@@ -41,12 +41,13 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 	private Appliance[] appliances = new Appliance[3];
 	private Retailer[] retailers = new Retailer[3];
 	private Home home;
+	private Broker broker;
 	
 	// Components
 	// Retailers
 	private JRadioButton rbR1, rbR2, rbR3;
 	private JTextField fRetailerName;
-	private JComboBox ddRetailerType;
+	private JComboBox<Retailer.RetailerType> ddRetailerType;
 	private JSlider sRetailerGenRate;
 	private JSlider sRetailerPrice;
 	private JSlider sRetailerSupply;
@@ -110,6 +111,10 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 	
 	public Home getHome() {
 		return home;
+	}
+	
+	public Broker getBroker() {
+		return broker;
 	}
 	
 	private SettingsGUI() {
@@ -734,7 +739,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_lblType.gridy = 7;
 		pRetailers.add(lblType, gbc_lblType);
 		
-		ddRetailerType = new JComboBox();
+		ddRetailerType = new JComboBox<Retailer.RetailerType>();
 		GridBagConstraints gbc_ddRetailerType = new GridBagConstraints();
 		gbc_ddRetailerType.insets = new Insets(0, 0, 5, 5);
 		gbc_ddRetailerType.fill = GridBagConstraints.HORIZONTAL;
@@ -865,9 +870,6 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		
 		JPanel pSetup = new JPanel();
 		getContentPane().add(pSetup, BorderLayout.SOUTH);
-		
-		JButton bQuickStart = new JButton("Quickstart!");
-		pSetup.add(bQuickStart);
 		
 		JButton bStart = new JButton("Run Configuration");
 		pSetup.add(bStart);
@@ -1154,7 +1156,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		Object[][] retailerArguments = new Object[3][2];
 		Object[][] applianceArguments = new Object[3][2];
 		
-		// Set up Home Agents
+		// Set up Home Agent
 		home = new Home(fHomeName.getText(), sHomeGenRate.getValue(), sHomeUseRate.getValue(), 
 				sHomeSupply.getValue(), sHomeIncome.getValue());
 		homeArguments[0] = home;
@@ -1200,11 +1202,15 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 			applianceArguments[i][1] = applianceUpdateData;
 		}
 		
+		// Set up broker agent
+		broker = new Broker();
+		Object[] brokerArguments = new Object[] {broker};
+		
 		// Create and start agents
 		try {
 			AgentController rma = mc.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]);
 			rma.start();
-			AgentController ba = mc.createNewAgent("Broker", "agents.BrokerAgent", new Object[0]);
+			AgentController ba = mc.createNewAgent("Broker", "agents.BrokerAgent", brokerArguments);
 			ba.start();
 			
 			AgentController ra, aa;

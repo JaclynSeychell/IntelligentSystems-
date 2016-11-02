@@ -2,6 +2,7 @@ package ontologies;
 
 import jade.content.Concept;
 
+@SuppressWarnings("serial")
 public abstract class Trader implements Concept {
 	private String name;
 	private String type;

@@ -29,10 +29,13 @@ import utility.*;
 @SuppressWarnings("serial")
 public class RetailerAgent extends Agent implements SupplierVocabulary {
 	private Retailer retailer;
+	
+	// Language
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
 	private Random rnd = Utility.newRandom(hashCode());
 	
+	// Run parameters
 	private int updateTicks = 60000;
 	private boolean updateTickRange = false;
 	private float updateTickMin;
@@ -64,7 +67,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			updateTicks = 60000 * 5;
 		}
 		
-		ProgramGUI.getInstance().printToLog(retailer.hashCode(), retailer.toString() + "\n", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(retailer.hashCode(), retailer.toString(), Color.GREEN);
 		addBehaviour(updateRetailer);
 		
 		// Register in the DF
@@ -184,10 +187,8 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		public void onTick() {
 			//Update supply based on generation rate
 			retailer.setSupply(retailer.getSupply() + retailer.getGenerationRate());
-		
-			System.out.println(myAgent.getLocalName() + " updating supply...\n Change = " + 
-					retailer.getGenerationRate() + "\n Supply = " + retailer.getSupply());
 			
+			ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Updating the supply", Color.BLACK);
 			if(updateTickRange) {
 				updateTicks = randomRange(updateTickMin, updateTickMax);
 			}
@@ -221,6 +222,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 					@Override
 					public void action() {
 						if(lastPrice == 0 || retailer.getPricePerUnit() != lastPrice) {
+							ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Notifying broker agent of price change.", Color.BLACK);
 							notification.setContent(Integer.toString(retailer.getPricePerUnit()));
 							lastPrice = retailer.getPricePerUnit();
 							sub.notify(notification);

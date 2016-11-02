@@ -89,16 +89,20 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		return singleton;
 	}
 	
-	private static Home getHome() {
+	private Home getHome() {
 		return SettingsGUI.getInstance().getHome();
 	}
 	
-	private static Appliance[] getAppliances() {
+	private Appliance[] getAppliances() {
 		return SettingsGUI.getInstance().getAppliances();
 	}
 	
-	private static Retailer[] getRetailers() {
+	private Retailer[] getRetailers() {
 		return SettingsGUI.getInstance().getRetailers();
+	}
+	
+	private Broker getBroker() {
+		return SettingsGUI.getInstance().getBroker();
 	}
 	
 	private ProgramGUI() {
@@ -952,6 +956,23 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 				lHomeSupplyValue.setText(Integer.toString(home.getSupply()));
 				lHomeBudgetValue.setText(Integer.toString(home.getBudget()));
 				lHomeExpenditureValue.setText(Integer.toString(home.getExpenditure()));
+				
+				if(!agentLogs.containsKey(home.hashCode())) {
+					agentLogs.put(home.hashCode(), tpHome);
+				}
+			}
+		} catch(Exception e) {
+			// Catch
+		}
+		
+		// update broker
+		try {
+			Broker broker = getBroker();
+			
+			if(broker.toString() != null) {
+				if(!agentLogs.containsKey(broker.hashCode())) {
+					agentLogs.put(broker.hashCode(), tpBroker);
+				}
 			}
 		} catch(Exception e) {
 			// Catch
@@ -1016,6 +1037,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 	
 	
 	public void printToLog(int hash, String msg, Color c) {
+		msg = msg + "\n";
 		// Log all to global pane
 		appendToPane(tpGlobalMessages, msg, c);
 		

@@ -21,9 +21,13 @@ import utility.*;
 
 @SuppressWarnings("serial")
 public class BrokerAgent extends Agent implements SupplierVocabulary {
+	private Broker broker;
+	
+	// Agents
 	private HashMap<AID, Integer> retailers = new HashMap<AID, Integer>();
 	private AID bestOffer;
 	
+	// Language
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
 	
@@ -33,7 +37,14 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		getContentManager().registerLanguage(codec);
 		getContentManager().registerOntology(ontology);
 		
-		//ProgramGUI.getInstance().printToLog("Broker agent successfully created" + "\n", Color.GREEN);
+		Object[] args = getArguments();
+		if(args != null && args.length > 0) {
+			broker = (Broker)args[0];
+		} else {
+			broker = new Broker();
+		}
+		
+		ProgramGUI.getInstance().printToLog(broker.hashCode(), "Broker agent successfully created", Color.GREEN);
 		
 		// Register in the DF
 		DFRegistry.register(this, BROKER_AGENT);
@@ -48,12 +59,12 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	
 	@Override
 	protected void takeDown() {
-		System.out.println("Shutting down " + this.getName() + ".");
+		ProgramGUI.getInstance().printToLog(broker.hashCode(), "Broker agent shutdown", Color.RED);
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 	}
 	
 	void query() {
-		System.out.println("Agent " + getLocalName() + " waiting for query requests...");
+		ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent " + getLocalName() + "Broker for query requests...", Color.ORANGE);
 		MessageTemplate template = MessageTemplate.and(
 		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 		  		MessageTemplate.MatchPerformative(ACLMessage.QUERY_REF) );
@@ -61,13 +72,13 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		AchieveREResponder arer = new AchieveREResponder(this, template) {
 			@Override
 			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
-				System.out.println("Agent " + getLocalName() + ": QUERY_REF received from " + 
-						request.getSender().getName() + ". Action is " + request.getContent());
+				ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent " + getLocalName() + ": QUERY_REF received from " + 
+						request.getSender().getName() + ". Action is " + request.getContent(), Color.ORANGE);
 				
 				// Request fails if their are no retailers
 				ACLMessage response = request.createReply();
 			
-				if(retailers.size() > 0) {
+				if(retailers.size() > 0 && bestOffer != null) {
 					response.setPerformative(ACLMessage.AGREE);
 				} else {
 					response.setPerformative(ACLMessage.REFUSE);
@@ -78,7 +89,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			
 			@Override
 			protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
-				System.out.println("Agent " + getLocalName() + ": returning best price");
+				ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent " + getLocalName() + ": returning best price", Color.ORANGE);
 				ACLMessage result = request.createReply();
 				result.setPerformative(ACLMessage.INFORM);
 				result.setContent(Integer.toString(retailers.get(bestOffer)));
@@ -90,7 +101,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	}
 	
 	void purchase() {
-		System.out.println("Agent " + getLocalName() + " waiting for purchase requests...");
+		ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent " + getLocalName() + " waiting for purchase requests...", Color.ORANGE);
 	  	MessageTemplate template = MessageTemplate.and(
 	  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 	  		MessageTemplate.MatchPerformative(ACLMessage.REQUEST) );
@@ -98,9 +109,9 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		AchieveREResponder arer = new AchieveREResponder(this, template) {
 			@Override
 			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
-				System.out.println("Agent " + getLocalName() + ": REQUEST received from " + 
-						request.getSender().getName() + ". Action is " + request.getContent());
-				
+				ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent " + getLocalName() + ": REQUEST received from " + 
+						request.getSender().getLocalName() + ". Action is " + request.getContent(), Color.ORANGE);
+			
 				// Request fails if their are no retailers
 				ACLMessage response = request.createReply();
 			
@@ -118,19 +129,25 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		arer.registerPrepareResultNotification(new AchieveREInitiator(this, null) {
 			@Override
 			protected Vector<ACLMessage> prepareRequests(ACLMessage request) {
-				// Retrieve the incoming request from the DataStore
-				String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
-				ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestKey);
-				// Prepare the request to forward to the responder
-				System.out.println("Agent "+getLocalName()+": Forward the request to "+bestOffer.getName());
-				ACLMessage outgoingRequest = new ACLMessage(ACLMessage.REQUEST);
-				outgoingRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-				outgoingRequest.addReceiver(bestOffer);
-				outgoingRequest.setContent(incomingRequest.getContent());
-				outgoingRequest.setReplyByDate(incomingRequest.getReplyByDate());
-				Vector<ACLMessage> v = new Vector<ACLMessage>(1);
-				v.addElement(outgoingRequest);
-				return v;
+				try {
+					// Retrieve the incoming request from the DataStore
+					String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
+					ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestKey);
+					// Prepare the request to forward to the responder
+					ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent "+getLocalName()+": Forward the request to "+bestOffer.getLocalName(), Color.ORANGE);
+					ACLMessage outgoingRequest = new ACLMessage(ACLMessage.REQUEST);
+					outgoingRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
+					outgoingRequest.addReceiver(bestOffer);
+					outgoingRequest.setContent(incomingRequest.getContent());
+					outgoingRequest.setReplyByDate(incomingRequest.getReplyByDate());
+					Vector<ACLMessage> v = new Vector<ACLMessage>(1);
+					v.addElement(outgoingRequest);
+					return v;
+				} catch(Exception e) {
+					e.printStackTrace();
+					ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent "+getLocalName()+": Failed to forward request to retailer", Color.RED);
+					return null;
+				}
 			}
 			
 			@Override
@@ -154,7 +171,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			}
 			
 			@Override
-			protected void handleAllResultNotifications(Vector notifications) {
+			protected void handleAllResultNotifications(@SuppressWarnings("rawtypes") Vector notifications) {
 				if (notifications.size() == 0) {
 					// Timeout
 					storeNotification(ACLMessage.FAILURE);
@@ -163,10 +180,10 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			
 			private void storeNotification(int performative) {
 				if (performative == ACLMessage.INFORM) {
-					System.out.println("Agent "+getLocalName()+": brokerage successful");
+					ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent "+getLocalName()+": brokerage successful", Color.GREEN);
 				}
 				else {
-					System.out.println("Agent "+getLocalName()+": brokerage failed");
+					ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent "+getLocalName()+": brokerage failed", Color.RED);
 				}
 					
 				// Retrieve the incoming request from the DataStore
@@ -207,10 +224,10 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
   					SubscriptionInitiator priceChanges = new SubscriptionInitiator(myAgent, retailSub) {		
   						@Override
   						protected void handleInform(ACLMessage inform) {
-  							System.out.println("Price updated: " + inform.getSender().getName() +
-  									" to $" + Integer.parseInt(inform.getContent()) + " per unit");
+  							ProgramGUI.getInstance().printToLog(broker.hashCode(), "Price updated: " + inform.getSender().getLocalName() +
+  									" to $" + Integer.parseInt(inform.getContent()) + " per unit", Color.GREEN);
+  
   							retailers.put(inform.getSender(), Integer.parseInt(inform.getContent()));
-  							
   							storeBestOffer();
   						}
   					};
@@ -230,16 +247,26 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 						priceChanges.reset(retailSub);
 						
 						if(exists) {
-							System.out.println("\tNew retailer: " + dfds[i].getName());
-							if (retailers.size() == 0) { System.out.println("\tBroker listening for price changes..."); }
+							ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + 
+									"New retailer: " + dfds[i].getName(), Color.GREEN);
+				
+							if (retailers.size() == 0) { 
+								ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + 
+										"Broker listening for price changes..." + dfds[i].getName(), Color.GREEN);
+							}
 							
 							retailers.put(dfds[i].getName(), null);
 							retailSub.addReceiver(dfds[i].getName());
 							
 							addBehaviour(priceChanges);
 						} else {
-							System.out.println("\tDeleted retailer: " + dfds[i].getName());
-							if(retailers.size() < 1) { System.out.println("\tBroker stopped listening for price changes."); }
+							ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + 
+									"Deleted retailer: " + dfds[i].getName(), Color.RED);
+
+							if(retailers.size() < 1) { 
+								ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + 
+										"Broker stopped listening for price changes." + dfds[i].getName(), Color.RED);
+							}
 							
 							retailers.remove(dfds[i].getName());
 							retailSub.removeReceiver(dfds[i].getName());
@@ -268,7 +295,8 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 					if(price < bestPrice) {
 						bestPrice = price;
 						bestOffer = (AID)pair.getKey();
-						System.out.println("Best price offered by " + bestOffer.getName() + " at " + bestPrice);
+						ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + "Best price offered by " + 
+								bestOffer.getName() + " at " + bestPrice, Color.GREEN);
 					} 
 				}
 			}

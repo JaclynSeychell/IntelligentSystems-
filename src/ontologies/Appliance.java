@@ -41,7 +41,7 @@ public class Appliance extends Trader implements Concept, SupplierVocabulary {
 
 	@Override
 	public String toString() {
-		return "Appliance [name= " + getName() + ", generationRate=" + 
+		return "[type=" + getType() + ", name=" + getName() + ", generationRate=" + 
 			generationRate + ", usageRate=" + usageRate + "]";
 	}
 }

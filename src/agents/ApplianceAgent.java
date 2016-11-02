@@ -8,8 +8,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
 import jade.domain.FIPAAgentManagement.RefuseException;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.gui.GuiAgent;
-import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.SubscriptionResponder;
@@ -27,16 +25,19 @@ import utility.*;
 @SuppressWarnings("serial")
 public class ApplianceAgent extends Agent implements SupplierVocabulary{
 	private Appliance appliance;
+	
+	// Language
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
+	
+	// Utility
 	private Random rnd = Utility.newRandom(hashCode());
 	
+	// Run parameters
 	private int updateTicks = 60000;
 	private boolean updateTickRange = false;
 	private float updateTickMin;
 	private float updateTickMax;
-	
-	transient protected ProgramGUI myGui; 
 	
 	public int randomRange(float min, float max) {
 		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
@@ -64,7 +65,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			appliance = new Appliance();
 		}
 		
-		ProgramGUI.getInstance().printToLog(appliance.hashCode(), appliance.toString() + "\n", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(appliance.hashCode(), appliance.toString(), Color.GREEN);
 		
 		// Register in the DF
 		DFRegistry.register(this, APPLIANCE_AGENT);
@@ -84,16 +85,18 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			dfd.addServices(sd);
 			
 			DFAgentDescription[] dfds = DFService.search(this, dfd);
-			
+			String msg = getLocalName() + ": ";
 			if(dfds.length > 0) {
-				System.out.println("\tRemaining appliances:");
+				msg = "remaining appliances:";
 			} else {
-				System.out.println("\tNo remaining appliances.");
+				msg = "no remaining appliances.";
 			}
 			
 			for(int i = 0; i < dfds.length; i++) {
-				System.out.print("\t" + dfds[i].getName());
+				msg += "\t" + dfds[i].getName();
 			}
+			
+			ProgramGUI.getInstance().printToLog(appliance.hashCode(), msg, Color.GREEN);
 		} catch (Exception e) { e.printStackTrace(); }
 	}
 	
@@ -112,11 +115,8 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
 				super.handleSubscription(subscription);
 				
-				ProgramGUI.getInstance().printToLog(appliance.hashCode(), "Subscription: \n\t" + 
+				ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName() + ": Subscription: \n\t" + 
 						subscription.getSender().getName() + " successfully subscribed to " + myAgent.getName(), Color.GREEN);
-				
-				System.out.println("Subscription: \n\t" + 
-						subscription.getSender().getName() + " successfully subscribed to " + myAgent.getName());
 				
 				sub = getSubscription(subscription);
 				notification = subscription.createReply();
@@ -126,8 +126,8 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 				addBehaviour(new TickerBehaviour(myAgent, updateTicks) {
 					@Override
 					public void onTick() {
-						System.out.println(myAgent.getLocalName() + " rate: " 
-								+ appliance.getRate() + " units.");
+						ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName() + 
+								": Notifying home agent of energy usage.", Color.BLACK);
 						
 						notification.setContent(Integer.toString(appliance.getRate()));
 						sub.notify(notification);
@@ -136,7 +136,6 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 							updateTicks = randomRange(updateTickMin, updateTickMax);
 						}
 						reset(updateTicks);
-
 					}
 				});
 				

@@ -69,7 +69,7 @@ public class Retailer extends Trader implements Concept, SupplierVocabulary {
 
 	@Override
 	public String toString() {
-		return "Retailer [generationRate=" + generationRate + ", pricePerUnit=" 
-				+ pricePerUnit + ", supply=" + supply + ", type=" + type + "]";
+		return "[type=" + getType() + ", name=" + getName() + ", generationRate=" + generationRate + 
+				", pricePerUnit=" + pricePerUnit + ", supply=" + supply + ", type=" + type + "]";
 	}
 }
