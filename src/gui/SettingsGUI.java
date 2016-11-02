@@ -37,6 +37,11 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 	private float aApplianceUpdateMinTimes[] = new float[3];
 	private float aApplianceUpdateMaxTimes[] = new float[3];
 	
+	// Agents
+	private Appliance[] appliances = new Appliance[3];
+	private Retailer[] retailers = new Retailer[3];
+	private Home home;
+	
 	// Components
 	// Retailers
 	private JRadioButton rbR1, rbR2, rbR3;
@@ -93,6 +98,18 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 	
 	public static SettingsGUI getInstance() {
 		return singleton;
+	}
+	
+	public Retailer[] getRetailers() {
+		return retailers;
+	}
+	
+	public Appliance[] getAppliances() {
+		return appliances;
+	}
+	
+	public Home getHome() {
+		return home;
 	}
 	
 	private SettingsGUI() {
@@ -855,29 +872,16 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		JButton bStart = new JButton("Run Configuration");
 		pSetup.add(bStart);
 		
-		bQuickStart.addActionListener(new ActionListener() {
-			@Override 
-			public void actionPerformed(ActionEvent e) {
-				initalizeJade(true);
-				//bStart.setEnabled(false);
-				//bQuickStart.setEnabled(false);
-				setVisible(false);
-				ProgramGUI.getInstance().setVisible(true);
-			}
-		});
-		
 		bStart.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				initalizeJade(false);
-				//bStart.setEnabled(false);
-				//bQuickStart.setEnabled(false);
 				setVisible(false);
 				ProgramGUI.getInstance().setVisible(true);
 			}
 		});
 		
-		setSize(1920, 1080);
+		pack();
 	} 
 	
 	// Random slider value
@@ -991,41 +995,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 			JRadioButton source = (JRadioButton)e.getSource();
 			if (source.isSelected() && retailer != selectedRetailer) {
 				try {
-					// Save last settings
-					aRetailerNames[selectedRetailer] = fRetailerName.getText();
-					aRetailerTypes[selectedRetailer] = (RetailerType)ddRetailerType.getSelectedItem();
-					aRetailerUpdateMinTimes[selectedRetailer] = (float)spRetailerUpdateMinTime.getValue();
-					aRetailerUpdateMaxTimes[selectedRetailer] = (float)spRetailerUpdateMaxTime.getValue();
-					
-					if(cbRandRetailerGenRate.isSelected()) {
-						cbRandRetailerGenRate.setSelected(false);
-						aRetailerGenRates[selectedRetailer] = randomSliderValue(sRetailerGenRate);
-					} else {
-						aRetailerGenRates[selectedRetailer] = sRetailerGenRate.getValue();
-					}
-					
-					if(cbRandRetailerPrice.isSelected()) {
-						cbRandRetailerPrice.setSelected(false);
-						aRetailerPrices[selectedRetailer] = randomSliderValue(sRetailerPrice);
-					} else {
-						
-						aRetailerPrices[selectedRetailer] = sRetailerPrice.getValue();
-					}
-					
-					if(cbRandRetailerSupply.isSelected()) {
-						cbRandRetailerSupply.setSelected(false);
-						aRetailerSupplies[selectedRetailer] = randomSliderValue(sRetailerSupply);
-					} else {
-						aRetailerSupplies[selectedRetailer] = sRetailerSupply.getValue();
-					}
-					
-					if (cbRangeRetailerUpdateTime.isSelected()) {
-						cbRangeRetailerUpdateTime.setSelected(false);
-						aRetailerUpdateRangeCB[selectedRetailer] = true;
-					} else {
-						aRetailerUpdateRangeCB[selectedRetailer] = false;
-					}
-					
+					saveRetailer();
 					selectedRetailer = retailer;
 					
 					// Update to new retailer values
@@ -1057,67 +1027,105 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 	}
 	
 	// Custom JRadioButton listener for appliances
-		public class ApplianceRadioButtonListener implements ActionListener {
-			private int appliance;
-			
-			ApplianceRadioButtonListener(int appliance) {
-				super();
-				this.appliance = appliance;
-			}
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JRadioButton source = (JRadioButton)e.getSource();
-				if (source.isSelected() && appliance != selectedAppliance) {
-					try {
-						// Save last settings
-						aApplianceNames[selectedAppliance] = fApplianceName.getText();
-						aApplianceUpdateMinTimes[selectedAppliance] = (float)spApplianceUpdateMinTime.getValue();
-						aApplianceUpdateMaxTimes[selectedAppliance] = (float)spApplianceUpdateMaxTime.getValue();
-						
-						if(cbRandApplianceGenRate.isSelected()) {
-							cbRandApplianceGenRate.setSelected(false);
-							aApplianceGenRates[selectedAppliance] = randomSliderValue(sApplianceGenRate);
-						} else {
-							aApplianceGenRates[selectedAppliance] = sApplianceGenRate.getValue();
-						}
-						
-						if(cbRandApplianceUseRate.isSelected()) {
-							cbRandApplianceUseRate.setSelected(false);
-							aApplianceUseRates[selectedAppliance] = randomSliderValue(sApplianceUseRate);
-						} else {
-							aApplianceUseRates[selectedAppliance] = sApplianceUseRate.getValue();
-						}
-						
-						if (cbRangeApplianceUpdateTime.isSelected()) {
-							cbRangeApplianceUpdateTime.setSelected(false);
-							aApplianceUpdateRangeCB[selectedAppliance] = true;
-						} else {
-							aApplianceUpdateRangeCB[selectedAppliance] = false;
-						}
-						
-						selectedAppliance = appliance;
-						
-						// Update to new appliance values
-						fApplianceName.setText(aApplianceNames[appliance]);
-						sApplianceGenRate.setValue(aApplianceGenRates[appliance]);
-						lApplianceGenRateValue.setText(Integer.toString(aApplianceGenRates[appliance]));
-						sApplianceUseRate.setValue(aApplianceUseRates[appliance]);
-						lApplianceUseRateValue.setText(Integer.toString(aApplianceUseRates[appliance]));
-						spApplianceUpdateMinTime.setValue(aApplianceUpdateMinTimes[appliance]);
-						spApplianceUpdateMaxTime.setValue(aApplianceUpdateMaxTimes[appliance]);
-						cbRangeApplianceUpdateTime.setSelected(aApplianceUpdateRangeCB[appliance]);
-						
-						// Update listeners
-						slApplianceGenRate = new SliderListener(lRetailerGenRateValue);
-						cblApplianceGenRate = new CheckBoxListener(lRetailerGenRateValue, sRetailerGenRate);
-						
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
+	public class ApplianceRadioButtonListener implements ActionListener {
+		private int appliance;
+		
+		ApplianceRadioButtonListener(int appliance) {
+			super();
+			this.appliance = appliance;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JRadioButton source = (JRadioButton)e.getSource();
+			if (source.isSelected() && appliance != selectedAppliance) {
+				try {
+					saveAppliance();
+					selectedAppliance = appliance;
+					
+					// Update to new appliance values
+					fApplianceName.setText(aApplianceNames[appliance]);
+					sApplianceGenRate.setValue(aApplianceGenRates[appliance]);
+					lApplianceGenRateValue.setText(Integer.toString(aApplianceGenRates[appliance]));
+					sApplianceUseRate.setValue(aApplianceUseRates[appliance]);
+					lApplianceUseRateValue.setText(Integer.toString(aApplianceUseRates[appliance]));
+					spApplianceUpdateMinTime.setValue(aApplianceUpdateMinTimes[appliance]);
+					spApplianceUpdateMaxTime.setValue(aApplianceUpdateMaxTimes[appliance]);
+					cbRangeApplianceUpdateTime.setSelected(aApplianceUpdateRangeCB[appliance]);
+					
+					// Update listeners
+					slApplianceGenRate = new SliderListener(lRetailerGenRateValue);
+					cblApplianceGenRate = new CheckBoxListener(lRetailerGenRateValue, sRetailerGenRate);
+					
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
 			}
 		}
+	}
+	
+	private void saveAppliance() {
+		aApplianceNames[selectedAppliance] = fApplianceName.getText();
+		aApplianceUpdateMinTimes[selectedAppliance] = (float)spApplianceUpdateMinTime.getValue();
+		aApplianceUpdateMaxTimes[selectedAppliance] = (float)spApplianceUpdateMaxTime.getValue();
+		
+		if(cbRandApplianceGenRate.isSelected()) {
+			cbRandApplianceGenRate.setSelected(false);
+			aApplianceGenRates[selectedAppliance] = randomSliderValue(sApplianceGenRate);
+		} else {
+			aApplianceGenRates[selectedAppliance] = sApplianceGenRate.getValue();
+		}
+		
+		if(cbRandApplianceUseRate.isSelected()) {
+			cbRandApplianceUseRate.setSelected(false);
+			aApplianceUseRates[selectedAppliance] = randomSliderValue(sApplianceUseRate);
+		} else {
+			aApplianceUseRates[selectedAppliance] = sApplianceUseRate.getValue();
+		}
+		
+		if (cbRangeApplianceUpdateTime.isSelected()) {
+			cbRangeApplianceUpdateTime.setSelected(false);
+			aApplianceUpdateRangeCB[selectedAppliance] = true;
+		} else {
+			aApplianceUpdateRangeCB[selectedAppliance] = false;
+		}
+	}
+	
+	private void saveRetailer() {
+		aRetailerNames[selectedRetailer] = fRetailerName.getText();
+		aRetailerTypes[selectedRetailer] = (RetailerType)ddRetailerType.getSelectedItem();
+		aRetailerUpdateMinTimes[selectedRetailer] = (float)spRetailerUpdateMinTime.getValue();
+		aRetailerUpdateMaxTimes[selectedRetailer] = (float)spRetailerUpdateMaxTime.getValue();
+		
+		if(cbRandRetailerGenRate.isSelected()) {
+			cbRandRetailerGenRate.setSelected(false);
+			aRetailerGenRates[selectedRetailer] = randomSliderValue(sRetailerGenRate);
+		} else {
+			aRetailerGenRates[selectedRetailer] = sRetailerGenRate.getValue();
+		}
+		
+		if(cbRandRetailerPrice.isSelected()) {
+			cbRandRetailerPrice.setSelected(false);
+			aRetailerPrices[selectedRetailer] = randomSliderValue(sRetailerPrice);
+		} else {
+			
+			aRetailerPrices[selectedRetailer] = sRetailerPrice.getValue();
+		}
+		
+		if(cbRandRetailerSupply.isSelected()) {
+			cbRandRetailerSupply.setSelected(false);
+			aRetailerSupplies[selectedRetailer] = randomSliderValue(sRetailerSupply);
+		} else {
+			aRetailerSupplies[selectedRetailer] = sRetailerSupply.getValue();
+		}
+		
+		if (cbRangeRetailerUpdateTime.isSelected()) {
+			cbRangeRetailerUpdateTime.setSelected(false);
+			aRetailerUpdateRangeCB[selectedRetailer] = true;
+		} else {
+			aRetailerUpdateRangeCB[selectedRetailer] = false;
+		}
+	}
 	
 	private void initalizeJade(boolean bQuickStart) {
 		Runtime rt = Runtime.instance();
@@ -1141,69 +1149,55 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		ProfileImpl ap = new ProfileImpl(null, 1200, "appliances");
 		ap.setParameter(Profile.CONTAINER_NAME, "Appliance-Container");
 		jade.wrapper.AgentContainer ac = rt.createAgentContainer(ap);
+	
+		Object[] homeArguments = new Object[3];
+		Object[][] retailerArguments = new Object[3][2];
+		Object[][] applianceArguments = new Object[3][2];
 		
-		String homeName = "Home";
-		String[] retailerNames = new String[3];
-		String[] applianceNames = new String[3];
-		Object[] homeArguments;
-		Object[][] retailerArguments;
-		Object[][] applianceArguments;
+		// Set up Home Agents
+		home = new Home(sHomeGenRate.getValue(), sHomeUseRate.getValue(), 
+				sHomeSupply.getValue(), sHomeIncome.getValue());
+		homeArguments[0] = home;
 		
-		// Use default values or set ones
-		if(!bQuickStart) {
-			retailerNames = aRetailerNames;
-			homeArguments = new Object[3];
-			homeArguments[0] = new Home(sHomeGenRate.getValue(), sHomeUseRate.getValue(), 
-					sHomeSupply.getValue(), sHomeIncome.getValue());
+		Object[] homeTradeData = new Object[] { 
+			cbRangeHomeTradeTime.isSelected(), 
+			(float)spHomeTradeMinTime.getValue(), 
+			(float)spHomeTradeMaxTime.getValue()
+		};
+		
+		Object[] homeUpdateData = new Object[] {
+			cbRangeHomeTradeTime.isSelected(),
+			(float)spHomeUpdateMinTime.getValue(),
+			(float)spHomeUpdateMaxTime.getValue()
+		};
+		
+		homeArguments[1] = homeTradeData;
+		homeArguments[2] = homeUpdateData;
+		
+		// Set up Retailer Agents
+		saveRetailer();
+		for(int i = 0; i < 3; i++) {
+			retailers[i] = new Retailer(aRetailerGenRates[i], aRetailerPrices[i], 
+					aRetailerSupplies[i], aRetailerTypes[i]);
+			retailerArguments[i][0] = retailers[i]; 
 			
-			Object[] homeTradeData = new Object[] { 
-				cbRangeHomeTradeTime.isSelected(), 
-				(float)spHomeTradeMinTime.getValue(), 
-				(float)spHomeTradeMaxTime.getValue()
+			Object[] retailerUpdateData = new Object[] {
+				aRetailerUpdateRangeCB[i], aRetailerUpdateMinTimes[i], aRetailerUpdateMaxTimes[i]
 			};
+			retailerArguments[i][1] = retailerUpdateData;
+		}
+		
+		// Set up Appliance Agents
+		saveAppliance();
+		for(int i = 0; i < 3; i++) {
+			appliances[i] = new Appliance(aApplianceNames[i], 
+				aApplianceGenRates[i], aApplianceUseRates[i]);
+			applianceArguments[i][0] = appliances[i];
 			
-			Object[] homeUpdateData = new Object[] {
-				cbRangeHomeTradeTime.isSelected(),
-				(float)spHomeUpdateMinTime.getValue(),
-				(float)spHomeUpdateMaxTime.getValue()
+			Object[] applianceUpdateData = new Object[] {
+				aApplianceUpdateRangeCB[i], aApplianceUpdateMinTimes[i], aApplianceUpdateMaxTimes[i]
 			};
-			
-			homeArguments[1] = homeTradeData;
-			homeArguments[2] = homeUpdateData;
-			
-			retailerNames = aRetailerNames;
-			retailerArguments = new Object[3][2];
-			Object retailerUpdateData[];
-			for(int i = 0; i < 3; i++) {
-				retailerArguments[i][0] = new Retailer(aRetailerGenRates[i], aRetailerPrices[i], 
-						aRetailerSupplies[i], aRetailerTypes[i]);
-				
-				retailerUpdateData = new Object[] {
-					aRetailerUpdateRangeCB[i], aRetailerUpdateMinTimes[i], aRetailerUpdateMaxTimes[i]
-				};
-				retailerArguments[i][1] = retailerUpdateData;
-			}
-			
-			applianceNames = aApplianceNames;
-			applianceArguments = new Object[3][2];
-			Object applianceUpdateData[];
-			for(int i = 0; i < 3; i++) {
-				applianceArguments[i][0] = new Appliance(aApplianceGenRates[i], aApplianceUseRates[i]);
-				
-				applianceUpdateData = new Object[] {
-					aApplianceUpdateRangeCB[i], aApplianceUpdateMinTimes[i], aApplianceUpdateMaxTimes[i]
-				};
-				applianceArguments[i][1] = applianceUpdateData;
-			}
-		} else {
-			homeArguments = new Object[0];
-			retailerArguments = new Object[3][0];
-			applianceArguments = new Object[3][0];
-			
-			for(int i = 0; i < 3; i++) {
-				retailerNames[i] = "R" + i; 
-				applianceNames[i] = "A" + i;
-			}
+			applianceArguments[i][1] = applianceUpdateData;
 		}
 		
 		// Create and start agents
@@ -1211,20 +1205,19 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 			AgentController rma = mc.createNewAgent("rma", "jade.tools.rma.rma", new Object[0]);
 			rma.start();
 			AgentController ba = mc.createNewAgent("Broker", "agents.BrokerAgent", new Object[0]);
+			ba.start();
 			
 			AgentController ra, aa;
 			for(int i = 0; i < 3; i++) {
-				ra = rc.createNewAgent(retailerNames[i], "agents.RetailerAgent", retailerArguments[i]);
+				ra = rc.createNewAgent(aRetailerNames[i], "agents.RetailerAgent", retailerArguments[i]);
 				ra.start();
 				
-				aa = ac.createNewAgent(applianceNames[i], "agents.ApplianceAgent", applianceArguments[i]);
+				aa = ac.createNewAgent(aApplianceNames[i], "agents.ApplianceAgent", applianceArguments[i]);
 				aa.start();
 			}
 			
-			AgentController ha = hc.createNewAgent(homeName, "agents.HomeAgent", homeArguments);
+			AgentController ha = hc.createNewAgent(fHomeName.getText(), "agents.HomeAgent", homeArguments);
 			ha.start();
-			
-			ba.start();
 			
 		} catch (Exception e) {
 			e.printStackTrace();

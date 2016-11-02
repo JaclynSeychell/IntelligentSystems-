@@ -25,7 +25,7 @@ import ontologies.*;
 import utility.*;
 
 @SuppressWarnings("serial")
-public class ApplianceAgent extends GuiAgent implements SupplierVocabulary{
+public class ApplianceAgent extends Agent implements SupplierVocabulary{
 	private Appliance appliance;
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
@@ -95,15 +95,6 @@ public class ApplianceAgent extends GuiAgent implements SupplierVocabulary{
 				System.out.print("\t" + dfds[i].getName());
 			}
 		} catch (Exception e) { e.printStackTrace(); }
-	}
-	
-	@Override
-	protected void onGuiEvent(GuiEvent ev) {
-	
-	}
-	
-	void alertGui(Object response) {
-		
 	}
 	
 	// -- Utility Methods -- 

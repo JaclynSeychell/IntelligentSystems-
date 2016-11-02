@@ -3,16 +3,18 @@ package ontologies;
 import jade.content.*;
 
 @SuppressWarnings("serial")
-public class Appliance implements Concept {
+public class Appliance extends Trader implements Concept, SupplierVocabulary {
 	private int generationRate;
 	private int usageRate;
 	
 	public Appliance() { 
+		super("", APPLIANCE_AGENT);
 		generationRate = 0;
 		usageRate = 0;
 	}
 	
-	public Appliance(int generationRate, int usageRate) {
+	public Appliance(String name, int generationRate, int usageRate) {
+		super(name, APPLIANCE_AGENT);
 		this.generationRate = generationRate;
 		this.usageRate = usageRate;
 	}
@@ -39,7 +41,7 @@ public class Appliance implements Concept {
 
 	@Override
 	public String toString() {
-		return "Appliance [generationRate=" + generationRate + ", " + 
-				"usageRate=" + usageRate + "]";
+		return "Appliance [name= " + getName() + ", generationRate=" + 
+			generationRate + ", usageRate=" + usageRate + "]";
 	}
 }
