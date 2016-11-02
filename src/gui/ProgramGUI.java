@@ -64,6 +64,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 	private JLabel lHomeSupplyValue;
 	private JLabel lHomeBudgetValue;
 	private JLabel lHomeExpenditureValue;
+	private JButton bBroker;
 	
 	public static ProgramGUI getInstance() {
 		return singleton;
@@ -522,6 +523,33 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		gbl_pBroker.rowWeights = new double[]{Double.MIN_VALUE};
 		pBroker.setLayout(gbl_pBroker);
 		
+		bBroker = new JButton("Broker Agent");
+		bBroker.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
+		GridBagConstraints gbc_bBroker = new GridBagConstraints();
+		gbc_bBroker.weighty = 25.0;
+		gbc_bBroker.gridwidth = 2;
+		gbc_bBroker.insets = new Insets(0, 0, 5, 0);
+		gbc_bBroker.fill = GridBagConstraints.BOTH;
+		gbc_bBroker.weightx = 100.0;
+		gbc_bBroker.gridx = 0;
+		gbc_bBroker.gridy = 0;
+		pBroker.add(bBroker, gbc_bBroker);
+		
+		JPanel pBrokerMessages = new JPanel();
+		pBrokerMessages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		GridBagConstraints gbc_pBrokerMessages = new GridBagConstraints();
+		gbc_pBrokerMessages.weighty = 25.0;
+		gbc_pBrokerMessages.fill = GridBagConstraints.BOTH;
+		gbc_pBrokerMessages.gridwidth = 2;
+		gbc_pBrokerMessages.insets = new Insets(5, 5, 5, 5);
+		gbc_pBrokerMessages.gridx = 0;
+		gbc_pBrokerMessages.gridy = 5;
+		pBroker.add(pBrokerMessages, gbc_pBrokerMessages);
+		pBrokerMessages.setLayout(new BorderLayout(0, 0));
+		
+		JTextPane tpBroker = new JTextPane();
+		pBrokerMessages.add(tpBroker);
+		
 		// RETAILERS
 		JPanel pRetailer1 = new JPanel();
 		pRetailer1.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
@@ -893,6 +921,22 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		updateRetailer(0, bRetailer1, lR1GenerationRateValue, lR1PricePerUnitValue, lR1SupplyValue, lR1TypeValue);
 		updateRetailer(1, bRetailer2, lR2GenerationRateValue, lR2PricePerUnitValue, lR2SupplyValue, lR2TypeValue);
 		updateRetailer(2, bRetailer3, lR3GenerationRateValue, lR3PricePerUnitValue, lR3SupplyValue, lR3TypeValue);
+		
+		// update home
+		try {
+			Home home = getHome();
+			
+			if(home.toString() != null) {
+				bHome.setText(home.getName());
+				lHomeGenerationRateValue.setText(Integer.toString(home.getGenerationRate()));
+				lHomeUsageRateValue.setText(Integer.toString(home.getUsageRate()));
+				lHomeSupplyValue.setText(Integer.toString(home.getSupply()));
+				lHomeBudgetValue.setText(Integer.toString(home.getBudget()));
+				lHomeExpenditureValue.setText(Integer.toString(home.getExpenditure()));
+			}
+		} catch(Exception e) {
+			// Catch
+		}
 	}
 	
 	private void updateAppliance(int element, JButton bAppliance, JLabel lGenerationRate, JLabel lUsageRate) {

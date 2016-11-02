@@ -4,7 +4,7 @@ import jade.content.*;
 
 @SuppressWarnings("serial")
 
-public class Home implements Concept {
+public class Home extends Trader implements Concept, SupplierVocabulary {
 	private int generationRate;
 	private int usageRate;
 	private int supply;
@@ -12,13 +12,15 @@ public class Home implements Concept {
 	private int expenditure;
 	
 	public Home() {
+		super("Home", HOME_AGENT);
 		generationRate = 0;
 		usageRate = 0;
 		supply = 0;
 		budget = 0;
 	}
 	
-	public Home(int generationRate, int usageRate, int supply, int budget) {
+	public Home(String name, int generationRate, int usageRate, int supply, int budget) {
+		super(name, HOME_AGENT);
 		this.generationRate = generationRate;
 		this.usageRate = usageRate;
 		this.supply = supply;
