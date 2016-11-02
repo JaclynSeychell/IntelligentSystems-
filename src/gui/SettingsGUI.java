@@ -1156,7 +1156,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		
 		// Set up Home Agents
 		home = new Home(sHomeGenRate.getValue(), sHomeUseRate.getValue(), 
-				sHomeSupply.getValue(), sHomeIncome.getValue());
+			sHomeSupply.getValue(), sHomeIncome.getValue());
 		homeArguments[0] = home;
 		
 		Object[] homeTradeData = new Object[] { 
@@ -1177,8 +1177,8 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		// Set up Retailer Agents
 		saveRetailer();
 		for(int i = 0; i < 3; i++) {
-			retailers[i] = new Retailer(aRetailerGenRates[i], aRetailerPrices[i], 
-					aRetailerSupplies[i], aRetailerTypes[i]);
+			retailers[i] = new Retailer(aRetailerNames[i], aRetailerGenRates[i], 
+				aRetailerPrices[i], aRetailerSupplies[i], aRetailerTypes[i]);
 			retailerArguments[i][0] = retailers[i]; 
 			
 			Object[] retailerUpdateData = new Object[] {

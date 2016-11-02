@@ -4,7 +4,7 @@ import jade.content.*;
 
 @SuppressWarnings("serial")
 
-public class Retailer implements Concept {
+public class Retailer extends Trader implements Concept, SupplierVocabulary {
 	// Determine retailer behaviour
 	public enum RetailerType { 
 		FIXED,
@@ -19,13 +19,15 @@ public class Retailer implements Concept {
 	private RetailerType type;
 	
 	public Retailer() { 
+		super("Retailer", RETAILER_AGENT);
 		generationRate = 0;
 		pricePerUnit = 0;
 		supply = 0;
 		type = RetailerType.FIXED; // Default to fixed price
 	}
 	
-	public Retailer(int generationRate, int pricePerUnit, int supply, RetailerType type) {
+	public Retailer(String name, int generationRate, int pricePerUnit, int supply, RetailerType type) {
+		super(name, RETAILER_AGENT);
 		this.generationRate = generationRate;
 		this.pricePerUnit = pricePerUnit;
 		this.supply = supply;

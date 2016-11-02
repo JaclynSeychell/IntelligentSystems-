@@ -372,7 +372,6 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JTextPane tpAppliance3 = new JTextPane();
 		pAppliance3Messages.add(tpAppliance3);
 		
-		
 		// HOME
 		JPanel pHome = new JPanel();
 		pHome.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
@@ -384,6 +383,12 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		gbc_pHome.gridx = 3;
 		gbc_pHome.gridy = 3;
 		pAgents.add(pHome, gbc_pHome);
+		GridBagLayout gbl_pHome = new GridBagLayout();
+		gbl_pHome.columnWidths = new int[]{0};
+		gbl_pHome.rowHeights = new int[]{0};
+		gbl_pHome.columnWeights = new double[]{Double.MIN_VALUE};
+		gbl_pHome.rowWeights = new double[]{Double.MIN_VALUE};
+		pHome.setLayout(gbl_pHome);
 		
 		// BROKER
 		JPanel pBroker = new JPanel();
@@ -396,6 +401,12 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		gbc_pBroker.gridx = 5;
 		gbc_pBroker.gridy = 3;
 		pAgents.add(pBroker, gbc_pBroker);
+		GridBagLayout gbl_pBroker = new GridBagLayout();
+		gbl_pBroker.columnWidths = new int[]{0};
+		gbl_pBroker.rowHeights = new int[]{0};
+		gbl_pBroker.columnWeights = new double[]{Double.MIN_VALUE};
+		gbl_pBroker.rowWeights = new double[]{Double.MIN_VALUE};
+		pBroker.setLayout(gbl_pBroker);
 		
 		// RETAILERS
 		JPanel pRetailer1 = new JPanel();
@@ -765,6 +776,9 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		updateAppliance(0, bAppliance1, lA1GenerationRateValue, lA1UsageRateValue);
 		updateAppliance(1, bAppliance2, lA2GenerationRateValue, lA2UsageRateValue);
 		updateAppliance(2, bAppliance3, lA3GenerationRateValue, lA3UsageRateValue);
+		updateRetailer(0, bRetailer1, lR1GenerationRateValue, lR1PricePerUnitValue, lR1SupplyValue, lR1TypeValue);
+		updateRetailer(1, bRetailer2, lR2GenerationRateValue, lR2PricePerUnitValue, lR2SupplyValue, lR2TypeValue);
+		updateRetailer(2, bRetailer3, lR3GenerationRateValue, lR3PricePerUnitValue, lR3SupplyValue, lR3TypeValue);
 	}
 	
 	private void updateAppliance(int element, JButton bAppliance, JLabel lGenerationRate, JLabel lUsageRate) {
@@ -776,6 +790,23 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 				bAppliance.setText(appliance.getName());
 				lGenerationRate.setText(Integer.toString(appliance.getGenerationRate()));
 				lUsageRate.setText(Integer.toString(appliance.getUsageRate()));
+			}
+		} catch(Exception e) {
+			// Catch
+		}
+	}
+	
+	private void updateRetailer(int element, JButton bRetailer, JLabel lGenerationRate, JLabel lPricePerUnit, JLabel lSupply, JLabel lType) {
+		try {
+			Retailer[] retailers = getRetailers();
+			Retailer retailer = retailers[element];
+			
+			if(retailer.toString() != null) {
+				bRetailer.setText(retailer.getName());
+				lGenerationRate.setText(Integer.toString(retailer.getGenerationRate()));
+				lPricePerUnit.setText(Integer.toString(retailer.getPricePerUnit()));
+				lSupply.setText(Integer.toString(retailer.getSupply()));
+				lType.setText(retailer.getType().toString());
 			}
 		} catch(Exception e) {
 			// Catch

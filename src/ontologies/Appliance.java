@@ -8,7 +8,7 @@ public class Appliance extends Trader implements Concept, SupplierVocabulary {
 	private int usageRate;
 	
 	public Appliance() { 
-		super("", APPLIANCE_AGENT);
+		super("Appliance", APPLIANCE_AGENT);
 		generationRate = 0;
 		usageRate = 0;
 	}
