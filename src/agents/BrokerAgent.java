@@ -248,11 +248,11 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 						
 						if(exists) {
 							ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + 
-									"New retailer: " + dfds[i].getName(), Color.GREEN);
+									": new retailer " + dfds[i].getName(), Color.GREEN);
 				
 							if (retailers.size() == 0) { 
 								ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + 
-										"Broker listening for price changes..." + dfds[i].getName(), Color.GREEN);
+										": listening for price changes from " + dfds[i].getName(), Color.GREEN);
 							}
 							
 							retailers.put(dfds[i].getName(), null);
@@ -261,11 +261,11 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 							addBehaviour(priceChanges);
 						} else {
 							ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + 
-									"Deleted retailer: " + dfds[i].getName(), Color.RED);
+									": stopped listening for retailer " + dfds[i].getName(), Color.RED);
 
 							if(retailers.size() < 1) { 
 								ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + 
-										"Broker stopped listening for price changes." + dfds[i].getName(), Color.RED);
+										": stopped listening for retailers.", Color.RED);
 							}
 							
 							retailers.remove(dfds[i].getName());

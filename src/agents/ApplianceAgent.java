@@ -75,7 +75,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 	// Deregister this agent
 	@Override
 	protected void takeDown() {
-		System.out.println("Shutting down " + this.getName() + ".");
+		ProgramGUI.getInstance().printToLog(appliance.hashCode(), getLocalName() + ": agent shutdown", Color.RED);
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 		
 		try {
@@ -97,7 +97,9 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			}
 			
 			ProgramGUI.getInstance().printToLog(appliance.hashCode(), msg, Color.GREEN);
-		} catch (Exception e) { e.printStackTrace(); }
+		} catch (Exception e) { 
+			e.printStackTrace(); 
+		}
 	}
 	
 	// -- Utility Methods -- 
@@ -115,8 +117,8 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
 				super.handleSubscription(subscription);
 				
-				ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName() + ": Subscription: \n\t" + 
-						subscription.getSender().getName() + " successfully subscribed to " + myAgent.getName(), Color.GREEN);
+				ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName() + ": new subcriber " + 
+						subscription.getSender().getLocalName(), Color.GREEN);
 				
 				sub = getSubscription(subscription);
 				notification = subscription.createReply();

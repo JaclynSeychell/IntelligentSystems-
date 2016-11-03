@@ -80,7 +80,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	
 	// Deregister this agent
 	protected void takeDown() {
-		System.out.println("Shutting down " + this.getName() + ".");
+		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + ": agent shutdown", Color.RED);
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 		
 		try {
@@ -90,21 +90,25 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			dfd.addServices(sd);
 			
 			DFAgentDescription[] dfds = DFService.search(this, dfd);
-			
+			String msg = getLocalName() + ": ";
 			if(dfds.length > 0) {
-				System.out.println("\tRemaining retailers:");
+				msg += "remaining retailers:";
 			} else {
-				System.out.println("\tNo remaining retailers.");
+				msg += "no remaining retailers.";
 			}
 			
 			for(int i = 0; i < dfds.length; i++) {
-				System.out.print("\t" + dfds[i].getName());
+				msg += "\t" + dfds[i].getName();
 			}
-		} catch (Exception e) { e.printStackTrace(); }
+			
+			ProgramGUI.getInstance().printToLog(retailer.hashCode(), msg, Color.RED);
+		} catch (Exception e) { 
+			e.printStackTrace();
+		}
 	}
 	
 	void process() {
-		System.out.println("Agent " + getLocalName() + " of " + retailer.getRetailerType() + " waiting for requests...");
+		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + ": waiting for purchase requests...", Color.RED);
 		MessageTemplate template = MessageTemplate.and(
 		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 		  		MessageTemplate.MatchPerformative(ACLMessage.REQUEST) );
@@ -211,8 +215,8 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			@Override
 			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
 				super.handleSubscription(subscription);
-				System.out.println("Subscription: \n\t" + 
-						subscription.getSender().getName() + " successfully subscribed to " + myAgent.getName());
+				ProgramGUI.getInstance().printToLog(retailer.hashCode(), myAgent.getLocalName() + ": new subscriber " + 
+						subscription.getSender().getLocalName(), Color.GREEN);
 				
 				sub = getSubscription(subscription);
 				notification = subscription.createReply();

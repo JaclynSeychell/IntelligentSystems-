@@ -302,7 +302,6 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 					
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
 							": \n\tBudget: " + home.getBudget() + "\n\tExpenditure: " + home.getExpenditure(), Color.ORANGE);
-					System.out.println();
 				}
 				
 				@Override
@@ -313,7 +312,6 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 					if (notifications.size() == 0) {
 						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
 								": Timeout expired: no response received", Color.ORANGE);
-						System.out.println();
 					}
 				}
 			});
@@ -399,16 +397,26 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 						rateUpdate.reset(applianceSub);
 						
 						if(exists) {
-							System.out.println("\tNew retailer: " + dfds[i].getName());
-							if (appliances.size() == 0) { System.out.println("\tHome listening for rate data..."); }
+							ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() +
+									": new appliance " + dfds[i].getName(), Color.GREEN);
+							
+							if (appliances.size() == 0) { 
+								ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() +
+										": listening for energy usage from " + dfds[i].getName(), Color.GREEN);
+							}
 							
 							appliances.put(dfds[i].getName(), null);
 							applianceSub.addReceiver(dfds[i].getName());
 							
 							addBehaviour(rateUpdate);
 						} else {
-							System.out.println("\tDeleted retailer: " + dfds[i].getName());
-							if(appliances.size() < 1) { System.out.println("\tHome stopped listening for rate data."); }
+							ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+									": stopped listening for appliance " + dfds[i].getName(), Color.RED);
+							
+							if(appliances.size() < 1) { 
+								ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+										": stopped listening for appliances.", Color.RED);
+							}
 							
 							appliances.remove(dfds[i].getName());
 							applianceSub.removeReceiver(dfds[i].getName());
