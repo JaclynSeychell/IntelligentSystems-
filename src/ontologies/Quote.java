@@ -3,21 +3,10 @@ package ontologies;
 import jade.content.*;
 
 @SuppressWarnings("serial")
-public class Exchange implements AgentAction {
-	private int type;
+public class Quote implements AgentAction {
 	private int price;
 	private int units;
 	
-	// Type getter & setter
-	public int getType() {
-		return type;
-	}
-	
-	public void setType(int type) {
-		this.type = type;
-	}
-	
-	// Price getter & setter
 	public int getPrice() {
 		return price;
 	}
@@ -26,7 +15,6 @@ public class Exchange implements AgentAction {
 		this.price = price;
 	}
 	
-	// Units getter & setter
 	public int getUnits() {
 		return units;
 	}
@@ -37,7 +25,6 @@ public class Exchange implements AgentAction {
 	
 	@Override
 	public String toString() {
-		return "Exchange {type:" + type + ", price:" + price + 
-				", units: " + units + "}";
+		return "Quote {price:" + price + ", units: " + units + "}";
 	}
 }

@@ -16,6 +16,7 @@ public class Retailer extends Trader implements Concept, SupplierVocabulary {
 	private int generationRate;
 	private int pricePerUnit;
 	private int supply;
+	private int orders;
 	private RetailerType type;
 	
 	public Retailer() { 
@@ -23,6 +24,7 @@ public class Retailer extends Trader implements Concept, SupplierVocabulary {
 		generationRate = 0;
 		pricePerUnit = 0;
 		supply = 0;
+		orders = 0;
 		type = RetailerType.FIXED; // Default to fixed price
 	}
 	
@@ -32,6 +34,7 @@ public class Retailer extends Trader implements Concept, SupplierVocabulary {
 		this.pricePerUnit = pricePerUnit;
 		this.supply = supply;
 		this.type = type;
+		orders = 0;
 	}
 	
 	public int getGenerationRate() {
@@ -65,6 +68,14 @@ public class Retailer extends Trader implements Concept, SupplierVocabulary {
 	
 	public void setRetailerType(RetailerType type) {
 		this.type = type;
+	}
+	
+	public int getOrders() {
+		return orders;
+	}
+
+	public void setOrders(int orders) {
+		this.orders = orders;
 	}
 
 	@Override

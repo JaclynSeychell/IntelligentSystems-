@@ -9,7 +9,7 @@ public class Home extends Trader implements Concept, SupplierVocabulary {
 	private int usageRate;
 	private int supply;
 	private int budget;
-	private int expenditure;
+	private int income;
 	
 	public Home() {
 		super("Home", HOME_AGENT);
@@ -17,14 +17,16 @@ public class Home extends Trader implements Concept, SupplierVocabulary {
 		usageRate = 0;
 		supply = 0;
 		budget = 0;
+		income = 0;
 	}
 	
-	public Home(String name, int generationRate, int usageRate, int supply, int budget) {
+	public Home(String name, int generationRate, int usageRate, int supply, int budget, int income) {
 		super(name, HOME_AGENT);
 		this.generationRate = generationRate;
 		this.usageRate = usageRate;
 		this.supply = supply;
 		this.budget = budget;
+		this.income = income;
 	}
 	
 	// Generation getter & setter
@@ -65,21 +67,18 @@ public class Home extends Trader implements Concept, SupplierVocabulary {
 	}
 	
 	// Expenditure getter & setter
-	public int getExpenditure() {
-		return expenditure;
+	public int getIncome() {
+		return income;
 	}
 	
-	public void setExpenditure(int expenditure) {
-		this.expenditure = expenditure;
-	}
-	
-	public int remainingBudget() {
-		return budget - expenditure;
+	public void setIncome(int income) {
+		this.income = income;
 	}
 
 	@Override
 	public String toString() {
 		return "[type=" + getType() + ", name=" + getName() + ", generationRate=" + 
-				generationRate + ", usageRate=" + usageRate + ", supply=" + supply + ", budget=" + budget + "]";
+				generationRate + ", usageRate=" + usageRate + ", supply=" + 
+				supply + ", budget=" + budget + ", income=" + income + "]";
 	}
 }

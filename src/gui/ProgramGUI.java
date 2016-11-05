@@ -449,7 +449,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		gbc_lHomeGenerationRateValue.gridy = 1;
 		pHome.add(lHomeGenerationRateValue, gbc_lHomeGenerationRateValue);
 		
-		JLabel lHomeUsageRate = new JLabel("Price Per Unit:");
+		JLabel lHomeUsageRate = new JLabel("Usage Rate:");
 		GridBagConstraints gbc_lHomeUsageRate = new GridBagConstraints();
 		gbc_lHomeUsageRate.weighty = 5.0;
 		gbc_lHomeUsageRate.weightx = 60.0;
@@ -497,7 +497,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		gbc_lHomeBudgetValue.gridy = 4;
 		pHome.add(lHomeBudgetValue, gbc_lHomeBudgetValue);
 		
-		JLabel lHomeExpediture = new JLabel("Expenditure:");
+		JLabel lHomeExpediture = new JLabel("Income:");
 		GridBagConstraints gbc_lHomeExpenditure = new GridBagConstraints();
 		gbc_lHomeExpenditure.weighty = 5.0;
 		gbc_lHomeExpenditure.weightx = 60.0;
@@ -955,7 +955,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 				lHomeUsageRateValue.setText(Integer.toString(home.getUsageRate()));
 				lHomeSupplyValue.setText(Integer.toString(home.getSupply()));
 				lHomeBudgetValue.setText(Integer.toString(home.getBudget()));
-				lHomeExpenditureValue.setText(Integer.toString(home.getExpenditure()));
+				lHomeExpenditureValue.setText(Integer.toString(home.getIncome()));
 				
 				if(!agentLogs.containsKey(home.hashCode())) {
 					agentLogs.put(home.hashCode(), tpHome);

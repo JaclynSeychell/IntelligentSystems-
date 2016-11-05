@@ -7,6 +7,7 @@ import jade.domain.FIPAAgentManagement.*;
 import jade.lang.acl.*;
 import jade.proto.AchieveREInitiator;
 import jade.proto.SubscriptionInitiator;
+import jade.content.ContentElement;
 import jade.content.lang.*;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
@@ -15,6 +16,8 @@ import jade.content.onto.basic.*;
 import java.awt.Color;
 import java.sql.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Vector;
 
@@ -25,8 +28,10 @@ import utility.*;
 
 @SuppressWarnings("serial")
 public class HomeAgent extends Agent implements SupplierVocabulary {
+	// Data
 	private Home home;
-	
+	private Queue<Tuple<Integer, Integer>> updateOverTime = new CircularFifoQueue<Tuple<Integer, Integer>>(100);
+
 	// Agents
 	private HashMap<AID, Integer> appliances = new HashMap<AID, Integer>();
 	private AID broker;
@@ -34,13 +39,18 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	// Language
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
-	private Exchange exchange;
+	private Exchange quote;
+	private Exchange purchase;
 	
 	// Utility
 	private Random rnd = Utility.newRandom(hashCode());	
 	private int bestPrice;
+	
+	// FSM Variables
 	private boolean queryFinished;
+	private boolean queryError;
 	private boolean purchaseFinished;
+	private boolean purchaseError;
 	
 	// Run parameters
 	private int tradeTicks = 60000;
@@ -52,9 +62,18 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private float updateTickMin;
 	private float updateTickMax;
 	
-	public int randomRange(float min, float max) {
+	public int randomRangeTimer(float min, float max) {
 		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
 		return (int)result;
+	}
+	
+	public float randomRangeFloat(float min, float max) {
+		float result = (rnd.nextFloat() * (max - min) + min);
+		return result;
+	}
+	
+	public float averageTime(float min, float max) {
+		return ( (max - min) / 2 ) + min;
 	}
 	
 	protected void setup() {
@@ -77,8 +96,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			updateTickMin = (float)updateData[1];
 			updateTickMax = (float)updateData[2];
 			
-			tradeTicks = tradeTickRange ? randomRange(tradeTickMin, tradeTickMax) : (int)tradeTickMax * 60000;
-			updateTicks = updateTickRange ? randomRange(updateTickMin, updateTickMax) : (int)updateTickMax * 60000;
+			tradeTicks = tradeTickRange ? randomRangeTimer(tradeTickMin, tradeTickMax) : (int)(tradeTickMax * 60000);
+			updateTicks = updateTickRange ? randomRangeTimer(updateTickMin, updateTickMax) : (int)(updateTickMax * 60000);
 		} else {
 			home = new Home();
 			tradeTicks = 60000 * 5;
@@ -86,113 +105,144 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		}
 		
 		ProgramGUI.getInstance().printToLog(home.hashCode(), home.toString(), Color.GREEN);
+		update.reset(updateTicks);
 		addBehaviour(update);
 		
 		// Find the broker agent
 		lookupBroker();
+		
 		// Find appliances
 		subscribeToAppliances();
 		
-		// Run agent
-		query();
+		process();
 	}
 	
-	void query() {
-		ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-				": Initiating Communication with Broker", Color.GREEN);
+	void process() {
+		SequentialBehaviour seq = new SequentialBehaviour();
 		
-		SequentialBehaviour querySequence = new SequentialBehaviour();
-		addBehaviour(querySequence);
-	
-		// Get Quotes
-		querySequence.addSubBehaviour(new OneShotBehaviour() {
+		// Time between trades
+		seq.addSubBehaviour(new WakerBehaviour(this, tradeTicks) {
+			@Override
+			protected void onWake() {
+				if (tradeTickRange) {
+					tradeTicks = randomRangeTimer(tradeTickMin, tradeTickMax);
+				}
+			}
+			
+			@Override
+			public int onEnd() {
+				System.out.println("Ticks: " + tradeTicks);
+				reset(tradeTicks);
+				return 0;
+			}
+		});
+		
+		// Start query
+		seq.addSubBehaviour(new OneShotBehaviour() {
 			@Override 
-			public void action() { 
+			public void action() {
 				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
 						": Sending query request", Color.GREEN);
+				
 				sendQuery();
 			}
 		});
 		
-		querySequence.addSubBehaviour(new SimpleBehaviour() {
+		seq.addSubBehaviour(new SimpleBehaviour() {
+			private boolean finished;
+			
 			@Override
-			public void action() {};
-			
-			@Override 
-			public boolean done() { 
+			public void action() {
 				if (queryFinished) {
-					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-							": Query request complete", Color.GREEN);
-					purchase();
+					finished = true;
+					
+					// Reset behaviour (don't run purchases) 
+					if (!queryError) {
+						System.out.println("Query finished with no errors");
+					} else {
+						System.out.println("Query finished with errors");
+						seq.reset();
+					}	
 				}
-				return queryFinished; 
 			}
-		});
-	}
-	
-	void purchase() {
-		SequentialBehaviour purchaseSequence = new SequentialBehaviour();
-		addBehaviour(purchaseSequence);
-		
-		if (bestPrice < home.remainingBudget()) {
-			// Make Purchases
-			purchaseSequence.addSubBehaviour(new OneShotBehaviour() {
-				@Override 
-				public void action() { 
-					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-							": Sending purchase request", Color.GREEN);
-					exchange = buyUnits();
-					purchaseRequest(exchange);
-				}
-			});
 			
-			purchaseSequence.addSubBehaviour(new SimpleBehaviour() {
-				@Override
-				public void action() {}
-				
-				@Override 
-				public boolean done() { 
-					if (purchaseFinished) {
-						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-								": Purchase request complete", Color.GREEN);
-					}
-					return purchaseFinished; 
-				}
-			});
-		} 
-		
-		purchaseSequence.addSubBehaviour(new DelayBehaviour(this, tradeTicks) {
 			@Override 
-			public void handleElapsedTimeout() { 
-				queryFinished = purchaseFinished = false;
-				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-						": Concluding Communication with Broker", Color.GREEN);
-				
-				query(); 
-				
-				if(tradeTickRange) {
-					tradeTicks = randomRange(tradeTickMin, tradeTickMax);
-				}
+			public boolean done() {
+				return finished;
 			}
 		});
+		
+		// Start purchase
+		seq.addSubBehaviour(new OneShotBehaviour() {
+			@Override
+			public void action() {
+				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+						": Sending purchase request", Color.GREEN);
+					
+				purchaseRequest(purchase);
+ 			}
+		});
+		
+		seq.addSubBehaviour(new SimpleBehaviour() {
+			private boolean finished;
+			
+			@Override 
+			public void action() {
+				if(purchaseFinished) {
+					finished = true;
+					
+					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+							": Purchase request complete", Color.GREEN);
+					
+					seq.reset();
+				}
+			}
+			
+			@Override 
+			public boolean done() {
+				return finished;
+			}
+		});
+		
+		addBehaviour(seq);
 	}
 	
 	TickerBehaviour update = new TickerBehaviour(this, updateTicks) {
 		@Override
 		public void onTick() {
-			int supplyChange = (home.getGenerationRate() + home.getUsageRate());
+			// Fluctuate supply +/- 20% with a 5% chance of a larger +/- 50% change
+			float variance;
+			variance = rnd.nextFloat() <= 0.05f ? (randomRangeFloat(-50, 50) / 100) + 1 : (randomRangeFloat(-20, 20) / 100) + 1;
+			int supplyChange = (int) Math.round(( ((home.getUsageRate() - home.getGenerationRate()) * variance) ));
 			home.setSupply(home.getSupply() - supplyChange);
 			
-			ProgramGUI.getInstance().printToLog(home.hashCode(), myAgent.getLocalName() + 
-					" updating supply: \n\tChange = " + supplyChange + "\n\tSupply = " + home.getSupply() +
-					"\n\tBudget reset", Color.RED);
+			// Fluctuate income +/- 20% with a 5% chance of a larger +/- 50% change
+			variance = rnd.nextFloat() <= 0.05f ? (randomRangeFloat(-50, 50) / 100) + 1 : (randomRangeFloat(-20, 20) / 100) + 1;
+			int budgetChange = (int) Math.round( (home.getIncome() * variance) );
+			home.setBudget( home.getBudget() + budgetChange );
 			
-			home.setExpenditure(0);
+			updateOverTime.add(new Tuple<Integer, Integer>(supplyChange, budgetChange));
+		
+			ProgramGUI.getInstance().printToLog(home.hashCode(), myAgent.getLocalName() + 
+					" updating: \n\tSupply=" + home.getSupply() + "(" + supplyChange + ")" + 
+					"\n\tBudget = " + home.getBudget() + "(" + budgetChange + ")", Color.RED);
 			
 			if(updateTickRange) {
-				updateTicks = randomRange(updateTickMin, updateTickMax);
+				updateTicks = randomRangeTimer(updateTickMin, updateTickMax);
 			}
 			reset(updateTicks);
+		}
+	};
+	
+	DelayBehaviour tradeDelay = new DelayBehaviour(this, tradeTicks) {
+		@Override
+		public void handleElapsedTimeout() {
+			ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+					": checking energy requirements", Color.BLACK);
+			
+			if (tradeTickRange) {
+				tradeTicks = randomRangeTimer(tradeTickMin, tradeTickMax);
+			}
 		}
 	};
 
@@ -231,40 +281,66 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		// Setup REQUEST message
 		ACLMessage msg = new ACLMessage(ACLMessage.QUERY_REF);
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-		msg.setReplyByDate(new Date(System.currentTimeMillis() + 5000));
+		msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
+		msg.setLanguage(codec.getName());
+		msg.setOntology(ontology.getName());
 		msg.addReceiver(broker);
 		
-		addBehaviour(new AchieveREInitiator(this, msg) {
-			@Override
-			protected void handleAgree(ACLMessage agree) {	
-				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-						": Agent " + agree.getSender().getName() + " agreed to find the best price.", Color.GREEN);
-			}
+		quote = buyUnits();
+		
+		try {
+			getContentManager().fillContent(msg, new Action(broker, quote));
 			
-			@Override
-			protected void handleRefuse(ACLMessage agree) {	
-				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-						": Agent " + agree.getSender().getName() + " refused to find the best price.", Color.RED);
-			}
-			
-			@Override
-			protected void handleInform(ACLMessage inform) {
-				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-						": Agent " + inform.getSender().getName() + " has retrieved the best price " + Integer.parseInt(inform.getContent()), Color.ORANGE);
-				bestPrice = Integer.parseInt(inform.getContent());
-			}
-			
-			@Override
-			protected void handleAllResultNotifications(@SuppressWarnings("rawtypes") Vector notifications) {
-				queryFinished = true;
-				
-				// Some responder didn't reply within the specified timeout
-				if (notifications.size() == 0) {
+			addBehaviour(new AchieveREInitiator(this, msg) {
+				@Override
+				protected void handleAgree(ACLMessage agree) {	
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-							": Timeout expired: no response received", Color.RED);
+							": Agent " + agree.getSender().getName() + " agreed to perform query.", Color.GREEN);
 				}
-			}
-		});
+				
+				@Override
+				protected void handleRefuse(ACLMessage agree) {	
+					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+							": Agent " + agree.getSender().getName() + " refused to perform query.", Color.RED);
+				}
+				
+				@Override 
+				protected void handleFailure(ACLMessage failure) {
+					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+							": Agent " + failure.getSender().getName() + " failed to perform query.", Color.RED);
+				}
+				
+				@Override
+				protected void handleInform(ACLMessage inform) {
+					try {
+						ContentElement content = getContentManager().extractContent(inform);
+						purchase = (Exchange)((Action)content).getAction();	
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
+					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+							": Agent " + inform.getSender().getName() + " has returned a quote $" + 
+							purchase.getPrice() * purchase.getUnits() + " for " + purchase.getUnits() + "units", 
+							Color.ORANGE);
+					
+				}
+				
+				@Override
+				protected void handleAllResultNotifications(@SuppressWarnings("rawtypes") Vector notifications) {
+					queryFinished = true;
+					
+					// Some responder didn't reply within the specified timeout
+					if (notifications.size() == 0) {
+						queryError = true;
+						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+								": Timeout expired! No response received", Color.RED);
+					}
+				}
+			});
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	void purchaseRequest(Exchange ex) {
@@ -278,30 +354,41 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		// Setup REQUEST message
 		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 		msg.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
-		msg.setReplyByDate(new Date(System.currentTimeMillis() + 5000));
+		msg.setReplyByDate(new Date(System.currentTimeMillis() + 10000));
 		msg.setLanguage(codec.getName());
 		msg.setOntology(ontology.getName());
 		
 		try {
-			getContentManager().fillContent(msg, new Action(broker, ex));
+			getContentManager().fillContent(msg, new Action(broker, purchase));
 			msg.addReceiver(broker);
 		
 			addBehaviour(new AchieveREInitiator(this, msg) {
 				@Override
 				protected void handleAgree(ACLMessage agree) {
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-							": Agent " + agree.getSender().getName() + " agreed to purchase units on our behalf.", Color.ORANGE);
+							": Agent " + agree.getSender().getName() + " agreed to purchase units on our behalf.", Color.GREEN);
 				}
 				
 				@Override
 				protected void handleInform(ACLMessage inform) {
-					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-							": Agent " + inform.getSender().getName() + " has purchased some energy units.", Color.GREEN);
-					
-					home.setExpenditure(home.getExpenditure() + (exchange.getPrice() * exchange.getUnits()));
-					
-					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-							": \n\tBudget: " + home.getBudget() + "\n\tExpenditure: " + home.getExpenditure(), Color.ORANGE);
+					switch(purchase.getType()) {
+					case BUY:
+						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+								": Agent " + inform.getSender().getName() + " buying transaction complete", Color.GREEN);
+						
+						home.setBudget(home.getBudget() - (purchase.getPrice() * purchase.getUnits()));
+						home.setSupply(home.getSupply() + purchase.getUnits());
+						
+						break;
+					case SELL:
+						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
+								": Agent " + inform.getSender().getName() + " selling transaction complete", Color.GREEN);
+						
+						home.setBudget(home.getBudget() + (purchase.getPrice() * purchase.getUnits()));
+						home.setSupply(home.getSupply() - purchase.getUnits());
+		
+						break;
+					}
 				}
 				
 				@Override
@@ -310,8 +397,10 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 					
 					// Some responder didn't reply within the specified timeout
 					if (notifications.size() == 0) {
+						purchaseError = true; 
+						
 						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
-								": Timeout expired: no response received", Color.ORANGE);
+								": Timeout expired! No response received", Color.RED);
 					}
 				}
 			});
@@ -321,35 +410,107 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	}
 	
 	Exchange buyUnits() {
-		Exchange ex = new Exchange();
-		ex.setType(SupplierVocabulary.BUY);
-		ex.setPrice(bestPrice); 
+		// Get average update times
+		int avgUpdate = updateTicks;
+		int avgTrade = tradeTicks;
 		
-		int max = (bestPrice != 0) ? home.remainingBudget() / bestPrice : 0;
-		int result = 0;
-		
-		// Purchase an amount if allowed when running low or purchase all units at a good price.
-		if (home.getSupply() < 50) {
-			if (max > 10) {
-				result = 10;
-			} else {
-				result = max;
-			}
-		} else if (bestPrice <= 5) {
-			result = max;
+		if (updateTickRange) {
+			avgUpdate = (int) (averageTime(updateTickMin, updateTickMax) * 60000);
 		}
 		
-		ex.setUnits(result);
-		return ex;
-	}
-	
-	// TO-DO: Selling of units
-	Exchange sellUnits() {
+		if(tradeTickRange) {
+			avgTrade = (int) (averageTime(tradeTickMin, tradeTickMax) * 60000);
+		}
+		
+		int updatesPerTrade = avgTrade / avgUpdate;
+		updatesPerTrade = updatesPerTrade < 1 ? 1 : updatesPerTrade; 
+		System.out.println(getLocalName() + ": has " + updatesPerTrade + " updates between trades");
+		
+		// Collect past data
+		int maxUsage = home.getUsageRate() - home.getGenerationRate(); 
+		int minUsage = home.getUsageRate() - home.getGenerationRate();
+		int avgUsage = home.getUsageRate() - home.getGenerationRate(); 
+		int totUsage = home.getUsageRate() - home.getGenerationRate();
+		int maxIncome = home.getIncome();
+		int minIncome = home.getIncome();
+		int avgIncome = home.getIncome();
+		int totIncome = home.getIncome();
+		
+		Iterator<Tuple<Integer, Integer>> it = updateOverTime.iterator();
+		int count = 1;
+		while(it.hasNext()) {
+			Tuple<Integer, Integer> e = it.next();
+			int usage = e.first();
+			int income = e.last();
+			
+			System.out.println(getLocalName() + ": usage = " + usage + ", income = " + income);
+			
+			if(count == 1) {
+				maxUsage = minUsage = avgUsage = totUsage = usage;
+				maxIncome = minIncome = avgIncome = totIncome = income;
+			} else {
+				maxUsage = usage > maxUsage ? usage : maxUsage;
+				minUsage = usage < minUsage ? usage : minUsage;
+				maxIncome = income > maxIncome ? income : maxIncome;
+				minIncome = income < minIncome ? income : minIncome;
+				
+				totUsage += usage;
+				totIncome += income;
+				avgUsage = totUsage / count;
+				avgIncome = totIncome / count;
+			}
+			
+			count++;
+		}
+		System.out.println(getLocalName() + ": average usage = " + avgUsage);
+		
+		int updatesLeft = ( (home.getSupply() - (avgUsage * updatesPerTrade)) / (avgUsage * updatesPerTrade) );
+		System.out.println(getLocalName() + ": has " + updatesLeft + " updates remaining until out of supply");
+		
 		Exchange ex = new Exchange();
-		ex.setType(SupplierVocabulary.SELL);
-		ex.setPrice(bestPrice);
-		int result = 0;
-		ex.setUnits(result);
+		ex.setType(SupplierVocabulary.BUY);
+		
+		int units = 0;
+		float roll = 0;
+		
+		if (updatesLeft < 3) {
+			units = (avgUsage * (updatesPerTrade + 2));
+			roll = 0.75f;
+			for(int i = 0; i < 3; i++) {
+				if(rnd.nextFloat() > roll) {
+					units += avgUsage;
+				}
+			}
+		} else if (updatesLeft < 5) {
+			units = (avgUsage * (updatesPerTrade + 1));
+			roll = 0.50f;
+			for(int i = 0; i < 3; i++) {
+				if(rnd.nextFloat() > roll) {
+					units += avgUsage;
+				}
+			}
+		} else if (updatesLeft < 10) {
+			units = (avgUsage * updatesPerTrade);
+			roll = 0.25f;
+			for(int i = 0; i < 3; i++) {
+				if(rnd.nextFloat() > roll) {
+					units += avgUsage;
+				}
+			}
+		} else {
+			ex.setType(SupplierVocabulary.SELL);
+			
+			units = (avgUsage * updatesPerTrade);
+			roll = 0.10f;
+			for(int i = 0; i < 3; i++) {
+				if(rnd.nextFloat() > roll) {
+					units += avgUsage;
+				}
+			}
+		}
+
+		ex.setPrice(0); 
+		ex.setUnits(units);
 		return ex;
 	}
 	
@@ -363,21 +524,23 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		// Handle registration of new appliances
   		addBehaviour(new SubscriptionInitiator(this,
 			DFService.createSubscriptionMessage(this, getDefaultDF(), dfd, null)) {
-  			ACLMessage applianceSub = new ACLMessage(ACLMessage.QUERY_REF);
   			
   			@Override
   			protected void handleInform(ACLMessage inform) {
   				try {
+  					ACLMessage applianceSub = new ACLMessage(ACLMessage.QUERY_REF);
+  					applianceSub.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
+  					
   					DFAgentDescription[] dfds = DFService.decodeNotification(inform.getContent());
   					DFAgentDescription[] df = DFService.search(myAgent, dfd);
-  					applianceSub.setProtocol(FIPANames.InteractionProtocol.FIPA_SUBSCRIBE);
   					
   					// Register additional energy usage subscription
   					SubscriptionInitiator rateUpdate = new SubscriptionInitiator(myAgent, applianceSub) {		
   						@Override
   						protected void handleInform(ACLMessage inform) {
-  							ProgramGUI.getInstance().printToLog(home.hashCode(), "Appliance data received. Updating supply.", Color.BLACK);
-  							home.setSupply(home.getSupply() - Integer.parseInt(inform.getContent()));
+  							ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + ": appliance data received. Updating supply.", Color.BLACK);
+  							
+  							home.setSupply(home.getSupply() + Integer.parseInt(inform.getContent()));
   							appliances.put(inform.getSender(), Integer.parseInt(inform.getContent()));
   						}
   					};
@@ -397,10 +560,12 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 						rateUpdate.reset(applianceSub);
 						
 						if(exists) {
+							System.out.println(getLocalName() + ": new appliance " + dfds[i].getName());
 							ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() +
 									": new appliance " + dfds[i].getName(), Color.GREEN);
 							
 							if (appliances.size() == 0) { 
+								System.out.println(getLocalName() + ": listening for energy usage from " + dfds[i].getName());
 								ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() +
 										": listening for energy usage from " + dfds[i].getName(), Color.GREEN);
 							}

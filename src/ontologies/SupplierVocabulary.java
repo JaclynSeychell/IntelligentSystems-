@@ -33,6 +33,10 @@ public interface SupplierVocabulary {
 	public static final String EXCHANGE_PRICE = "price";
 	public static final String EXCHANGE_UNITS = "units";
 	
+	public static final String QUOTE = "Quote";
+	public static final String QUOTE_PRICE = "price";
+	public static final String QUOTE_UNITS = "units";
+	
 	public static final String PROBLEM = "Problem";
 	public static final String PROBLEM_NUM = "num";
 	public static final String PROBLEM_MSG = "msg";

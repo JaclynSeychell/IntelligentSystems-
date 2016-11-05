@@ -2,6 +2,8 @@ package utility;
 
 import java.util.Random;
 
+import behaviours.DelayBehaviour;
+
 public final class Utility {
 	private Utility() {}
 	

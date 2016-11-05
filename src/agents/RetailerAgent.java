@@ -13,8 +13,10 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREResponder;
 import jade.proto.SubscriptionResponder;
+import jade.content.Concept;
 import jade.content.ContentElement;
 import jade.content.lang.*;
+import jade.content.lang.Codec.CodecException;
 import jade.content.lang.sl.*;
 import jade.content.onto.*;
 import jade.content.onto.basic.Action;
@@ -41,9 +43,16 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	private float updateTickMin;
 	private float updateTickMax;
 	
-	public int randomRange(float min, float max) {
+	private boolean sendNotification = true;
+	
+	public int randomRangeTimer(float min, float max) {
 		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
 		return (int)result;
+	}
+	
+	public float randomRangeFloat(float min, float max) {
+		float result = (rnd.nextFloat() * (max - min) + min);
+		return result;
 	}
 	
 	protected void setup() {
@@ -61,13 +70,14 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			updateTickMin = (float)updateData[1];
 			updateTickMax = (float)updateData[2];
 			
-			updateTicks = updateTickRange ? randomRange(updateTickMin, updateTickMax) : (int)updateTickMax * 60000;
+			updateTicks = updateTickRange ? randomRangeTimer(updateTickMin, updateTickMax) : (int)(updateTickMax * 60000);
 		} else {
 			retailer = new Retailer();
 			updateTicks = 60000 * 5;
 		}
 		
 		ProgramGUI.getInstance().printToLog(retailer.hashCode(), retailer.toString(), Color.GREEN);
+		updateRetailer.reset(updateTicks);
 		addBehaviour(updateRetailer);
 		
 		// Register in the DF
@@ -108,7 +118,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	}
 	
 	void process() {
-		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + ": waiting for purchase requests...", Color.RED);
+		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + ": waiting for purchase requests...", Color.GREEN);
 		MessageTemplate template = MessageTemplate.and(
 		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 		  		MessageTemplate.MatchPerformative(ACLMessage.REQUEST) );
@@ -138,15 +148,29 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 					Exchange action = (Exchange)((Action)content).getAction();
 					
 					switch(action.getType()) {
-					case SupplierVocabulary.BUY:
-						int updatedSupply = retailer.getSupply() - action.getUnits();
+					case BUY:
+						retailer.setSupply(retailer.getSupply() - action.getUnits());
+						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName() + 
+								": Action successfully performed" + "\n\tSuppy sold: " + action.getUnits(), Color.GREEN);
+						
 						System.out.println("Agent " + getLocalName() + ": Action successfully performed" + 
-								"\nSuppy sold: " + retailer.getSupply() + "\nRemaining supply: " + updatedSupply);
-						retailer.setSupply(updatedSupply);
+								"\n\tSuppy sold: " + action.getUnits());
 						
 						break;
-					case SupplierVocabulary.SELL:
+					case SELL:
+						retailer.setSupply(retailer.getSupply() + action.getUnits());
+						
+						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName() + 
+								": Action successfully performed" + "\n\tSuppy purchased: " + action.getUnits(), Color.GREEN);
+						
+						System.out.println("Agent " + getLocalName() + ": Action successfully performed" + 
+								"\n\tSuppy purchased: " + action.getUnits());
+		
+						break;
 					}
+					
+					// Accumulate orders over trading cycle
+					retailer.setOrders(retailer.getOrders() + 1);
 					
 				} catch(Exception e) {
 					inform.setPerformative(ACLMessage.FAILURE);
@@ -188,14 +212,66 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	
 	TickerBehaviour updateRetailer = new TickerBehaviour(this, updateTicks) {
 		@Override
+		public void onStart() {
+			super.onStart();
+			System.out.println(getLocalName() + ": updating in " + updateTicks + "ms");
+		}
+		
+		@Override
 		public void onTick() {
 			//Update supply based on generation rate
-			retailer.setSupply(retailer.getSupply() + retailer.getGenerationRate());
+			float variance;
+			int priceChange = 0;
+			int supplyChange = 0;
 			
-			ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Updating the supply", Color.BLACK);
-			if(updateTickRange) {
-				updateTicks = randomRange(updateTickMin, updateTickMax);
+			variance = rnd.nextFloat() <= 0.05f ? (randomRangeFloat(-50, 50) / 100) + 1 : (randomRangeFloat(-20, 20) / 100) + 1;
+			supplyChange = (int) Math.round( (retailer.getGenerationRate() * variance) );
+			retailer.setSupply(retailer.getSupply() + supplyChange);
+			
+			switch(retailer.getRetailerType()) {
+			// Price is fixed
+			case FIXED:
+				break;
+				
+			// Fluctuate prices +/- 5% with a 5% chance of a larger +/- 10% change
+			case RANDOM:
+				variance = rnd.nextFloat() <= 0.05f ? (randomRangeFloat(-10, 10) / 100) + 1 : (randomRangeFloat(-5, 5) / 100) + 1;
+				priceChange = (int) Math.round( (retailer.getPricePerUnit() * variance) );
+				
+				System.out.println("Variance: " + variance + " = " + retailer.getPricePerUnit() + " + " + priceChange);
+				retailer.setPricePerUnit(priceChange);
+				
+				// min price is 1
+				if(retailer.getPricePerUnit() < 1) {
+					retailer.setPricePerUnit(1);
+				}
+				break;
+			// For each order made since the last update 75% to increase by 2 & 50% to increase by 1
+			case DEMAND:
+				System.out.println(retailer.getOrders());
+				for(int i = 0; i < retailer.getOrders(); i++) {
+					if(rnd.nextFloat() > 0.75) {
+						retailer.setPricePerUnit(retailer.getPricePerUnit() + 2);
+					} else if (rnd.nextFloat() > 0.5) {
+						retailer.setPricePerUnit(retailer.getPricePerUnit() + 1);
+					}
+				}
+				break;
 			}
+			
+			ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + 
+					": " + retailer.getOrders() + " made during this update cycle\n" + 
+					"updating: \n\tSupply=" + retailer.getSupply() + "(" + supplyChange + ")" +
+					"\n\tPrice=" + retailer.getPricePerUnit() + "(" + priceChange + ")", 
+					Color.GREEN);
+			
+			if(updateTickRange) {
+				updateTicks = randomRangeTimer(updateTickMin, updateTickMax);
+			}
+			
+			// inform subscribers of changes
+			sendNotification = true;
+			retailer.setOrders(0);
 			reset(updateTicks);
 		}
 	};
@@ -210,13 +286,12 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		SubscriptionResponder sr = new SubscriptionResponder(this, mt) {
 			ACLMessage notification;
 			Subscription sub;
-			int lastPrice = 0;
 			
 			@Override
 			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
 				super.handleSubscription(subscription);
 				ProgramGUI.getInstance().printToLog(retailer.hashCode(), myAgent.getLocalName() + ": new subscriber " + 
-						subscription.getSender().getLocalName(), Color.GREEN);
+						subscription.getSender().getLocalName(), Color.BLACK);
 				
 				sub = getSubscription(subscription);
 				notification = subscription.createReply();
@@ -225,11 +300,19 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 				addBehaviour(new CyclicBehaviour() {
 					@Override
 					public void action() {
-						if(lastPrice == 0 || retailer.getPricePerUnit() != lastPrice) {
-							ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Notifying broker agent of price change.", Color.BLACK);
-							notification.setContent(Integer.toString(retailer.getPricePerUnit()));
-							lastPrice = retailer.getPricePerUnit();
+						if( sendNotification ) {
+							
+							try {
+								getContentManager().fillContent(notification, new Action(subscription.getSender(), getQuote()));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							
+							ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + 
+									": notifying broker agent of price change.", Color.BLACK);
+					
 							sub.notify(notification);
+							sendNotification = false;
 						}
 					}
 				});
@@ -239,5 +322,12 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		};
 		
 		addBehaviour(sr);
+	}
+	
+	Quote getQuote() {
+		Quote result = new Quote();
+		result.setPrice(retailer.getPricePerUnit());
+		result.setUnits(retailer.getSupply());
+		return result;
 	}
 }

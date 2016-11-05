@@ -129,8 +129,9 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 					@Override
 					public void onTick() {
 						ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName() + 
-								": Notifying home agent of energy usage.", Color.BLACK);
+								": notifying home agent of energy usage.", Color.BLACK);
 						
+						System.out.println(getLocalName() + ": " + appliance.getRate());
 						notification.setContent(Integer.toString(appliance.getRate()));
 						sub.notify(notification);
 						

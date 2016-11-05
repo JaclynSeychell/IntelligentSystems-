@@ -9,8 +9,7 @@ public class DFRegistry {
 	public static void register(Agent agent, String type) {
 		ServiceDescription sd = new ServiceDescription();
 		sd.setType(type);
-		sd.setName(agent.getName());
-		sd.setOwnership("Group");
+		sd.setName(agent.getLocalName());
 		
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(agent.getAID());
