@@ -56,7 +56,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			broker = new Broker("Broker");
 		}
 		
-		ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "successfully created", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "successfully created", Color.GREEN.darker());
 		
 		// Register in the DF
 		DFRegistry.register(this, BROKER_AGENT);
@@ -73,7 +73,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	}
 	
 	void query() {
-		ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "awaiting queries...", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "awaiting queries...", Color.GREEN.darker());
 		
 		MessageTemplate template = MessageTemplate.and(
 		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
@@ -82,7 +82,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		AchieveREResponder arer = new AchieveREResponder(this, template) {
 			@Override
 			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
-				ProgramGUI.getInstance().printToLog(broker.hashCode(),  broker.getName(), ">> query received", Color.GREEN);
+				ProgramGUI.getInstance().printToLog(broker.hashCode(),  broker.getName(), ">> query received", Color.GREEN.darker());
 				
 				try {
 					Thread.sleep(1000);
@@ -104,7 +104,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			
 			@Override
 			protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) throws FailureException {
-				ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "<< returning best price", Color.ORANGE);
+				ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "<< returning best price", Color.ORANGE.darker());
 				ACLMessage result = request.createReply();
 				result.setPerformative(ACLMessage.INFORM);
 				
@@ -196,7 +196,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	}
 	
 	void purchase() {
-		ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "awaiting requests...", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "awaiting requests...", Color.GREEN.darker());
 		
 	  	MessageTemplate template = MessageTemplate.and(
 	  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
@@ -205,7 +205,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		AchieveREResponder arer = new AchieveREResponder(this, template) {
 			@Override
 			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
-				ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), ">> received request", Color.ORANGE);
+				ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), ">> received request", Color.ORANGE.darker());
 				
 				
 				// sleep
@@ -238,7 +238,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 					String incomingRequestKey = (String) ((AchieveREResponder) parent).REQUEST_KEY;
 					ACLMessage incomingRequest = (ACLMessage) getDataStore().get(incomingRequestKey);
 					// Prepare the request to forward to the responder
-					ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "forwarding request >>"+ bestOffer.getLocalName(), Color.ORANGE);
+					ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), "forwarding request >>"+ bestOffer.getLocalName(), Color.ORANGE.darker());
 					
 					ACLMessage outgoingRequest = new ACLMessage(ACLMessage.REQUEST);
 					outgoingRequest.setProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST);
@@ -294,7 +294,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			private void storeNotification(int performative) {
 				if (performative == ACLMessage.INFORM) {
 					ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), 
-							"brokerage successful", Color.GREEN);
+							"brokerage successful", Color.GREEN.darker());
 				}
 				else {
 					ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), 
@@ -348,7 +348,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	  							//TODO Confirm
 	  							ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(),
 	  									inform.getSender().getLocalName() + " price now $" +
-  											quote.getPrice() + "/unit", Color.ORANGE);
+  											quote.getPrice() + "/unit", Color.ORANGE.darker());
 	  							
 	  							retailers.put( inform.getSender(), new Tuple<Integer, Integer>( quote.getPrice(), quote.getUnits() ) );
 	  							
@@ -378,7 +378,7 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 						if(exists) {
 							System.out.println(getLocalName() + ": new retailer " + dfds[i].getName());
 							ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(), 
-									"new retailer " + dfds[i].getName(), Color.GREEN);
+									"new retailer " + dfds[i].getName(), Color.GREEN.darker());
 				
 							if (retailers.size() == 0) { 
 								System.out.println(getLocalName() + ": listening for price changes from " + dfds[i].getName());
