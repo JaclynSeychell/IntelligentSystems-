@@ -151,7 +151,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			public void action() {
 				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
 						"Query sent >>", Color.GREEN.darker());
-				
+				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
+						"Awaiting response...", Color.ORANGE.darker());
 				sendQuery();
 			}
 		});
@@ -186,6 +187,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			public void action() {
 				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
 						"Order sent >>", Color.GREEN.darker());
+				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
+						"Awaiting order...", Color.ORANGE.darker());
 				
 				boolean makePurchase = true;
 				
@@ -218,7 +221,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 					finished = true;
 					
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-							"Order complete", Color.GREEN.darker());
+							"Order complete!", Color.GREEN.darker());
 					
 					seq.reset();
 				}
@@ -252,7 +255,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			//TODO Confirm
 			ProgramGUI.getInstance().printToLog(home.hashCode(), myAgent.getLocalName(), 
 					" updating: \n\tSupply=" + home.getSupply() + "(" + supplyChange + ")" + 
-					"\n\tBudget = " + home.getBudget() + "(" + budgetChange + ")", Color.RED);
+					"\n\tBudget = " + home.getBudget() + "(" + budgetChange + ")", Color.BLUE.darker());
 			
 			if(updateTickRange) {
 				updateTicks = randomRangeTimer(updateTickMin, updateTickMax);
@@ -265,7 +268,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		@Override
 		public void handleElapsedTimeout() {
 			ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-					"checking energy requirements", Color.BLACK);
+					"checking energy\nrequirements", Color.BLUE.darker());
 			
 			if (tradeTickRange) {
 				tradeTicks = randomRangeTimer(tradeTickMin, tradeTickMax);
@@ -286,12 +289,12 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 				broker = dfds[0].getName();
 				//TODO Confirm
 				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-						"broker localised", Color.GREEN.darker());
+						"broker localised", Color.BLUE.darker());
 				
 			} else {
 				//TODO Confirm
 				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-						"broker not localised", Color.RED);
+						"broker not localised", Color.RED.darker());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -303,7 +306,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		if (broker == null) lookupBroker();
 		if (broker == null) {
 			ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-					"Broker not found!", Color.RED);
+					"Broker not found!", Color.RED.darker());
 			return;
 		}
 		
@@ -324,19 +327,19 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 				@Override
 				protected void handleAgree(ACLMessage agree) {	
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-							agree.getSender().getName() + " agreed to query.", Color.GREEN.darker());
+							agree.getSender().getName() + "\nagreed to query <<", Color.GREEN.darker());
 				}
 				
 				@Override
 				protected void handleRefuse(ACLMessage agree) {	
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-							agree.getSender().getName() + " refused query.", Color.RED);
+							agree.getSender().getName() + "\nrefused query <<", Color.RED.darker());
 				}
 				
 				@Override 
 				protected void handleFailure(ACLMessage failure) {
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-							failure.getSender().getName() + " failed query.", Color.RED);
+							failure.getSender().getName() + "\nfailed query <<", Color.RED.darker());
 				}
 				
 				@Override
@@ -349,8 +352,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 					}
 					
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-							inform.getSender().getName() + " has returned a quote $" + 
-							purchase.getPrice() * purchase.getUnits() + " for " + purchase.getUnits() + "units", 
+							inform.getSender().getName() + " quoted $" + 
+							purchase.getPrice() * purchase.getUnits() + " for " + purchase.getUnits() + " units <<", 
 							Color.ORANGE.darker());
 				}
 				
@@ -362,7 +365,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 					if (notifications.size() == 0) {
 						queryError = true;
 						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-								"no response, timeout!", Color.RED);
+								"no response, timeout!", Color.RED.darker());
 					}
 					
 					// sleep
@@ -383,7 +386,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		if (broker == null) {
 			//TODO Confirm
 			ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-					"broker not found!", Color.RED);
+					"broker not found!", Color.RED.darker());
 			return;
 		}
 		
@@ -402,7 +405,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 				@Override
 				protected void handleAgree(ACLMessage agree) {
 					ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-							agree.getSender().getName() + " confirmed purchase", Color.GREEN.darker());
+							agree.getSender().getName() + "\nconfirmed purchase", Color.GREEN.darker());
 				}
 				
 				@Override
@@ -410,7 +413,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 					switch(purchase.getType()) {
 					case BUY:
 						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-								inform.getSender().getName() + " completed purchase", Color.GREEN.darker());
+								inform.getSender().getName() + "\ncompleted purchase <<", Color.GREEN.darker());
 						
 						home.setBudget(home.getBudget() - (purchase.getPrice() * purchase.getUnits()));
 						home.setSupply(home.getSupply() + purchase.getUnits());
@@ -418,7 +421,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 						break;
 					case SELL:
 						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-								": Agent " + inform.getSender().getName() + " completed sale", Color.GREEN.darker());
+								inform.getSender().getName() + "\ncompleted sale <<", Color.GREEN.darker());
 						
 						home.setBudget(home.getBudget() + (purchase.getPrice() * purchase.getUnits()));
 						home.setSupply(home.getSupply() - purchase.getUnits());
@@ -436,7 +439,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 						purchaseError = true; 
 						
 						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-								"no response, timeout!", Color.RED);
+								"no response, timeout!", Color.RED.darker());
 					}
 					
 					// sleep
@@ -579,7 +582,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 //  							ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(),
 //  									"appliance data received. Updating supply.", Color.BLACK);
   							ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(),
-  									"supply updated", Color.BLACK);
+  									"supply updated", Color.BLUE.darker());
   							
   							home.setSupply(home.getSupply() + Integer.parseInt(inform.getContent()));
   							appliances.put(inform.getSender(), Integer.parseInt(inform.getContent()));
@@ -614,7 +617,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 //								ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(),
 //										"listening for energy usage from " + dfds[i].getName(), Color.GREEN.darker());
 								ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(),
-										"tracking energy usage", Color.GREEN.darker());
+										"tracking energy usage", Color.BLUE.darker());
 							}
 							
 							appliances.put(dfds[i].getName(), null);
@@ -624,11 +627,11 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 						} else {
 							//TODO Confirm
 							ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-									": stopped listening for appliance " + dfds[i].getName(), Color.RED);
+									"stopped listening\nfor appliance " + dfds[i].getName(), Color.RED.darker());
 							
 							if(appliances.size() < 1) { 
 								ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
-										": stopped listening for appliances.", Color.RED);
+										"stopped listening\nfor appliances.", Color.RED.darker());
 							}
 							
 							appliances.remove(dfds[i].getName());
