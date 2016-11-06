@@ -15,6 +15,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JSeparator;
 import javax.swing.JTextPane;
 import javax.swing.WindowConstants;
@@ -83,6 +84,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 	
 	private JButton bBroker;
 	private JTextPane tpBroker;
+	private JScrollPane scrollGlobalMessages;
 	
 	public static ProgramGUI getInstance() {
 		return singleton;
@@ -920,15 +922,15 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		// Global log
 		tpGlobalMessages = new JTextPane();
 
-		JScrollPane scrollPane = new JScrollPane(tpGlobalMessages, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setBorder(new LineBorder(new Color(0, 0, 0), 2, true));
+		scrollGlobalMessages = new JScrollPane(tpGlobalMessages, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollGlobalMessages.setBorder(new LineBorder(new Color(0, 0, 0), 2, true));
 		
-		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
-		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridx = 3;
-		gbc_scrollPane.gridy = 2;
-		pBody.add(scrollPane, gbc_scrollPane);
+		GridBagConstraints gbc_scrollGlobalMessages = new GridBagConstraints();
+		gbc_scrollGlobalMessages.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollGlobalMessages.fill = GridBagConstraints.BOTH;
+		gbc_scrollGlobalMessages.gridx = 3;
+		gbc_scrollGlobalMessages.gridy = 2;
+		pBody.add(scrollGlobalMessages, gbc_scrollGlobalMessages);
 		
 		JButton btnClear = new JButton("Clear");
 		GridBagConstraints gbc_btnClear = new GridBagConstraints();
@@ -1053,8 +1055,8 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		// Log all to global pane
 		appendToPane(tpGlobalMessages, msg, c);
 		
-		int endOfText = tpGlobalMessages.getText().length();
-		tpGlobalMessages.setCaretPosition(endOfText); //autoscrolls to show latest updates
+		JScrollBar vertical = scrollGlobalMessages.getVerticalScrollBar();
+		vertical.setValue(vertical.getMaximum());
 		
 		// Log to individual agent pane
 		try {

@@ -100,6 +100,8 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			
 			tradeTicks = tradeTickRange ? randomRangeTimer(tradeTickMin, tradeTickMax) : (int)(tradeTickMax * updateUnit);
 			updateTicks = updateTickRange ? randomRangeTimer(updateTickMin, updateTickMax) : (int)(updateTickMax * updateUnit);
+			System.out.println(getLocalName() + " Trading every " + tradeTicks + "ms");
+			System.out.println(getLocalName() + " Updating every " + updateTicks + "ms");
 		} else {
 			home = new Home();
 			tradeTicks = 60000 * 5;
