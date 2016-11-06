@@ -107,7 +107,6 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 	}
 	
 	private ProgramGUI() {
-		setResizable(false);
 //		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		
@@ -1050,10 +1049,12 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
     }
 	
 	
-	public void printToLog(int hash, String msg, Color c) {
-		msg = msg + "\n";
+	public void printToLog(int hash, String agentName, String msg, Color c) {
+		String globalMsg = agentName + ": " + msg + "\n";
+		String localMsg = msg + "\n";
+
 		// Log all to global pane
-		appendToPane(tpGlobalMessages, msg, c);
+		appendToPane(tpGlobalMessages, globalMsg, c);
 		
 		JScrollBar vertical = scrollGlobalMessages.getVerticalScrollBar();
 		vertical.setValue(vertical.getMaximum());
@@ -1063,7 +1064,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 			JTextPane log = agentLogs.get(hash);
 			if (log != null) {
 				log.setText("");
-				appendToPane(log, msg, c);
+				appendToPane(log, localMsg, c);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

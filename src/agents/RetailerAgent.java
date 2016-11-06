@@ -77,8 +77,10 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			retailer = new Retailer();
 			updateTicks = 60000 * 5;
 		}
-		
-		ProgramGUI.getInstance().printToLog(retailer.hashCode(), retailer.toString(), Color.GREEN);
+		//TODO Confirm
+//		ProgramGUI.getInstance().printToLog(retailer.hashCode(), retailer.toString(), Color.GREEN);
+		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName(),
+				"created", Color.GREEN);
 		updateRetailer.reset(updateTicks);
 		addBehaviour(updateRetailer);
 		
@@ -92,7 +94,8 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	
 	// Deregister this agent
 	protected void takeDown() {
-		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + ": agent shutdown", Color.RED);
+		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName(),
+				"shutdown", Color.RED);
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 		
 		try {
@@ -113,14 +116,17 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 				msg += "\t" + dfds[i].getName();
 			}
 			
-			ProgramGUI.getInstance().printToLog(retailer.hashCode(), msg, Color.RED);
+			//TODO Confirm
+//			ProgramGUI.getInstance().printToLog(retailer.hashCode(), msg, Color.RED);
+			ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName(), msg, Color.RED);
 		} catch (Exception e) { 
 			e.printStackTrace();
 		}
 	}
 	
 	void process() {
-		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + ": waiting for purchase requests...", Color.GREEN);
+		ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName(),
+				"awaitaing requests...", Color.GREEN);
 		MessageTemplate template = MessageTemplate.and(
 		  		MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST),
 		  		MessageTemplate.MatchPerformative(ACLMessage.REQUEST) );
@@ -152,8 +158,11 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 					switch(action.getType()) {
 					case BUY:
 						retailer.setSupply(retailer.getSupply() - action.getUnits());
-						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName() + 
-								": Action successfully performed" + "\n\tSuppy sold: " + action.getUnits(), Color.GREEN);
+						//TODO Confirm
+//						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName(),
+//								": Action successfully performed" + "\n\tSuppy sold: " + action.getUnits(), Color.GREEN);
+						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName(),
+								"<< " + action.getUnits() + " units sold", Color.GREEN);
 						
 						System.out.println("Agent " + getLocalName() + ": Action successfully performed" + 
 								"\n\tSuppy sold: " + action.getUnits());
@@ -162,8 +171,11 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 					case SELL:
 						retailer.setSupply(retailer.getSupply() + action.getUnits());
 						
-						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName() + 
-								": Action successfully performed" + "\n\tSuppy purchased: " + action.getUnits(), Color.GREEN);
+						//TODO Confirm
+//						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName(), 
+//								": Action successfully performed" + "\n\tSuppy purchased: " + action.getUnits(), Color.GREEN);
+						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName(), 
+								"<< " + action.getUnits() + " units bought", Color.GREEN);
 						
 						System.out.println("Agent " + getLocalName() + ": Action successfully performed" + 
 								"\n\tSuppy purchased: " + action.getUnits());
@@ -260,12 +272,17 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 				}
 				break;
 			}
-			
-			ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + 
-					": " + retailer.getOrders() + " orders made during this update cycle\n" + 
+			//TODO Confirm
+//			ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName(), 
+//					": " + retailer.getOrders() + " orders made during this update cycle\n" + 
+//					"updating: \n\tSupply=" + retailer.getSupply() + "(" + supplyChange + ")" +
+//					"\n\tPrice=" + retailer.getPricePerUnit() + "(" + priceChange + ")", 
+//					Color.GREEN);
+			ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName(), 
+					retailer.getOrders() + " orders made during update cycle\n" + 
 					"updating: \n\tSupply=" + retailer.getSupply() + "(" + supplyChange + ")" +
 					"\n\tPrice=" + retailer.getPricePerUnit() + "(" + priceChange + ")", 
-					Color.GREEN);
+					Color.GREEN.darker());
 			
 			if(updateTickRange) {
 				updateTicks = randomRangeTimer(updateTickMin, updateTickMax);
@@ -292,8 +309,9 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			@Override
 			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
 				super.handleSubscription(subscription);
-				ProgramGUI.getInstance().printToLog(retailer.hashCode(), myAgent.getLocalName() + ": new subscriber " + 
-						subscription.getSender().getLocalName(), Color.BLACK);
+				//TODO Confirm
+				ProgramGUI.getInstance().printToLog(retailer.hashCode(), myAgent.getLocalName(),
+						"new subscriber " + subscription.getSender().getLocalName(), Color.BLACK);
 				
 				sub = getSubscription(subscription);
 				notification = subscription.createReply();

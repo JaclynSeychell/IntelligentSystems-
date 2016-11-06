@@ -300,12 +300,12 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pAppliances.add(pApplianceUpdateTime, gbc_pApplianceUpdateTime);
 		
 		spApplianceUpdateMinTime = new JSpinner();
-		spApplianceUpdateMinTime.setModel(new SpinnerNumberModel(0, 0, 120, 1));
+		spApplianceUpdateMinTime.setModel(new SpinnerNumberModel(1, 1, 120, 1));
 		spApplianceUpdateMinTime.setEnabled(false);
 		pApplianceUpdateTime.add(spApplianceUpdateMinTime);
 		
 		spApplianceUpdateMaxTime = new JSpinner();
-		spApplianceUpdateMaxTime.setModel(new SpinnerNumberModel(30, 1, 600, 1));
+		spApplianceUpdateMaxTime.setModel(new SpinnerNumberModel(10, 1, 600, 1));
 		pApplianceUpdateTime.add(spApplianceUpdateMaxTime);
 		
 		cbRangeApplianceUpdateTime = new JCheckBox("Range");
@@ -684,12 +684,12 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pHome.add(pHomeTradeTime, gbc_pHomeTradeTime);
 		
 		spHomeTradeMinTime = new JSpinner();
-		spHomeTradeMinTime.setModel(new SpinnerNumberModel(0, 0, 120, 1));
+		spHomeTradeMinTime.setModel(new SpinnerNumberModel(1, 1, 120, 1));
 		spHomeTradeMinTime.setEnabled(false);
 		pHomeTradeTime.add(spHomeTradeMinTime);
 		
 		spHomeTradeMaxTime = new JSpinner();
-		spHomeTradeMaxTime.setModel(new SpinnerNumberModel(60, 1, 600, 1));
+		spHomeTradeMaxTime.setModel(new SpinnerNumberModel(50, 1, 600, 1));
 		pHomeTradeTime.add(spHomeTradeMaxTime);
 		
 		cbRangeHomeTradeTime = new JCheckBox("Range");
@@ -717,12 +717,12 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pHome.add(pHomeUpdateTime, gbc_pHomeUpdateTime);
 		
 		spHomeUpdateMinTime = new JSpinner();
-		spHomeUpdateMinTime.setModel(new SpinnerNumberModel(0, 0, 120, 1));
+		spHomeUpdateMinTime.setModel(new SpinnerNumberModel(1, 1, 120, 1));
 		spHomeUpdateMinTime.setEnabled(false);
 		pHomeUpdateTime.add(spHomeUpdateMinTime);
 		
 		spHomeUpdateMaxTime = new JSpinner();
-		spHomeUpdateMaxTime.setModel(new SpinnerNumberModel(20, 1, 600, 1));
+		spHomeUpdateMaxTime.setModel(new SpinnerNumberModel(10, 1, 600, 1));
 		pHomeUpdateTime.add(spHomeUpdateMaxTime);
 		
 		cbRangeHomeUpdateTime = new JCheckBox("Range");
@@ -765,12 +765,12 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pRetailers.add(pRetailerUpdateTime, gbc_pRetailerUpdateTime);
 		
 		spRetailerUpdateMinTime = new JSpinner();
-		spRetailerUpdateMinTime.setModel(new SpinnerNumberModel(0, 0, 120, 1));
+		spRetailerUpdateMinTime.setModel(new SpinnerNumberModel(1, 1, 120, 1));
 		spRetailerUpdateMinTime.setEnabled(false);
 		pRetailerUpdateTime.add(spRetailerUpdateMinTime);
 		
 		spRetailerUpdateMaxTime = new JSpinner();
-		spRetailerUpdateMaxTime.setModel(new SpinnerNumberModel(300, 1, 600, 1));
+		spRetailerUpdateMaxTime.setModel(new SpinnerNumberModel(10, 1, 600, 1));
 		pRetailerUpdateTime.add(spRetailerUpdateMaxTime);
 		
 		cbRangeRetailerUpdateTime = new JCheckBox("Range");

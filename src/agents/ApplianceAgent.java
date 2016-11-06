@@ -67,7 +67,8 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			appliance = new Appliance();
 		}
 		
-		ProgramGUI.getInstance().printToLog(appliance.hashCode(), appliance.toString(), Color.GREEN);
+//		ProgramGUI.getInstance().printToLog(appliance.hashCode(), appliance.toString(), Color.GREEN);
+		ProgramGUI.getInstance().printToLog(appliance.hashCode(), getLocalName(), "created", Color.GREEN);
 		
 		// Register in the DF
 		DFRegistry.register(this, APPLIANCE_AGENT);
@@ -77,7 +78,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 	// Deregister this agent
 	@Override
 	protected void takeDown() {
-		ProgramGUI.getInstance().printToLog(appliance.hashCode(), getLocalName() + ": agent shutdown", Color.RED);
+		ProgramGUI.getInstance().printToLog(appliance.hashCode(), getLocalName(), "shutdown", Color.RED);
 		try { DFService.deregister(this); } catch (Exception e) { e.printStackTrace(); };
 		
 		try {
@@ -98,7 +99,8 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 				msg += "\t" + dfds[i].getName();
 			}
 			
-			ProgramGUI.getInstance().printToLog(appliance.hashCode(), msg, Color.GREEN);
+			//TODO Confirm
+			ProgramGUI.getInstance().printToLog(appliance.hashCode(), getLocalName(), msg, Color.GREEN);
 		} catch (Exception e) { 
 			e.printStackTrace(); 
 		}
@@ -119,7 +121,8 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			protected ACLMessage handleSubscription(ACLMessage subscription) throws NotUnderstoodException, RefuseException {
 				super.handleSubscription(subscription);
 				
-				ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName() + ": new subcriber " + 
+				//TODO Confirm
+				ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName(), "new subcriber " + 
 						subscription.getSender().getLocalName(), Color.GREEN);
 				
 				sub = getSubscription(subscription);
@@ -130,8 +133,8 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 				addBehaviour(new TickerBehaviour(myAgent, updateTicks) {
 					@Override
 					public void onTick() {
-						ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName() + 
-								": notifying home agent of energy usage.", Color.BLACK);
+						ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName(),  
+								"energy usage shared...", Color.GREEN.darker().darker());
 						
 						System.out.println(getLocalName() + ": " + appliance.getRate());
 						notification.setContent(Integer.toString(appliance.getRate()));
