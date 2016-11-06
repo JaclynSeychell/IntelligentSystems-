@@ -78,7 +78,6 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 	private JLabel lHomeGenerationRateValue;
 	private JLabel lHomeUsageRateValue;
 	private JLabel lHomeSupplyValue;
-	private JLabel lHomeBudgetValue;
 	private JLabel lHomeExpenditureValue;
 	private JTextPane tpHome;
 	
@@ -106,7 +105,10 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 	}
 	
 	private ProgramGUI() {
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setResizable(false);
+//		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		
 		// HEADER
 		JPanel pHeader = new JPanel();
 		getContentPane().add(pHeader, BorderLayout.NORTH);
@@ -131,7 +133,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pBody = new GridBagLayout();
 		gbl_pBody.columnWidths = new int[]{0, 0, 0, 0, 0, 0};
 		gbl_pBody.rowHeights = new int[]{0, 0, 0, 0, 0, 0};
-		gbl_pBody.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_pBody.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_pBody.rowWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		pBody.setLayout(gbl_pBody);
 		
@@ -147,6 +149,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JLabel lMessages = new JLabel("Global Messages");
 		lMessages.setFont(new Font("Calibri", Font.BOLD, 24));
 		GridBagConstraints gbc_lMessages = new GridBagConstraints();
+		gbc_lMessages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lMessages.insets = new Insets(0, 0, 5, 5);
 		gbc_lMessages.weightx = 25.0;
 		gbc_lMessages.gridx = 3;
@@ -165,13 +168,14 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pAgents = new GridBagLayout();
 		gbl_pAgents.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 		gbl_pAgents.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_pAgents.columnWeights = new double[]{1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_pAgents.rowWeights = new double[]{1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_pAgents.columnWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_pAgents.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		pAgents.setLayout(gbl_pAgents);
 		
 		// APPLIANCES
 		JPanel pAppliance1 = new JPanel();
 		pAppliance1.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
+//		pAppliance1.width;
 		GridBagConstraints gbc_pAppliance1 = new GridBagConstraints();
 		gbc_pAppliance1.insets = new Insets(0, 0, 5, 5);
 		gbc_pAppliance1.weighty = 25.0;
@@ -183,17 +187,18 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pAppliance1 = new GridBagLayout();
 		gbl_pAppliance1.columnWidths = new int[]{0, 0, 0};
 		gbl_pAppliance1.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_pAppliance1.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
-		gbl_pAppliance1.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_pAppliance1.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_pAppliance1.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		pAppliance1.setLayout(gbl_pAppliance1);
 		
 		bAppliance1 = new JButton("Appliance 1");
 		bAppliance1.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		GridBagConstraints gbc_bAppliance1 = new GridBagConstraints();
+		gbc_bAppliance1.anchor = GridBagConstraints.NORTH;
 		gbc_bAppliance1.weighty = 25.0;
 		gbc_bAppliance1.gridwidth = 2;
 		gbc_bAppliance1.insets = new Insets(0, 0, 5, 0);
-		gbc_bAppliance1.fill = GridBagConstraints.BOTH;
+		gbc_bAppliance1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_bAppliance1.weightx = 100.0;
 		gbc_bAppliance1.gridx = 0;
 		gbc_bAppliance1.gridy = 0;
@@ -235,8 +240,9 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JPanel pAppliance1Messages = new JPanel();
 		pAppliance1Messages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pAppliance1Messages = new GridBagConstraints();
+		gbc_pAppliance1Messages.anchor = GridBagConstraints.SOUTH;
 		gbc_pAppliance1Messages.weighty = 25.0;
-		gbc_pAppliance1Messages.fill = GridBagConstraints.BOTH;
+		gbc_pAppliance1Messages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pAppliance1Messages.gridwidth = 2;
 		gbc_pAppliance1Messages.insets = new Insets(5, 5, 5, 5);
 		gbc_pAppliance1Messages.gridx = 0;
@@ -245,6 +251,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pAppliance1Messages.setLayout(new BorderLayout(0, 0));
 		
 		tpAppliance1 = new JTextPane();
+		tpAppliance1.setEditable(false);
 		pAppliance1Messages.add(tpAppliance1);
 		
 		JPanel pAppliance2 = new JPanel();
@@ -260,17 +267,18 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pAppliance2 = new GridBagLayout();
 		gbl_pAppliance2.columnWidths = new int[]{0, 0, 0};
 		gbl_pAppliance2.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_pAppliance2.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
-		gbl_pAppliance2.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_pAppliance2.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_pAppliance2.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		pAppliance2.setLayout(gbl_pAppliance2);
 		
 		bAppliance2 = new JButton("Appliance 2");
 		bAppliance2.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		GridBagConstraints gbc_bAppliance2 = new GridBagConstraints();
+		gbc_bAppliance2.anchor = GridBagConstraints.NORTH;
 		gbc_bAppliance2.weighty = 25.0;
 		gbc_bAppliance2.gridwidth = 2;
 		gbc_bAppliance2.insets = new Insets(0, 0, 5, 0);
-		gbc_bAppliance2.fill = GridBagConstraints.BOTH;
+		gbc_bAppliance2.fill = GridBagConstraints.HORIZONTAL;
 		gbc_bAppliance2.weightx = 100.0;
 		gbc_bAppliance2.gridx = 0;
 		gbc_bAppliance2.gridy = 0;
@@ -313,8 +321,9 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pAppliance2Messages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		pAppliance1Messages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pAppliance2Messages = new GridBagConstraints();
+		gbc_pAppliance2Messages.anchor = GridBagConstraints.SOUTH;
 		gbc_pAppliance2Messages.weighty = 25.0;
-		gbc_pAppliance2Messages.fill = GridBagConstraints.BOTH;
+		gbc_pAppliance2Messages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pAppliance2Messages.gridwidth = 2;
 		gbc_pAppliance2Messages.insets = new Insets(5, 5, 5, 5);
 		gbc_pAppliance2Messages.gridx = 0;
@@ -323,6 +332,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pAppliance2Messages.setLayout(new BorderLayout(0, 0));
 		
 		tpAppliance2 = new JTextPane();
+		tpAppliance2.setEditable(false);
 		pAppliance2Messages.add(tpAppliance2);
 		
 		JPanel pAppliance3 = new JPanel();
@@ -338,17 +348,18 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pAppliance3 = new GridBagLayout();
 		gbl_pAppliance3.columnWidths = new int[]{0, 0, 0};
 		gbl_pAppliance3.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_pAppliance3.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
-		gbl_pAppliance3.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
+		gbl_pAppliance3.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_pAppliance3.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		pAppliance3.setLayout(gbl_pAppliance3);
 		
 		bAppliance3 = new JButton("Appliance 3");
 		bAppliance3.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		GridBagConstraints gbc_bAppliance3 = new GridBagConstraints();
+		gbc_bAppliance3.anchor = GridBagConstraints.NORTH;
 		gbc_bAppliance3.weighty = 25.0;
 		gbc_bAppliance3.gridwidth = 2;
 		gbc_bAppliance3.insets = new Insets(0, 0, 5, 0);
-		gbc_bAppliance3.fill = GridBagConstraints.BOTH;
+		gbc_bAppliance3.fill = GridBagConstraints.HORIZONTAL;
 		gbc_bAppliance3.weightx = 100.0;
 		gbc_bAppliance3.gridx = 0;
 		gbc_bAppliance3.gridy = 0;
@@ -390,8 +401,9 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JPanel pAppliance3Messages = new JPanel();
 		pAppliance3Messages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pAppliance3Messages = new GridBagConstraints();
+		gbc_pAppliance3Messages.anchor = GridBagConstraints.SOUTH;
 		gbc_pAppliance3Messages.weighty = 25.0;
-		gbc_pAppliance3Messages.fill = GridBagConstraints.BOTH;
+		gbc_pAppliance3Messages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pAppliance3Messages.gridwidth = 2;
 		gbc_pAppliance3Messages.insets = new Insets(5, 5, 5, 5);
 		gbc_pAppliance3Messages.gridx = 0;
@@ -400,6 +412,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pAppliance3Messages.setLayout(new BorderLayout(0, 0));
 		
 		tpAppliance3 = new JTextPane();
+		tpAppliance3.setEditable(false);
 		pAppliance3Messages.add(tpAppliance3);
 		
 		// HOME
@@ -416,17 +429,18 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pHome = new GridBagLayout();
 		gbl_pHome.columnWidths = new int[]{0};
 		gbl_pHome.rowHeights = new int[]{0};
-		gbl_pHome.columnWeights = new double[]{Double.MIN_VALUE};
-		gbl_pHome.rowWeights = new double[]{Double.MIN_VALUE};
+		gbl_pHome.columnWeights = new double[]{0.0};
+		gbl_pHome.rowWeights = new double[]{0.0};
 		pHome.setLayout(gbl_pHome);
 		
 		bHome = new JButton("Home Agent");
 		bHome.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		GridBagConstraints gbc_bHome = new GridBagConstraints();
+		gbc_bHome.anchor = GridBagConstraints.NORTH;
 		gbc_bHome.weighty = 25.0;
 		gbc_bHome.gridwidth = 2;
 		gbc_bHome.insets = new Insets(0, 0, 5, 0);
-		gbc_bHome.fill = GridBagConstraints.BOTH;
+		gbc_bHome.fill = GridBagConstraints.HORIZONTAL;
 		gbc_bHome.weightx = 100.0;
 		gbc_bHome.gridx = 0;
 		gbc_bHome.gridy = 0;
@@ -481,51 +495,37 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		gbc_lHomeSupplyValue.gridy = 3;
 		pHome.add(lHomeSupplyValue, gbc_lHomeSupplyValue);
 		
-		JLabel lHomeBudget = new JLabel("Budget:");
-		GridBagConstraints gbc_lHomeBudget = new GridBagConstraints();
-		gbc_lHomeBudget.weighty = 5.0;
-		gbc_lHomeBudget.weightx = 60.0;
-		gbc_lHomeBudget.insets = new Insets(0, 0, 5, 5);
-		gbc_lHomeBudget.gridx = 0;
-		gbc_lHomeBudget.gridy = 4;
-		pHome.add(lHomeBudget, gbc_lHomeBudget);
-		
-		lHomeBudgetValue = new JLabel("value");
-		GridBagConstraints gbc_lHomeBudgetValue = new GridBagConstraints();
-		gbc_lHomeBudgetValue.insets = new Insets(0, 0, 5, 0);
-		gbc_lHomeBudgetValue.gridx = 1;
-		gbc_lHomeBudgetValue.gridy = 4;
-		pHome.add(lHomeBudgetValue, gbc_lHomeBudgetValue);
-		
 		JLabel lHomeExpediture = new JLabel("Income:");
 		GridBagConstraints gbc_lHomeExpenditure = new GridBagConstraints();
 		gbc_lHomeExpenditure.weighty = 5.0;
 		gbc_lHomeExpenditure.weightx = 60.0;
 		gbc_lHomeExpenditure.insets = new Insets(0, 0, 5, 5);
 		gbc_lHomeExpenditure.gridx = 0;
-		gbc_lHomeExpenditure.gridy = 5;
+		gbc_lHomeExpenditure.gridy = 4;
 		pHome.add(lHomeExpediture, gbc_lHomeExpenditure);
 		
 		lHomeExpenditureValue = new JLabel("value");
 		GridBagConstraints gbc_lHomeExpenditureValue = new GridBagConstraints();
 		gbc_lHomeExpenditureValue.insets = new Insets(0, 0, 5, 0);
 		gbc_lHomeExpenditureValue.gridx = 1;
-		gbc_lHomeExpenditureValue.gridy = 5;
+		gbc_lHomeExpenditureValue.gridy = 4;
 		pHome.add(lHomeExpenditureValue, gbc_lHomeExpenditureValue);
 		
 		JPanel pHomeMessages = new JPanel();
 		pHomeMessages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pHomeMessages = new GridBagConstraints();
+		gbc_pHomeMessages.fill = GridBagConstraints.HORIZONTAL;
+		gbc_pHomeMessages.anchor = GridBagConstraints.SOUTH;
 		gbc_pHomeMessages.weighty = 25.0;
-		gbc_pHomeMessages.fill = GridBagConstraints.BOTH;
 		gbc_pHomeMessages.gridwidth = 2;
-		gbc_pHomeMessages.insets = new Insets(5, 5, 5, 5);
+		gbc_pHomeMessages.insets = new Insets(5, 5, 0, 0);
 		gbc_pHomeMessages.gridx = 0;
 		gbc_pHomeMessages.gridy = 6;
 		pHome.add(pHomeMessages, gbc_pHomeMessages);
 		pHomeMessages.setLayout(new BorderLayout(0, 0));
 		
 		tpHome = new JTextPane();
+		tpHome.setEditable(false);
 		pHomeMessages.add(tpHome);
 		
 		// BROKER
@@ -542,7 +542,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pBroker = new GridBagLayout();
 		gbl_pBroker.columnWidths = new int[]{0};
 		gbl_pBroker.rowHeights = new int[]{0};
-		gbl_pBroker.columnWeights = new double[]{Double.MIN_VALUE};
+		gbl_pBroker.columnWeights = new double[]{0.0};
 		gbl_pBroker.rowWeights = new double[]{Double.MIN_VALUE};
 		pBroker.setLayout(gbl_pBroker);
 		
@@ -553,7 +553,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		gbc_bBroker.anchor = GridBagConstraints.NORTH;
 		gbc_bBroker.gridwidth = 2;
 		gbc_bBroker.insets = new Insets(0, 0, 5, 0);
-		gbc_bBroker.fill = GridBagConstraints.BOTH;
+		gbc_bBroker.fill = GridBagConstraints.HORIZONTAL;
 		gbc_bBroker.weightx = 100.0;
 		gbc_bBroker.gridx = 0;
 		gbc_bBroker.gridy = 0;
@@ -562,7 +562,8 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JPanel pBrokerMessages = new JPanel();
 		pBrokerMessages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pBrokerMessages = new GridBagConstraints();
-		gbc_pBrokerMessages.fill = GridBagConstraints.BOTH;
+		gbc_pBrokerMessages.anchor = GridBagConstraints.SOUTH;
+		gbc_pBrokerMessages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pBrokerMessages.gridwidth = 2;
 		gbc_pBrokerMessages.insets = new Insets(5, 5, 5, 5);
 		gbc_pBrokerMessages.gridx = 0;
@@ -571,6 +572,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pBrokerMessages.setLayout(new BorderLayout(0, 0));
 		
 		tpBroker = new JTextPane();
+		tpBroker.setEditable(false);
 		pBrokerMessages.add(tpBroker);
 		
 		// RETAILERS
@@ -587,17 +589,18 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pRetailer1 = new GridBagLayout();
 		gbl_pRetailer1.columnWidths = new int[]{0, 0, 0};
 		gbl_pRetailer1.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_pRetailer1.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+		gbl_pRetailer1.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		gbl_pRetailer1.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		pRetailer1.setLayout(gbl_pRetailer1);
 		
 		bRetailer1 = new JButton("Retailer 1");
 		bRetailer1.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		GridBagConstraints gbc_bRetailer1 = new GridBagConstraints();
+		gbc_bRetailer1.anchor = GridBagConstraints.NORTH;
 		gbc_bRetailer1.weighty = 25.0;
 		gbc_bRetailer1.gridwidth = 2;
 		gbc_bRetailer1.insets = new Insets(0, 0, 5, 0);
-		gbc_bRetailer1.fill = GridBagConstraints.BOTH;
+		gbc_bRetailer1.fill = GridBagConstraints.HORIZONTAL;
 		gbc_bRetailer1.weightx = 100.0;
 		gbc_bRetailer1.gridx = 0;
 		gbc_bRetailer1.gridy = 0;
@@ -671,8 +674,9 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JPanel pRetailer1Messages = new JPanel();
 		pRetailer1Messages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pRetailer1Messages = new GridBagConstraints();
+		gbc_pRetailer1Messages.anchor = GridBagConstraints.SOUTH;
 		gbc_pRetailer1Messages.weighty = 25.0;
-		gbc_pRetailer1Messages.fill = GridBagConstraints.BOTH;
+		gbc_pRetailer1Messages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pRetailer1Messages.gridwidth = 2;
 		gbc_pRetailer1Messages.insets = new Insets(5, 5, 5, 5);
 		gbc_pRetailer1Messages.gridx = 0;
@@ -681,6 +685,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pRetailer1Messages.setLayout(new BorderLayout(0, 0));
 		
 		tpRetailer1 = new JTextPane();
+		tpRetailer1.setEditable(false);
 		pRetailer1Messages.add(tpRetailer1);
 		
 		JPanel pRetailer2 = new JPanel();
@@ -696,17 +701,18 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pRetailer2 = new GridBagLayout();
 		gbl_pRetailer2.columnWidths = new int[]{0, 0, 0};
 		gbl_pRetailer2.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_pRetailer2.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+		gbl_pRetailer2.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		gbl_pRetailer1.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		pRetailer2.setLayout(gbl_pRetailer2);
 		
 		bRetailer2 = new JButton("Retailer 2");
 		bRetailer2.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		GridBagConstraints gbc_bRetailer2 = new GridBagConstraints();
+		gbc_bRetailer2.anchor = GridBagConstraints.NORTH;
 		gbc_bRetailer2.weighty = 25.0;
 		gbc_bRetailer2.gridwidth = 2;
 		gbc_bRetailer2.insets = new Insets(0, 0, 5, 0);
-		gbc_bRetailer2.fill = GridBagConstraints.BOTH;
+		gbc_bRetailer2.fill = GridBagConstraints.HORIZONTAL;
 		gbc_bRetailer2.weightx = 100.0;
 		gbc_bRetailer2.gridx = 0;
 		gbc_bRetailer2.gridy = 0;
@@ -785,8 +791,9 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JPanel pRetailer2Messages = new JPanel();
 		pRetailer2Messages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pRetailer2Messages = new GridBagConstraints();
+		gbc_pRetailer2Messages.anchor = GridBagConstraints.SOUTH;
 		gbc_pRetailer2Messages.weighty = 25.0;
-		gbc_pRetailer2Messages.fill = GridBagConstraints.BOTH;
+		gbc_pRetailer2Messages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pRetailer2Messages.gridwidth = 2;
 		gbc_pRetailer2Messages.insets = new Insets(5, 5, 5, 5);
 		gbc_pRetailer2Messages.gridx = 0;
@@ -795,6 +802,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pRetailer2Messages.setLayout(new BorderLayout(0, 0));
 		
 		tpRetailer2 = new JTextPane();
+		tpRetailer2.setEditable(false);
 		pRetailer2Messages.add(tpRetailer2);
 		
 		JPanel pRetailer3 = new JPanel();
@@ -810,17 +818,18 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		GridBagLayout gbl_pRetailer3 = new GridBagLayout();
 		gbl_pRetailer3.columnWidths = new int[]{0, 0, 0};
 		gbl_pRetailer3.rowHeights = new int[]{0, 0, 0, 0, 0};
-		gbl_pRetailer3.columnWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+		gbl_pRetailer3.columnWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
 		gbl_pRetailer3.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		pRetailer3.setLayout(gbl_pRetailer3);
 		
 		bRetailer3 = new JButton("Retailer 3");
 		bRetailer3.setBorder(new BevelBorder(BevelBorder.RAISED, null, null, null, null));
 		GridBagConstraints gbc_bRetailer3 = new GridBagConstraints();
+		gbc_bRetailer3.anchor = GridBagConstraints.NORTH;
 		gbc_bRetailer3.weighty = 25.0;
 		gbc_bRetailer3.gridwidth = 2;
 		gbc_bRetailer3.insets = new Insets(0, 0, 5, 0);
-		gbc_bRetailer3.fill = GridBagConstraints.BOTH;
+		gbc_bRetailer3.fill = GridBagConstraints.HORIZONTAL;
 		gbc_bRetailer3.weightx = 100.0;
 		gbc_bRetailer3.gridx = 0;
 		gbc_bRetailer3.gridy = 0;
@@ -894,8 +903,9 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		JPanel pRetailer3Messages = new JPanel();
 		pRetailer3Messages.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		GridBagConstraints gbc_pRetailer3Messages = new GridBagConstraints();
+		gbc_pRetailer3Messages.anchor = GridBagConstraints.SOUTH;
 		gbc_pRetailer3Messages.weighty = 25.0;
-		gbc_pRetailer3Messages.fill = GridBagConstraints.BOTH;
+		gbc_pRetailer3Messages.fill = GridBagConstraints.HORIZONTAL;
 		gbc_pRetailer3Messages.gridwidth = 2;
 		gbc_pRetailer3Messages.insets = new Insets(5, 5, 5, 5);
 		gbc_pRetailer3Messages.gridx = 0;
@@ -904,14 +914,15 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		pRetailer3Messages.setLayout(new BorderLayout(0, 0));
 		
 		tpRetailer3 = new JTextPane();
+		tpRetailer3.setEditable(false);
 		pRetailer3Messages.add(tpRetailer3);
 		
 		// Global log
 		tpGlobalMessages = new JTextPane();
-		tpGlobalMessages.setEditable(false);
 
 		JScrollPane scrollPane = new JScrollPane(tpGlobalMessages, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setBorder(new LineBorder(new Color(0, 0, 0), 2, true));
+		
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
@@ -921,7 +932,8 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		
 		JButton btnClear = new JButton("Clear");
 		GridBagConstraints gbc_btnClear = new GridBagConstraints();
-		gbc_btnClear.fill = GridBagConstraints.BOTH;
+		gbc_btnClear.anchor = GridBagConstraints.SOUTH;
+		gbc_btnClear.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnClear.insets = new Insets(0, 0, 5, 5);
 		gbc_btnClear.gridx = 3;
 		gbc_btnClear.gridy = 3;
@@ -954,7 +966,7 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 				lHomeGenerationRateValue.setText(Integer.toString(home.getGenerationRate()));
 				lHomeUsageRateValue.setText(Integer.toString(home.getUsageRate()));
 				lHomeSupplyValue.setText(Integer.toString(home.getSupply()));
-				lHomeBudgetValue.setText(Integer.toString(home.getBudget()));
+//				lHomeBudgetValue.setText(Integer.toString(home.getBudget()));
 				lHomeExpenditureValue.setText(Integer.toString(home.getIncome()));
 				
 				if(!agentLogs.containsKey(home.hashCode())) {
@@ -1040,6 +1052,9 @@ public class ProgramGUI extends JFrame implements SupplierVocabulary {
 		msg = msg + "\n";
 		// Log all to global pane
 		appendToPane(tpGlobalMessages, msg, c);
+		
+		int endOfText = tpGlobalMessages.getText().length();
+		tpGlobalMessages.setCaretPosition(endOfText); //autoscrolls to show latest updates
 		
 		// Log to individual agent pane
 		try {
