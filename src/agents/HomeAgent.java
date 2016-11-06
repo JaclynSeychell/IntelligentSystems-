@@ -323,7 +323,6 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 							": Agent " + inform.getSender().getName() + " has returned a quote $" + 
 							purchase.getPrice() * purchase.getUnits() + " for " + purchase.getUnits() + "units", 
 							Color.ORANGE);
-					
 				}
 				
 				@Override
@@ -335,6 +334,13 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 						queryError = true;
 						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
 								": Timeout expired! No response received", Color.RED);
+					}
+					
+					// sleep
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
 			});
@@ -401,6 +407,13 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 						
 						ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName() + 
 								": Timeout expired! No response received", Color.RED);
+					}
+					
+					// sleep
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
 			});

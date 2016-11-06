@@ -260,7 +260,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 			}
 			
 			ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + 
-					": " + retailer.getOrders() + " made during this update cycle\n" + 
+					": " + retailer.getOrders() + " orders made during this update cycle\n" + 
 					"updating: \n\tSupply=" + retailer.getSupply() + "(" + supplyChange + ")" +
 					"\n\tPrice=" + retailer.getPricePerUnit() + "(" + priceChange + ")", 
 					Color.GREEN);
@@ -308,11 +308,18 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 								e.printStackTrace();
 							}
 							
-							ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + 
-									": notifying broker agent of price change.", Color.BLACK);
+							//ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName() + 
+							//		": notifying broker agent of price change.", Color.BLACK);
 					
 							sub.notify(notification);
 							sendNotification = false;
+							
+							// sleep
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				});

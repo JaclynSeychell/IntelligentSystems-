@@ -208,6 +208,13 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			protected ACLMessage handleRequest(ACLMessage request) throws NotUnderstoodException, RefuseException {
 				ProgramGUI.getInstance().printToLog(broker.hashCode(), "Agent " + getLocalName() + ": REQUEST received from " + 
 						request.getSender().getLocalName() + ". Action is " + request.getContent(), Color.ORANGE);
+				
+				// sleep
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			
 				// Request fails if their are no retailers
 				ACLMessage response = request.createReply();
@@ -273,6 +280,13 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 			
 			@Override
 			protected void handleAllResultNotifications(@SuppressWarnings("rawtypes") Vector notifications) {
+				// sleep
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
 				if (notifications.size() == 0) {
 					// Timeout
 					storeNotification(ACLMessage.FAILURE);
@@ -337,6 +351,10 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	  									" to $" + quote.getPrice() + " per unit", Color.ORANGE);
 	  							
 	  							retailers.put( inform.getSender(), new Tuple<Integer, Integer>( quote.getPrice(), quote.getUnits() ) );
+	  							
+	  							// sleep
+								Thread.sleep(1000);
+								
   							} catch(Exception e) {
   								e.printStackTrace();
   							}
@@ -390,30 +408,5 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
   				}
   			}
 		});
-	}
-	
-	private void storeBestOffer() {
-		Iterator<Entry<AID, Tuple<Integer, Integer>>> it = retailers.entrySet().iterator();
-		int bestPrice = Integer.MAX_VALUE;
-		bestOffer = null;
-		
-		try {
-			while(it.hasNext()) {
-				Map.Entry<AID, Tuple<Integer, Integer>> pair = (Map.Entry<AID, Tuple<Integer, Integer>>)it.next();
-				Tuple<Integer, Integer> t = (Tuple<Integer, Integer>)pair.getValue();
-				int price = t.first();
-				int supply = t.last();
-				
-				if(price < bestPrice) {
-					bestPrice = price;
-					bestOffer = (AID)pair.getKey();
-				
-					ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName() + "Best price offered by " + 
-							bestOffer.getName() + " at " + bestPrice, Color.GREEN);
-				} 
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
 	}
 }
