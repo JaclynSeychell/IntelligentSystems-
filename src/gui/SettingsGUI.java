@@ -283,11 +283,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_cbRandApplianceUseRate.gridy = 4;
 		pAppliances.add(cbRandApplianceUseRate, gbc_cbRandApplianceUseRate);
 		
-<<<<<<< HEAD
-		JLabel lApplianceUpdateFrequency = new JLabel("Update Frequency (secs):");
-=======
 		JLabel lApplianceUpdateFrequency = new JLabel("Update Frequency (sec):");
->>>>>>> origin/master
 		GridBagConstraints gbc_lApplianceUpdateFrequency = new GridBagConstraints();
 		gbc_lApplianceUpdateFrequency.anchor = GridBagConstraints.EAST;
 		gbc_lApplianceUpdateFrequency.insets = new Insets(0, 0, 5, 5);
@@ -304,20 +300,12 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pAppliances.add(pApplianceUpdateTime, gbc_pApplianceUpdateTime);
 		
 		spApplianceUpdateMinTime = new JSpinner();
-<<<<<<< HEAD
-		spApplianceUpdateMinTime.setModel(new SpinnerNumberModel(new Float(1), new Float(1), new Float(120), new Float(1)));
-=======
 		spApplianceUpdateMinTime.setModel(new SpinnerNumberModel(0, 0, 120, 1));
->>>>>>> origin/master
 		spApplianceUpdateMinTime.setEnabled(false);
 		pApplianceUpdateTime.add(spApplianceUpdateMinTime);
 		
 		spApplianceUpdateMaxTime = new JSpinner();
-<<<<<<< HEAD
-		spApplianceUpdateMaxTime.setModel(new SpinnerNumberModel(new Float(5), new Float(1), new Float(120), new Float(1)));
-=======
 		spApplianceUpdateMaxTime.setModel(new SpinnerNumberModel(30, 1, 600, 1));
->>>>>>> origin/master
 		pApplianceUpdateTime.add(spApplianceUpdateMaxTime);
 		
 		cbRangeApplianceUpdateTime = new JCheckBox("Range");
@@ -679,11 +667,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_cbRandRetailerSupply.gridy = 6;
 		pRetailers.add(cbRandRetailerSupply, gbc_cbRandRetailerSupply);
 		
-<<<<<<< HEAD
-		JLabel lHomeTradeFrequency = new JLabel("Trading Frequency (secs):");
-=======
 		JLabel lHomeTradeFrequency = new JLabel("Trading Frequency (sec):");
->>>>>>> origin/master
 		GridBagConstraints gbc_lHomeTradeFrequency = new GridBagConstraints();
 		gbc_lHomeTradeFrequency.anchor = GridBagConstraints.EAST;
 		gbc_lHomeTradeFrequency.insets = new Insets(0, 0, 5, 5);
@@ -700,20 +684,12 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pHome.add(pHomeTradeTime, gbc_pHomeTradeTime);
 		
 		spHomeTradeMinTime = new JSpinner();
-<<<<<<< HEAD
-		spHomeTradeMinTime.setModel(new SpinnerNumberModel(new Float(1), new Float(1), new Float(120), new Float(1)));
-=======
 		spHomeTradeMinTime.setModel(new SpinnerNumberModel(0, 0, 120, 1));
->>>>>>> origin/master
 		spHomeTradeMinTime.setEnabled(false);
 		pHomeTradeTime.add(spHomeTradeMinTime);
 		
 		spHomeTradeMaxTime = new JSpinner();
-<<<<<<< HEAD
-		spHomeTradeMaxTime.setModel(new SpinnerNumberModel(new Float(10), new Float(1), new Float(120), new Float(1)));
-=======
 		spHomeTradeMaxTime.setModel(new SpinnerNumberModel(60, 1, 600, 1));
->>>>>>> origin/master
 		pHomeTradeTime.add(spHomeTradeMaxTime);
 		
 		cbRangeHomeTradeTime = new JCheckBox("Range");
@@ -724,11 +700,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_cbRangeHomeTradeTime.gridy = 8;
 		pHome.add(cbRangeHomeTradeTime, gbc_cbRangeHomeTradeTime);
 		
-<<<<<<< HEAD
-		JLabel lHomeUpdateFrequency = new JLabel("Update Frequency (secs):");
-=======
 		JLabel lHomeUpdateFrequency = new JLabel("Update Frequency (sec):");
->>>>>>> origin/master
 		GridBagConstraints gbc_lHomeUpdateFrequency = new GridBagConstraints();
 		gbc_lHomeUpdateFrequency.anchor = GridBagConstraints.EAST;
 		gbc_lHomeUpdateFrequency.insets = new Insets(0, 0, 0, 5);
@@ -745,20 +717,12 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pHome.add(pHomeUpdateTime, gbc_pHomeUpdateTime);
 		
 		spHomeUpdateMinTime = new JSpinner();
-<<<<<<< HEAD
-		spHomeUpdateMinTime.setModel(new SpinnerNumberModel(new Float(1), new Float(1), new Float(120), new Float(1)));
-=======
 		spHomeUpdateMinTime.setModel(new SpinnerNumberModel(0, 0, 120, 1));
->>>>>>> origin/master
 		spHomeUpdateMinTime.setEnabled(false);
 		pHomeUpdateTime.add(spHomeUpdateMinTime);
 		
 		spHomeUpdateMaxTime = new JSpinner();
-<<<<<<< HEAD
-		spHomeUpdateMaxTime.setModel(new SpinnerNumberModel(new Float(5), new Float(1), new Float(120), new Float(1)));
-=======
 		spHomeUpdateMaxTime.setModel(new SpinnerNumberModel(20, 1, 600, 1));
->>>>>>> origin/master
 		pHomeUpdateTime.add(spHomeUpdateMaxTime);
 		
 		cbRangeHomeUpdateTime = new JCheckBox("Range");
@@ -784,11 +748,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_ddRetailerType.gridy = 7;
 		pRetailers.add(ddRetailerType, gbc_ddRetailerType);
 		
-<<<<<<< HEAD
-		JLabel lRetailerUpdateFrequency = new JLabel("Update Frequency (secs):");
-=======
 		JLabel lRetailerUpdateFrequency = new JLabel("Update Frequency (sec):");
->>>>>>> origin/master
 		GridBagConstraints gbc_lRetailerUpdateFrequency = new GridBagConstraints();
 		gbc_lRetailerUpdateFrequency.anchor = GridBagConstraints.EAST;
 		gbc_lRetailerUpdateFrequency.insets = new Insets(0, 0, 5, 5);
@@ -805,20 +765,12 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pRetailers.add(pRetailerUpdateTime, gbc_pRetailerUpdateTime);
 		
 		spRetailerUpdateMinTime = new JSpinner();
-<<<<<<< HEAD
-		spRetailerUpdateMinTime.setModel(new SpinnerNumberModel(new Float(1), new Float(1), new Float(120), new Float(1)));
-=======
 		spRetailerUpdateMinTime.setModel(new SpinnerNumberModel(0, 0, 120, 1));
->>>>>>> origin/master
 		spRetailerUpdateMinTime.setEnabled(false);
 		pRetailerUpdateTime.add(spRetailerUpdateMinTime);
 		
 		spRetailerUpdateMaxTime = new JSpinner();
-<<<<<<< HEAD
-		spRetailerUpdateMaxTime.setModel(new SpinnerNumberModel(new Float(5), new Float(1), new Float(120), new Float(1)));
-=======
 		spRetailerUpdateMaxTime.setModel(new SpinnerNumberModel(300, 1, 600, 1));
->>>>>>> origin/master
 		pRetailerUpdateTime.add(spRetailerUpdateMaxTime);
 		
 		cbRangeRetailerUpdateTime = new JCheckBox("Range");
@@ -844,13 +796,8 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 			aApplianceGenRates[i] = sApplianceGenRate.getValue();
 			aApplianceUseRates[i] = sApplianceUseRate.getValue();
 			aApplianceUpdateRangeCB[i] = false;
-<<<<<<< HEAD
-			aApplianceUpdateMinTimes[i] = (float)spApplianceUpdateMinTime.getValue(); //convert from mins to secs
-			aApplianceUpdateMaxTimes[i] = (float)spApplianceUpdateMaxTime.getValue(); //convert from mins to secs
-=======
 			aApplianceUpdateMinSeconds[i] = (int)spApplianceUpdateMinTime.getValue();
 			aApplianceUpdateMaxSeconds[i] = (int)spApplianceUpdateMaxTime.getValue();
->>>>>>> origin/master
 		}
 		
 		// Handle Slider events
@@ -1217,24 +1164,14 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		
 		Object[] homeTradeData = new Object[] { 
 			cbRangeHomeTradeTime.isSelected(), 
-<<<<<<< HEAD
-			(float)spHomeTradeMinTime.getValue()/60, //convert from mins to secs
-			(float)spHomeTradeMaxTime.getValue()/60  //convert from mins to secs
-=======
 			spHomeTradeMinTime.getValue(), 
 			spHomeTradeMaxTime.getValue()
->>>>>>> origin/master
 		};
 		
 		Object[] homeUpdateData = new Object[] {
 			cbRangeHomeTradeTime.isSelected(),
-<<<<<<< HEAD
-			(float)spHomeUpdateMinTime.getValue()/60, //convert from mins to secs
-			(float)spHomeUpdateMaxTime.getValue()/60 //convert from mins to secs
-=======
 			spHomeUpdateMinTime.getValue(),
 			spHomeUpdateMaxTime.getValue()
->>>>>>> origin/master
 		};
 		
 		homeArguments[1] = homeTradeData;
@@ -1248,13 +1185,8 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 			retailerArguments[i][0] = retailers[i]; 
 			
 			Object[] retailerUpdateData = new Object[] {
-<<<<<<< HEAD
-				aRetailerUpdateRangeCB[i], aRetailerUpdateMinTimes[i]/60, aRetailerUpdateMaxTimes[i]/60
-			}; //convert from mins to secs
-=======
 				aRetailerUpdateRangeCB[i], aRetailerUpdateMinSeconds[i], aRetailerUpdateMaxSeconds[i]
 			};
->>>>>>> origin/master
 			retailerArguments[i][1] = retailerUpdateData;
 		}
 		
@@ -1266,13 +1198,8 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 			applianceArguments[i][0] = appliances[i];
 			
 			Object[] applianceUpdateData = new Object[] {
-<<<<<<< HEAD
-				aApplianceUpdateRangeCB[i], aApplianceUpdateMinTimes[i]/60, aApplianceUpdateMaxTimes[i]/60
-			}; //convert from mins to secs
-=======
 				aApplianceUpdateRangeCB[i], aApplianceUpdateMinSeconds[i], aApplianceUpdateMaxSeconds[i]
 			};
->>>>>>> origin/master
 			applianceArguments[i][1] = applianceUpdateData;
 		}
 		
