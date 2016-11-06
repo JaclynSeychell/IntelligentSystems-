@@ -284,7 +284,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_cbRandApplianceUseRate.gridy = 4;
 		pAppliances.add(cbRandApplianceUseRate, gbc_cbRandApplianceUseRate);
 		
-		JLabel lApplianceUpdateFrequency = new JLabel("Update Frequency (min):");
+		JLabel lApplianceUpdateFrequency = new JLabel("Update Frequency (sec):");
 		GridBagConstraints gbc_lApplianceUpdateFrequency = new GridBagConstraints();
 		gbc_lApplianceUpdateFrequency.anchor = GridBagConstraints.EAST;
 		gbc_lApplianceUpdateFrequency.insets = new Insets(0, 0, 5, 5);
@@ -306,7 +306,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pApplianceUpdateTime.add(spApplianceUpdateMinTime);
 		
 		spApplianceUpdateMaxTime = new JSpinner();
-		spApplianceUpdateMaxTime.setModel(new SpinnerNumberModel(5, 0, 120, 1));
+		spApplianceUpdateMaxTime.setModel(new SpinnerNumberModel(30, 1, 600, 1));
 		pApplianceUpdateTime.add(spApplianceUpdateMaxTime);
 		
 		cbRangeApplianceUpdateTime = new JCheckBox("Range");
@@ -703,7 +703,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_cbRandRetailerSupply.gridy = 6;
 		pRetailers.add(cbRandRetailerSupply, gbc_cbRandRetailerSupply);
 		
-		JLabel lHomeTradeFrequency = new JLabel("Trading Frequency (min):");
+		JLabel lHomeTradeFrequency = new JLabel("Trading Frequency (sec):");
 		GridBagConstraints gbc_lHomeTradeFrequency = new GridBagConstraints();
 		gbc_lHomeTradeFrequency.anchor = GridBagConstraints.EAST;
 		gbc_lHomeTradeFrequency.insets = new Insets(0, 0, 5, 5);
@@ -725,7 +725,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pHomeTradeTime.add(spHomeTradeMinTime);
 		
 		spHomeTradeMaxTime = new JSpinner();
-		spHomeTradeMaxTime.setModel(new SpinnerNumberModel(5, 0, 120, 1));
+		spHomeTradeMaxTime.setModel(new SpinnerNumberModel(60, 1, 600, 1));
 		pHomeTradeTime.add(spHomeTradeMaxTime);
 		
 		cbRangeHomeTradeTime = new JCheckBox("Range");
@@ -736,7 +736,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_cbRangeHomeTradeTime.gridy = 8;
 		pHome.add(cbRangeHomeTradeTime, gbc_cbRangeHomeTradeTime);
 		
-		JLabel lHomeUpdateFrequency = new JLabel("Update Frequency (min):");
+		JLabel lHomeUpdateFrequency = new JLabel("Update Frequency (sec):");
 		GridBagConstraints gbc_lHomeUpdateFrequency = new GridBagConstraints();
 		gbc_lHomeUpdateFrequency.anchor = GridBagConstraints.EAST;
 		gbc_lHomeUpdateFrequency.insets = new Insets(0, 0, 0, 5);
@@ -758,7 +758,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pHomeUpdateTime.add(spHomeUpdateMinTime);
 		
 		spHomeUpdateMaxTime = new JSpinner();
-		spHomeUpdateMaxTime.setModel(new SpinnerNumberModel(5, 0, 120, 1));
+		spHomeUpdateMaxTime.setModel(new SpinnerNumberModel(20, 1, 600, 1));
 		pHomeUpdateTime.add(spHomeUpdateMaxTime);
 		
 		cbRangeHomeUpdateTime = new JCheckBox("Range");
@@ -784,7 +784,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		gbc_ddRetailerType.gridy = 7;
 		pRetailers.add(ddRetailerType, gbc_ddRetailerType);
 		
-		JLabel lRetailerUpdateFrequency = new JLabel("Update Frequency (min):");
+		JLabel lRetailerUpdateFrequency = new JLabel("Update Frequency (sec):");
 		GridBagConstraints gbc_lRetailerUpdateFrequency = new GridBagConstraints();
 		gbc_lRetailerUpdateFrequency.anchor = GridBagConstraints.EAST;
 		gbc_lRetailerUpdateFrequency.insets = new Insets(0, 0, 5, 5);
@@ -806,7 +806,7 @@ public class SettingsGUI extends JFrame implements SupplierVocabulary {
 		pRetailerUpdateTime.add(spRetailerUpdateMinTime);
 		
 		spRetailerUpdateMaxTime = new JSpinner();
-		spRetailerUpdateMaxTime.setModel(new SpinnerNumberModel(5, 0, 120, 1));
+		spRetailerUpdateMaxTime.setModel(new SpinnerNumberModel(300, 1, 600, 1));
 		pRetailerUpdateTime.add(spRetailerUpdateMaxTime);
 		
 		cbRangeRetailerUpdateTime = new JCheckBox("Range");
