@@ -270,6 +270,14 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 						retailer.setPricePerUnit(retailer.getPricePerUnit() + 1);
 					}
 				}
+				
+				if(retailer.getOrders() == 0) {
+					if(rnd.nextFloat() > 0.75) {
+						retailer.setPricePerUnit(retailer.getPricePerUnit() - 2);
+					} else if (rnd.nextFloat() > 0.5) {
+						retailer.setPricePerUnit(retailer.getPricePerUnit() - 1);
+					}
+				}
 				break;
 			}
 			//TODO Confirm

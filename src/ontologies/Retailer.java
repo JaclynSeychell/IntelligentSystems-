@@ -54,6 +54,7 @@ public class Retailer extends Trader implements Concept, SupplierVocabulary {
 
 	public void setPricePerUnit(int pricePerUnit) {
 		this.pricePerUnit = pricePerUnit;
+		if (this.pricePerUnit < 1) this.pricePerUnit = 1; 
 	}
 
 	public int getSupply() {
