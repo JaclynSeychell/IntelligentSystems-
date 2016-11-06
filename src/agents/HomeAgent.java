@@ -57,13 +57,15 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private int updateTicks = 60000;
 	private boolean tradeTickRange = false;
 	private boolean updateTickRange = false;
-	private float tradeTickMin;
-	private float tradeTickMax;
-	private float updateTickMin;
-	private float updateTickMax;
+	private int tradeTickMin;
+	private int tradeTickMax;
+	private int updateTickMin;
+	private int updateTickMax;
 	
-	public int randomRangeTimer(float min, float max) {
-		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
+	public int updateUnit = 1000; // seconds;
+	
+	public int randomRangeTimer(int min, int max) {
+		float result = (rnd.nextFloat() * (max - min) + min) * updateUnit;
 		return (int)result;
 	}
 	
@@ -89,15 +91,15 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			Object[] updateData = (Object[])args[2];
 			
 			tradeTickRange = (boolean)tradeData[0];
-			tradeTickMin = (float)tradeData[1];
-			tradeTickMax = (float)tradeData[2];
+			tradeTickMin = (int)tradeData[1];
+			tradeTickMax = (int)tradeData[2];
 			
 			updateTickRange = (boolean)updateData[0];
-			updateTickMin = (float)updateData[1];
-			updateTickMax = (float)updateData[2];
+			updateTickMin = (int)updateData[1];
+			updateTickMax = (int)updateData[2];
 			
-			tradeTicks = tradeTickRange ? randomRangeTimer(tradeTickMin, tradeTickMax) : (int)(tradeTickMax * 60000);
-			updateTicks = updateTickRange ? randomRangeTimer(updateTickMin, updateTickMax) : (int)(updateTickMax * 60000);
+			tradeTicks = tradeTickRange ? randomRangeTimer(tradeTickMin, tradeTickMax) : (int)(tradeTickMax * updateUnit);
+			updateTicks = updateTickRange ? randomRangeTimer(updateTickMin, updateTickMax) : (int)(updateTickMax * updateUnit);
 		} else {
 			home = new Home();
 			tradeTicks = 60000 * 5;
@@ -428,11 +430,11 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		int avgTrade = tradeTicks;
 		
 		if (updateTickRange) {
-			avgUpdate = (int) (averageTime(updateTickMin, updateTickMax) * 60000);
+			avgUpdate = (int) (averageTime(updateTickMin, updateTickMax) * updateUnit);
 		}
 		
 		if(tradeTickRange) {
-			avgTrade = (int) (averageTime(tradeTickMin, tradeTickMax) * 60000);
+			avgTrade = (int) (averageTime(tradeTickMin, tradeTickMax) * updateUnit);
 		}
 		
 		int updatesPerTrade = avgTrade / avgUpdate;
