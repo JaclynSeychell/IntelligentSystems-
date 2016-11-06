@@ -30,17 +30,19 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 	private Codec codec = new SLCodec();
 	private Ontology ontology = SupplierOntology.getInstance();
 	
+	public int updateUnit = 1000; // seconds;
+	
 	// Utility
 	private Random rnd = Utility.newRandom(hashCode());
 	
 	// Run parameters
 	private int updateTicks = 60000;
 	private boolean updateTickRange = false;
-	private float updateTickMin;
-	private float updateTickMax;
+	private int updateTickMin;
+	private int updateTickMax;
 	
-	public int randomRange(float min, float max) {
-		float result = (rnd.nextFloat() * (max - min) + min) * 60000;
+	public int randomRangeTimer(int min, int max) {
+		float result = (rnd.nextFloat() * (max - min) + min) * updateUnit;
 		return (int)result;
 	}
 	
@@ -57,10 +59,10 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			Object[] updateData = (Object[])args[1];
 			
 			updateTickRange = (boolean)updateData[0];
-			updateTickMin = (float)updateData[1];
-			updateTickMax = (float)updateData[2];
+			updateTickMin = (int)updateData[1];
+			updateTickMax = (int)updateData[2];
 			
-			updateTicks = updateTickRange ? randomRange(updateTickMin, updateTickMax) : (int)updateTickMax * 60000;
+			updateTicks = updateTickRange ? randomRangeTimer(updateTickMin, updateTickMax) : (int)updateTickMax * updateUnit;
 		} else {
 			appliance = new Appliance();
 		}
@@ -136,7 +138,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 						sub.notify(notification);
 						
 						if(updateTickRange) {
-							updateTicks = randomRange(updateTickMin, updateTickMax);
+							updateTicks = randomRangeTimer(updateTickMin, updateTickMax);
 						}
 						reset(updateTicks);
 					}
