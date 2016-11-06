@@ -36,7 +36,8 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	private Broker broker;
 	
 	// Agents
-	private HashMap<AID, Tuple<Integer, Integer>> retailers = new HashMap<AID, Tuple<Integer, Integer>>();
+	private HashMap<AID, Quote> retailers = new HashMap<AID, Quote>();
+	private Queue<Integer> priceData = new CircularFifoQueue<Integer>(100);
 	private AID bestOffer;
 	
 	// Language
@@ -118,8 +119,6 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 					ContentElement content = getContentManager().extractContent(request);
 					Exchange e = (Exchange)((Action)content).getAction();
 					
-					System.out.println(getLocalName() + ": Home wants to purchase " + e.getUnits() + " units.");
-					
 					AID optimal = null;
 					AID subOptimal = null;
 					
@@ -128,42 +127,49 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 					int optimalSellPrice = 0;
 					int subOptimalPrice = 0;
 					int subOptimalSupply = 0;
-					int count = 1;
 					
 					// Try and find the best retailer based on homes wants
-					for(Map.Entry<AID, Tuple<Integer, Integer>> cursor : retailers.entrySet()) {
+					for(Map.Entry<AID, Quote> cursor : retailers.entrySet()) {
 						AID retailer = cursor.getKey();
-						int price = cursor.getValue().first();
-						int supply = cursor.getValue().last();
+						int sellPrice = cursor.getValue().getSellPrice();
+						int buyPrice = cursor.getValue().getBuyPrice();
+						int supply = cursor.getValue().getUnits();
 						
 						// find retailer with the best price that has stock available.
 						if(e.getType() == BUY) {
+							System.out.println(getLocalName() + ": Home wants to purchase " + e.getUnits() + " units.");
+							
 							if(supply >= e.getUnits()) {
-								if(price < optimalPrice) {
+								if(sellPrice < optimalPrice) {
 									optimal = retailer;
-									optimalBuyPrice = price;
+									optimalBuyPrice = sellPrice;
 								}
 							}
 							
 							if(supply > subOptimalSupply) {
 								subOptimalSupply = supply;
-								subOptimalPrice = price;
+								subOptimalPrice = sellPrice;
 								subOptimal = retailer;
 							}
 							
 							optimalPrice = optimalBuyPrice;
+						
 						} else if (e.getType() == SELL) {
-							if(price > optimalSellPrice) {
+							System.out.println(getLocalName() + ": Home wants to sell " + e.getUnits() + " units.");
+							
+							if(buyPrice > optimalSellPrice) {
 								optimal = retailer;
-								optimalSellPrice = price;
+								optimalSellPrice = buyPrice;
 							}
 							
 							optimalPrice = optimalSellPrice;
 						}
 					}
 					
+					// Prepare exchange object to be sent back
 					Exchange eResult = new Exchange();
 					eResult.setType(e.getType());
+					eResult.setValue(AVERAGE);
 					
 					// if no retailers have sufficient stock choose the retailer with the most stock
 					if(optimal != null) {
@@ -171,11 +177,13 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 						bestOffer = optimal;
 						eResult.setPrice(optimalPrice);
 						eResult.setUnits(e.getUnits());
+						e.setValue(getExchangeValue(optimalPrice));
 					} else {
 						bestOffer = subOptimal;
 						eResult.setPrice(subOptimalPrice);
 						eResult.setUnits(subOptimalSupply);
-					}
+						e.setValue(getExchangeValue(subOptimalPrice));
+					}	
 					
 					getContentManager().fillContent(result, new Action(request.getSender(), eResult));
 				} catch(Exception e) {
@@ -315,6 +323,30 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 		addBehaviour(arer);
   	}
 	
+	public int getExchangeValue(int price) {
+		int avg;
+		int total = 0;
+		int count = 0;
+		for(Iterator it = priceData.iterator(); it.hasNext();) {
+			total += (int)it.next();
+			count++;
+		}
+		avg = total / count;
+		
+		int result;
+		
+		if(avg / price >= 1.1) {
+			result = CHEAP;
+		} else if (avg / price <= 0.9) {
+			result = EXPENSIVE;
+		} else {
+			result = AVERAGE;
+		}
+		
+		return result;
+	}
+	
+	
 	// -- Utility Methods --
 	void subscribeToRetailers() {
 		DFAgentDescription dfd = new DFAgentDescription();
@@ -348,9 +380,10 @@ public class BrokerAgent extends Agent implements SupplierVocabulary {
 	  							//TODO Confirm
 	  							ProgramGUI.getInstance().printToLog(broker.hashCode(), getLocalName(),
 	  									inform.getSender().getLocalName() + " price now $" +
-  											quote.getPrice() + "/unit", Color.ORANGE.darker());
+  											quote.getSellPrice() + "/unit", Color.ORANGE.darker());
 	  							
-	  							retailers.put( inform.getSender(), new Tuple<Integer, Integer>( quote.getPrice(), quote.getUnits() ) );
+	  							retailers.put(inform.getSender(), quote);
+	  							priceData.add(quote.getSellPrice()); // track price averages
 	  							
 	  							// sleep
 								Thread.sleep(1000);

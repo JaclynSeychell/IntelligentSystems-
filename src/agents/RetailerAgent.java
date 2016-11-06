@@ -353,7 +353,8 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 	
 	Quote getQuote() {
 		Quote result = new Quote();
-		result.setPrice(retailer.getPricePerUnit());
+		result.setSellPrice(retailer.getPricePerUnit());
+		result.setBuyPrice(retailer.getBuyPrice());
 		result.setUnits(retailer.getSupply());
 		return result;
 	}

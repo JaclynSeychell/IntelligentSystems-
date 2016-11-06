@@ -55,11 +55,14 @@ public class SupplierOntology extends Ontology implements SupplierVocabulary {
 			as.add(EXCHANGE_TYPE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 	        as.add(EXCHANGE_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 	        as.add(EXCHANGE_UNITS, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+	        as.add(EXCHANGE_VALUE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 	        
 	        AgentActionSchema qas = new AgentActionSchema(QUOTE);
 			add(qas, Quote.class);
-			qas.add(QUOTE_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			qas.add(QUOTE_BUY_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			qas.add(QUOTE_SELL_PRICE, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
 			qas.add(QUOTE_UNITS, (PrimitiveSchema) getSchema(BasicOntology.INTEGER), ObjectSchema.MANDATORY);
+			
 	         
 		} catch (OntologyException oe) {
 			oe.printStackTrace();

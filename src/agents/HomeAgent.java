@@ -41,6 +41,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 	private Ontology ontology = SupplierOntology.getInstance();
 	private Exchange quote;
 	private Exchange purchase;
+	private String mood = "";
 	
 	// Utility
 	private Random rnd = Utility.newRandom(hashCode());	
@@ -185,8 +186,26 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 			public void action() {
 				ProgramGUI.getInstance().printToLog(home.hashCode(), getLocalName(), 
 						"Order sent >>", Color.GREEN.darker());
+				
+				boolean makePurchase = true;
+				
+				if(purchase.getType() == BUY) {
+					if (purchase.getValue() == EXPENSIVE && mood == "standard") {
+						makePurchase = rnd.nextFloat() >= 0.5 ? true : false;
+					}
 					
-				purchaseRequest(purchase);
+					if(purchase.getValue() == CHEAP) {
+						if(rnd.nextFloat() >= 0.5) {
+							purchase.setUnits(purchase.getUnits() + (purchase.getUnits() / 4));
+						}
+					}
+				}
+				
+				if(makePurchase) {
+					purchaseRequest(purchase);
+				} else {
+					seq.reset();
+				}
  			}
 		});
 		
@@ -498,6 +517,7 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 		float roll = 0;
 		
 		if (updatesLeft < 3) {
+			mood = "desperate";
 			units = (avgUsage * (updatesPerTrade + 2));
 			roll = 0.75f;
 			for(int i = 0; i < 3; i++) {
@@ -506,16 +526,9 @@ public class HomeAgent extends Agent implements SupplierVocabulary {
 				}
 			}
 		} else if (updatesLeft < 5) {
+			mood = "standard";
 			units = (avgUsage * (updatesPerTrade + 1));
 			roll = 0.50f;
-			for(int i = 0; i < 3; i++) {
-				if(rnd.nextFloat() > roll) {
-					units += avgUsage;
-				}
-			}
-		} else if (updatesLeft < 10) {
-			units = (avgUsage * updatesPerTrade);
-			roll = 0.25f;
 			for(int i = 0; i < 3; i++) {
 				if(rnd.nextFloat() > roll) {
 					units += avgUsage;

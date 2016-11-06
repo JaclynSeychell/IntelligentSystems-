@@ -4,6 +4,9 @@ public interface SupplierVocabulary {
 	// Basic Vocabulary
 	public static final int BUY = 1;
 	public static final int SELL = 2;
+	public static final int CHEAP = 2;
+	public static final int AVERAGE = 2;
+	public static final int EXPENSIVE = 3;
 	public static final int NO_RETAILERS = 3;
 	public static final String HOME_AGENT = "Home agent";
 	public static final String BROKER_AGENT = "Broker agent";
@@ -32,9 +35,11 @@ public interface SupplierVocabulary {
 	public static final String EXCHANGE_TYPE = "type";
 	public static final String EXCHANGE_PRICE = "price";
 	public static final String EXCHANGE_UNITS = "units";
+	public static final String EXCHANGE_VALUE = "type";
 	
 	public static final String QUOTE = "Quote";
-	public static final String QUOTE_PRICE = "price";
+	public static final String QUOTE_BUY_PRICE = "buyPrice";
+	public static final String QUOTE_SELL_PRICE = "sellPrice";
 	public static final String QUOTE_UNITS = "units";
 	
 	public static final String PROBLEM = "Problem";

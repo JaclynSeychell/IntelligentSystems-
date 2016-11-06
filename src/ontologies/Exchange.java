@@ -7,6 +7,7 @@ public class Exchange implements AgentAction {
 	private int type;
 	private int price;
 	private int units;
+	private int value;
 	
 	// Type getter & setter
 	public int getType() {
@@ -33,6 +34,14 @@ public class Exchange implements AgentAction {
 	
 	public void setUnits(int units) {
 		this.units = units;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
 	}
 	
 	@Override

@@ -1,6 +1,9 @@
 package ontologies;
 
+import java.util.Random;
+
 import jade.content.*;
+import utility.Utility;
 
 @SuppressWarnings("serial")
 
@@ -76,6 +79,23 @@ public class Retailer extends Trader implements Concept, SupplierVocabulary {
 
 	public void setOrders(int orders) {
 		this.orders = orders;
+	}
+	
+	public int getBuyPrice() {
+		Random rnd = Utility.newRandom(hashCode());	
+		float variance = rnd.nextFloat();
+		if (variance < 0.2) {
+			variance = 0.2f;
+		} else if (variance > 0.8) {
+			variance = 0.8f;
+		}
+		
+		int result = (int)(pricePerUnit * variance);
+		if(result >= pricePerUnit && pricePerUnit > 1) {
+			result = pricePerUnit - 1;
+		}
+		
+		return (int)(pricePerUnit * variance);
 	}
 
 	@Override
