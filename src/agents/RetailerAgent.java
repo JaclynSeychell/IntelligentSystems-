@@ -161,11 +161,14 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 						//TODO Confirm
 //						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName(),
 //								": Action successfully performed" + "\n\tSuppy sold: " + action.getUnits(), Color.GREEN.darker());
-						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName(),
+						ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName(),
 								"<< " + action.getUnits() + " units sold", Color.GREEN.darker());
 						
 						System.out.println("Agent " + getLocalName() + ": Action successfully performed" + 
 								"\n\tSuppy sold: " + action.getUnits());
+						
+						// Accumulate orders over trading cycle
+						retailer.setOrders(retailer.getOrders() + 1);
 						
 						break;
 					case SELL:
@@ -174,7 +177,7 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 						//TODO Confirm
 //						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName(), 
 //								": Action successfully performed" + "\n\tSuppy purchased: " + action.getUnits(), Color.GREEN.darker());
-						ProgramGUI.getInstance().printToLog(retailer.hashCode(), "Agent " + getLocalName(), 
+						ProgramGUI.getInstance().printToLog(retailer.hashCode(), getLocalName(), 
 								"<< " + action.getUnits() + " units bought", Color.GREEN.darker());
 						
 						System.out.println("Agent " + getLocalName() + ": Action successfully performed" + 
@@ -182,9 +185,6 @@ public class RetailerAgent extends Agent implements SupplierVocabulary {
 		
 						break;
 					}
-					
-					// Accumulate orders over trading cycle
-					retailer.setOrders(retailer.getOrders() + 1);
 					
 				} catch(Exception e) {
 					inform.setPerformative(ACLMessage.FAILURE);
