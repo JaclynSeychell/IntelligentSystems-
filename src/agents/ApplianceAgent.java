@@ -100,7 +100,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 			}
 			
 			//TODO Confirm
-			ProgramGUI.getInstance().printToLog(appliance.hashCode(), getLocalName(), msg, Color.GREEN.darker());
+//			ProgramGUI.getInstance().printToLog(appliance.hashCode(), getLocalName(), msg, Color.GREEN.darker());
 		} catch (Exception e) { 
 			e.printStackTrace(); 
 		}
@@ -123,7 +123,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 				
 				//TODO Confirm
 				ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName(), "new subcriber " + 
-						subscription.getSender().getLocalName(), Color.GREEN.darker());
+						subscription.getSender().getLocalName(), Color.BLUE.darker());
 				
 				sub = getSubscription(subscription);
 				notification = subscription.createReply();
@@ -134,7 +134,7 @@ public class ApplianceAgent extends Agent implements SupplierVocabulary{
 					@Override
 					public void onTick() {
 						ProgramGUI.getInstance().printToLog(appliance.hashCode(), myAgent.getLocalName(),  
-								"energy usage shared...", Color.GREEN.darker());
+								"energy usage shared...", Color.BLUE.darker());
 						
 						System.out.println(getLocalName() + ": " + appliance.getRate());
 						notification.setContent(Integer.toString(appliance.getRate()));
